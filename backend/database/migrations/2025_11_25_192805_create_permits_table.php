@@ -15,7 +15,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'approved', 'rejected', 'expired'])->default('pending');
             $table->date('issue_date');
             $table->date('expiry_date');
-            $table->foreignId('document_id')->nullable()->constrained('documents');
+            $table->json('related_documents')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
