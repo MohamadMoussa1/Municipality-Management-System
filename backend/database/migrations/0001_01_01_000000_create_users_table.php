@@ -15,10 +15,20 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->enum('role', [
+                'admin',           // Admin / Mayor
+                'finance_officer', // Finance Officer
+                'urban_planner',   // Urban Planner / Project Manager
+                'hr_manager',      // HR Manager
+                'clerk',           // Clerk / Staff
+                'citizen'          // Citizen
+            ])->default('citizen');
             $table->string('password');
+            $table->enum('status', ['active', 'inactive', 'suspended'])->default('active');
+            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
