@@ -8,7 +8,8 @@ use App\Http\Requests\Auth\AdminRegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
-
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -148,6 +149,20 @@ class AuthController extends Controller
         });
     }
 
+    public function logout(Request $request)
+{
+    try {
+        $request->user()->currentAccessToken()->delete();
 
+        return response()->json([
+            'message' => 'Successfully logged out'
+        ], Response::HTTP_OK);  // Changed from Response::HTTP_OK to 200
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Error during logout',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 
 }
