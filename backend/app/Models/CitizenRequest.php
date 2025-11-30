@@ -4,9 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Request extends Model
+
+class CitizenRequest  extends Model
 {
+    protected $table = 'requests';
+    
     protected $fillable = [
         'citizen_id',
         'type',
