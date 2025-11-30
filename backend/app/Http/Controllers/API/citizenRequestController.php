@@ -66,17 +66,22 @@ class citizenRequestController extends Controller
     public function departmentRequests(Request $request)
     {
         $user = $request->user();
+        if ($user->role === 'admin') {
+            $requests = CitizenRequest::orderBy('submission_date', 'desc')->get();
 
-        // 1. Check if user is an employee
-        if ($user->role !== 'clerk' && $user->role !== 'admin') {
             return response()->json([
-                'message' => 'Only clerk and admin can view department requests.'
+                'role' => 'admin',
+                'message' => 'All requests fetched successfully.',
+                'requests' => $requests
+            ], 200);
+        }
+        // 1. Check if user is an employee
+        $employee = $user->employee;
+        if ($user->role !== 'clerk') {
+            return response()->json([
+                'message' => 'Only clerk can view department requests.'
             ], 403);
         }
-        
-        $employee = $user->employee;
-
-        
         if ($employee->department !== 'public_services') {
             return response()->json([
                 'message' => 'No requests assigned to your department.'
@@ -125,17 +130,72 @@ class citizenRequestController extends Controller
         $user = $request->user();
         $citizenRequest = CitizenRequest::find($id);
 
-    // 1. Check if request exists
+        // 1. Check if request exists
         if (!$citizenRequest) {
             return response()->json(['message' => 'Request not found.'], 404);
         }
-    // 2. Ensure the request belongs to the logged-in citizen
-        if ($citizenRequest->citizen_id !==  $user->citizen->id) {
-            return response()->json(['message' => 'Unauthorized access.'], 403);
+
+        // 2. Allow access for admin and clerk
+        if (in_array($user->role, ['admin', 'clerk'])) {
+            return response()->json([
+                'request' => $citizenRequest
+            ]);
         }
-    // 3. Return full details
+
+        // 3. For citizens, ensure the request belongs to them
+        if ($user->role === 'citizen') {
+            if (!$user->citizen || $citizenRequest->citizen_id !== $user->citizen->id) {
+                return response()->json(['message' => 'Unauthorized access.'], 403);
+            }
+            return response()->json([
+                'request' => $citizenRequest
+            ]);
+        }
+
+        // 4. If none of the above, deny access
+        return response()->json(['message' => 'Unauthorized access.'], 403);
+    }   
+
+    
+    /**
+     * Remove the specified request (Admin and Clerk only)
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(Request $request, $id)
+{
+    $user = $request->user();
+    $citizenRequest = CitizenRequest::find($id);
+
+    // Check if request exists
+    if (!$citizenRequest) {
         return response()->json([
-            'request' => $citizenRequest
-        ]);
+            'message' => 'Request not found.'
+        ], 404);
     }
+
+    // Allow admin and clerk to delete any request
+    // Allow citizens to delete only their own requests
+    if (!in_array($user->role, ['admin', 'clerk']) && 
+        ($user->role !== 'citizen' || !$user->citizen || $citizenRequest->citizen_id !== $user->citizen->id)) {
+        return response()->json([
+            'message' => 'Unauthorized.'
+        ], 403);
+    }
+
+    try {
+        $citizenRequest->delete();
+        
+        return response()->json([
+            'message' => 'Request deleted successfully.'
+        ], 200);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Failed to delete request.',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 }

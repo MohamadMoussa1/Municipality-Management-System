@@ -22,23 +22,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
 // Citizen request routes
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/citizen/requests', [citizenRequestController::class, 'store']);
+    // Get requests for the authenticated citizen
+    Route::get('/requests/my-requests', [citizenRequestController::class, 'myRequests']);
+    // Get all requests that employees can view
+    Route::get('/requests/department', [citizenRequestController::class, 'departmentRequests']);
+    
+    // Get a specific request for the authenticated citizen
+    Route::get('/requests/{id}', [citizenRequestController::class, 'show']);
+    // Update request status by employee
+    Route::put('/requests/{id}/status', [citizenRequestController::class, 'updateStatus']);
+    
+    // Delete a request (admin/clerk only)
+    Route::delete('/requests/{id}', [citizenRequestController::class, 'destroy']);
 });
 
-// Get requests for the authenticated citizen
-Route::middleware('auth:sanctum')->get('/requests/my-requests', [CitizenRequestController::class, 'myRequests']);
-
-// Get a specific request for the authenticated citizen
-Route::middleware('auth:sanctum')->get('/requests/{id}',
-    [CitizenRequestController::class, 'show']
-);
-
-// Get all requests that employees can view
-Route::middleware('auth:sanctum')->get('/requests/department',
-    [CitizenRequestController::class, 'departmentRequests']
-);
-
-// Update request status by employee
-Route::middleware('auth:sanctum')->put('/requests/{id}/status',
-    [CitizenRequestController::class, 'updateStatus']
-);
 

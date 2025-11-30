@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class CitizenRequest  extends Model
 {
     protected $table = 'requests';
-    use SoftDeletes;
+    
     protected $fillable = [
         'citizen_id',
         'type',
