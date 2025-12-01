@@ -6,6 +6,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\CitizenController;
 use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\API\citizenRequestController;
+use App\Http\Controllers\Api\PermitController;
 
 // Public routes
 Route::prefix('auth')->group(function () {
@@ -80,6 +81,34 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
     // Delete a request (admin/clerk only)
     Route::delete('/requests/{id}', [citizenRequestController::class, 'destroy']);
+
+    // Permit routes
+    Route::prefix('permits')->group(function () {
+        // Citizen routes
+        Route::middleware(['role:citizen'])->group(function () {
+            // Create a new permit
+            Route::post('/', [PermitController::class, 'store']);
+            // Get authenticated citizen's permits
+            Route::get('/my-permits', [PermitController::class, 'myPermits']);
+            
+        });
+
+        Route::middleware(['role:admin|clerk|citizen'])->group(function () {
+            
+            // Get a specific permit
+            Route::get('/{permit}', [PermitController::class, 'show']);
+            
+        });
+        // Admin and Clerk routes
+        Route::middleware(['role:admin|clerk'])->group(function () {
+            // Get all permits with filters
+            Route::get('/', [PermitController::class, 'index']);
+            
+            // Update permit status
+            Route::put('/{permit}/status', [PermitController::class, 'updateStatus']);
+            
+            // Delete a permit (admin only - enforced by policy)
+            Route::delete('/{permit}', [PermitController::class, 'destroy']);
+        });
+    });
 });
-
-
