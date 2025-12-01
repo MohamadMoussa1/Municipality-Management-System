@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+use App\Models\Document;
+
 class Permit extends Model
 {
-    use SoftDeletes;
+   
 
     protected $fillable = [
         'type',
@@ -34,6 +36,7 @@ class Permit extends Model
     // Relationship to Document
     public function documents()
     {
-        return Document::findMany($this->related_documents ?? []);
+        return Document::whereIn('id', $this->related_documents ?? []);
     }
+
 }

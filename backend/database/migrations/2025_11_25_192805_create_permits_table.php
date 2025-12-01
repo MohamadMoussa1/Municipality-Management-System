@@ -13,11 +13,10 @@ return new class extends Migration
             $table->enum('type', ['business', 'construction', 'vehicle', 'public_event']);
             $table->foreignId('applicant_id')->constrained('citizens');
             $table->enum('status', ['pending', 'approved', 'rejected', 'expired'])->default('pending');
-            $table->date('issue_date');
-            $table->date('expiry_date');
+            $table->date('issue_date')->nullable();
+            $table->date('expiry_date')->nullable();
             $table->json('related_documents')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
