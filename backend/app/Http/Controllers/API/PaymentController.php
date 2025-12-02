@@ -37,7 +37,7 @@ class PaymentController extends Controller
                 'citizen_id'   => $validated['citizen_id'],
                 'amount'       => $validated['amount'],
                 'payment_type' => $validated['payment_type'],
-                'date'         => $validated['date'],
+                'date'         => now(),
                 'status'       => $validated['status'] ?? 'pending',
             ]);
 

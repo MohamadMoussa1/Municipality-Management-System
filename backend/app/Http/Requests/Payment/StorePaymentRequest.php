@@ -21,7 +21,7 @@ class StorePaymentRequest extends FormRequest
             'citizen_id'   => 'required|exists:citizens,id',
             'amount'       => 'required|numeric|min:0.01',
             'payment_type' => 'required|in:property_tax,water_bill,electricity_bill,waste_management,other',
-            'date'         => 'required|date'
+           
             
         ];
     }
