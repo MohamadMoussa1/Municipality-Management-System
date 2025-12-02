@@ -7,6 +7,7 @@ use App\Http\Controllers\API\CitizenController;
 use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\API\citizenRequestController;
 use App\Http\Controllers\Api\PermitController;
+use App\Http\Controllers\API\PaymentController;
 
 // Public routes
 Route::prefix('auth')->group(function () {
@@ -112,3 +113,27 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
     });
 });
+
+
+// Payment routes
+Route::middleware(['auth:sanctum'])->group(function () {
+
+    // Citizen payments MUST come before /payments/{payment}
+    Route::get('/payments/my-payments', [PaymentController::class, 'myPayments']);
+
+    // Create payment
+    Route::post('/payments', [PaymentController::class, 'store']);
+
+    // List all payments (admin / finance)
+    Route::get('/payments', [PaymentController::class, 'index']);
+
+    // Update payment
+    Route::put('/payments/{payment}', [PaymentController::class, 'updateStatus']);
+
+    // View specific payment (must be last)
+    Route::get('/payments/{payment}', [PaymentController::class, 'show']);
+
+    // delete payment
+    Route::delete('/payments/{payment}', [PaymentController::class, 'destroy']);
+});
+
