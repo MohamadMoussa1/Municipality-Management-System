@@ -10,6 +10,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\ProfileResources\EmployeeResource;
+use App\Http\Resources\TaskResource;
+use App\Http\Requests\Task\UpdateTaskStatusRequest;
+use App\Models\Task;
+use Illuminate\Http\Response;
 
 class EmployeeController extends Controller
 {
@@ -72,6 +76,43 @@ class EmployeeController extends Controller
             ->firstOrFail();
 
         return new EmployeeResource($employee);
+    }
+
+    /**
+     * Get tasks assigned to the currently authenticated employee
+     */
+    public function myTasks()
+    {
+        $employee = Employee::where('user_id', Auth::id())->firstOrFail();
+        $tasks = $employee->tasks()
+            ->with(['project', 'assignee.user']) // Eager load relationships
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return TaskResource::collection($tasks);
+    }
+
+    /**
+     * Update the status of a task assigned to the authenticated employee.
+     */
+    public function updateTaskStatus(UpdateTaskStatusRequest $request, Task $task)
+    {
+        // Verify the task is assigned to the authenticated employee
+        if ($task->assignee_id !== Auth::user()->employee->id) {
+            return response()->json([
+                'message' => 'Unauthorized. You can only update tasks assigned to you.'
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        // Update the task status
+        $task->update([
+            'status' => $request->status
+        ]);
+
+        // Reload the task with relationships
+        $task->load(['project', 'assignee.user']);
+
+        return new TaskResource($task);
     }
 
     /**

@@ -50,6 +50,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Update authenticated employee's profile
         Route::put('/me/update', [EmployeeController::class, 'updateProfile']);
         
+        // Get tasks assigned to the authenticated employee
+        Route::get('/me/tasks', [EmployeeController::class, 'myTasks']);
+        
+        // Update task status for assigned tasks
+        Route::put('/tasks/{task}/status', [EmployeeController::class, 'updateTaskStatus']);
+        
         // Admin-only employee routes
         Route::middleware(['role:admin'])->group(function () {
             // Get all employees (admin only)
