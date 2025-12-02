@@ -130,7 +130,7 @@ class PaymentController extends Controller
         $allowed = $user->role === 'admin'
             || ($user->role === 'finance_officer'
                 && optional($user->employee)->department === 'finance')
-                || ($user->role === 'citizen' && $payment->citizen_id === $user->id);;
+                || ($user->role === 'citizen' && $payment->citizen_id === $user->citizen->id);;
 
         if (!$allowed) {
             return response()->json([
