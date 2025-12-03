@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\PermitController;
 use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\BulkPaymentController;
 use App\Http\Controllers\API\ProjectController;
+use App\Http\Controllers\API\AttendanceController;
 
 // Public routes
 Route::prefix('auth')->group(function () {
@@ -146,6 +147,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // delete payment
     Route::delete('/payments/{payment}', [PaymentController::class, 'destroy']);
+
+    // we still need payment process integration here
 });
 
 // Project routes
@@ -169,5 +172,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Route::get('/projects/{project}', [ProjectController::class, 'show']);
     // Route::put('/projects/{project}', [ProjectController::class, 'update']);
     // Route::delete('/projects/{project}', [ProjectController::class, 'destroy']);
+});
+
+// Attendace routes
+Route::middleware(['auth:sanctum'])->group(function () {
+    // check-in
+    Route::post('/attendance/check-in', [AttendanceController::class, 'checkIn']);
+    // check-out
+    Route::post('/attendance/check-out', [AttendanceController::class, 'checkOut']);
+    // get attendance records
+    Route::get('/attendance', [AttendanceController::class, 'index']);
+    // get specific attendance record
+    Route::get('/attendance/{attendance}', [AttendanceController::class, 'show']);
+    // update attendance record
+    Route::put('/attendance/{attendance}', [AttendanceController::class, 'update']);
+
 });
 
