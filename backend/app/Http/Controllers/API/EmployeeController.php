@@ -24,8 +24,8 @@ class EmployeeController extends Controller
     {
         $user = Auth::user();
         
-        // Only allow admin to list all employees
-        if (!$user->hasRole('admin')) {
+        // Only allow admin or hr_manager to list all employees
+        if (!$user->hasAnyRole(['admin', 'hr_manager'])) {
             return response()->json([
                 'message' => 'Unauthorized. Only administrators can view all employees.'
             ], 403);
@@ -57,7 +57,7 @@ class EmployeeController extends Controller
         $employee = $query->firstOrFail();
 
         // Check if the user is authorized to view this employee
-        if (!$user->hasRole('admin')) {
+        if (!$user->hasAnyRole(['admin', 'hr_manager'])) {
             return response()->json([
                 'message' => 'Unauthorized. You can only view your own information.'
             ], 403);
@@ -116,7 +116,7 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Update the specified employee's information (admin only).
+     * Update the specified employee's information (admin or hr_manager only).
      */
     public function updateByAdmin(Request $request, string $id)
     {
@@ -124,9 +124,9 @@ class EmployeeController extends Controller
         $employee = Employee::findOrFail($id);
 
         // Check if the user is authorized to update this employee
-        if (!$user->hasRole('admin')) {
+        if (!$user->hasAnyRole(['admin', 'hr_manager'])) {
             return response()->json([
-                'message' => 'Unauthorized. Only administrators can update employee information.'
+                'message' => 'Unauthorized. Only administrators or hr_manager can update employee information.'
             ], 403);
         }
 
