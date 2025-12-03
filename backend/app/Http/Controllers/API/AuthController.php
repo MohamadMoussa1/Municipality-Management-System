@@ -120,29 +120,22 @@ class AuthController extends Controller
             // Assign role
             $user->assignRole($request->role);
 
-            // Create profile based on role
-            if ($request->role === 'citizen') {
-                $user->citizen()->create([
-                    'national_id' => $request->national_id,
-                    'address' => $request->address,
-                    'contact' => $request->contact,
-                    'date_of_birth' => $request->date_of_birth,
-                ]);
-            } else {
-                $user->employee()->create([
-                    'department' => $request->department,
-                    'position' => $request->position,
-                    'hire_date' => $request->hire_date,  
-                    'salary' => $request->salary
-                ]);
-            }
+            // Create profile for employee roles
+            
+            $user->employee()->create([
+                'department' => $request->department,
+                'position' => $request->position,
+                'hire_date' => $request->hire_date,  
+                'salary' => $request->salary
+            ]);
+            
 
             // Generate API token
             $token = $user->createToken('auth-token')->plainTextToken;
 
             return response()->json([
                 'message' => 'User registered successfully',
-                'user' => new UserResource($user->load(['citizen', 'employee'])),
+                'user' => new UserResource($user->load('employee')),
                 'access_token' => $token,
                 'token_type' => 'Bearer',
             ], 201);

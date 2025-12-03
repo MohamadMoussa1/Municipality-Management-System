@@ -9,7 +9,7 @@ class AdminRegisterRequest extends FormRequest
 {
     public function authorize()
     {
-        return $this->user()?->hasRole('admin');
+        return $this->user()?->hasAnyRole(['admin', 'hr_manager']);
     }
 
     public function rules()
@@ -19,7 +19,7 @@ class AdminRegisterRequest extends FormRequest
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|string|in:admin,finance_officer,urban_planner,hr_manager,clerk,citizen',
+            'role' => 'required|string|in:admin,finance_officer,urban_planner,hr_manager,clerk',
             'status' => 'string|in:active,inactive,suspended|nullable',
             
             // Employee fields
@@ -28,11 +28,7 @@ class AdminRegisterRequest extends FormRequest
             'hire_date' => 'required_unless:role,citizen|date|before_or_equal:today',
             'salary' => 'required_unless:role,citizen|numeric|min:0',
             
-            // Citizen fields
-            'national_id' => 'required_if:role,citizen|string|size:14|unique:citizens,national_id',
-            'address' => 'required_if:role,citizen|string|max:500',
-            'contact' => 'required_if:role,citizen|string|max:20',
-            'date_of_birth' => 'required_if:role,citizen|date|before:today'
+            
         ];
     }
 
@@ -42,9 +38,7 @@ class AdminRegisterRequest extends FormRequest
             'role.in' => 'Invalid role selected.',
             'department.in' => 'Invalid department selected.',
             'email.unique' => 'This email is already registered.',
-            'national_id.unique' => 'This national ID is already registered.',
             '*.required' => 'The :attribute field is required.',
-            '*.required_if' => 'The :attribute field is required for citizens.',
             '*.required_unless' => 'The :attribute field is required for employees.'
         ];
     }
