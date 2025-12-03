@@ -19,7 +19,7 @@ class AdminRegisterRequest extends FormRequest
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|string|in:admin,finance_officer,urban_planner,hr_manager,clerk,citizen',
+            'role' => 'required|string|in:admin,finance_officer,urban_planner,hr_manager,clerk',
             'status' => 'string|in:active,inactive,suspended|nullable',
             
             // Employee fields

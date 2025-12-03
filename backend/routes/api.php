@@ -31,7 +31,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Update authenticated user's profile
         Route::put('/me/update', [CitizenController::class, 'updateProfile']);
         
-        Route::middleware(['role:admin'])->group(function () {
+        Route::middleware(['role:admin|hr_manager'])->group(function () {
         // Get all citizens (admin only)
             Route::get('/', [CitizenController::class, 'index']);
             
@@ -58,7 +58,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/tasks/{task}/status', [EmployeeController::class, 'updateTaskStatus']);
         
         // Admin-only employee routes
-        Route::middleware(['role:admin'])->group(function () {
+        Route::middleware(['role:admin|hr_manager'])->group(function () {
             // Get all employees (admin only)
             Route::get('/', [EmployeeController::class, 'index']);
             
@@ -71,7 +71,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
     
     // Admin-only routes
-    Route::middleware(['role:admin'])->group(function () {
+    Route::middleware(['role:admin|hr_manager'])->group(function () {
         Route::post('/admin/register', [AuthController::class, 'adminRegister']);
     });
 });
