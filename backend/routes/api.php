@@ -11,6 +11,7 @@ use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\BulkPaymentController;
 use App\Http\Controllers\API\ProjectController;
 use App\Http\Controllers\API\AttendanceController;
+use App\Http\Controllers\API\EventController;
 
 // Public routes
 Route::prefix('auth')->group(function () {
@@ -20,6 +21,7 @@ Route::prefix('auth')->group(function () {
 
 // Protected routes
 Route::middleware(['auth:sanctum'])->group(function () {
+    
     // Auth routes
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     
@@ -189,3 +191,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 });
 
+Route::middleware(['auth:sanctum'])->group(function () {
+   // Event routes
+    Route::prefix('events')->group(function () {
+        // Admin-only routes
+        Route::middleware(['role:admin'])->group(function () {
+            Route::post('/', [EventController::class, 'store']);
+            Route::put('/{event}', [EventController::class, 'update']);
+            Route::delete('/{event}', [EventController::class, 'destroy']);
+        });
+        
+        // Public routes (for all authenticated users)
+        Route::get('/', [EventController::class, 'index']);
+        Route::get('/{event}', [EventController::class, 'show']);
+    });
+});
