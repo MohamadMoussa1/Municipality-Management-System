@@ -104,6 +104,7 @@ class CitizenController extends Controller
             'address' => 'sometimes|string|max:500',
             'contact' => 'sometimes|string|max:20',
             'date_of_birth' => 'sometimes|date|before:today',
+            'status' => 'sometimes|string|in:active,inactive,suspended'
         ]);
 
         if ($validator->fails()) {
@@ -114,9 +115,15 @@ class CitizenController extends Controller
         }
 
         // Update user information if provided
-        if ($request->has('name') || $request->has('email')) {
-            $userData = $request->only(['name', 'email']);
+        if ($request->has('name') || $request->has('email') || $request->has('status')) {
+            $userData = $request->only(['name', 'email', 'status']);
+            
             User::where('id', $citizen->user_id)->update($userData);
+            
+            // Dispatch notification only if status changed
+            if ($request->has('status')) {
+                $citizen->user->notify(new \App\Notifications\UserStatusUpdated($citizen->user));
+            }
         }
 
         // Update citizen information

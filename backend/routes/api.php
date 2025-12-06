@@ -201,3 +201,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{event}', [EventController::class, 'show']);
     });
 });
+
+Route::get('/test-email', function () {
+    \Mail::raw('Testing Gmail SMTP in Laravel', function ($message) {
+        $message->to('moussamohamad389@gmail.com')->subject('SMTP Test');
+    });
+
+    return 'Email sent!';
+});

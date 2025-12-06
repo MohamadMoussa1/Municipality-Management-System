@@ -152,6 +152,11 @@ class EmployeeController extends Controller
         if ($request->has('name') || $request->has('email') || $request->has('status') || $request->has('role') ) {
             $userData = $request->only(['name', 'email', 'status','role']);
             User::where('id', $employee->user_id)->update($userData);
+
+            // Dispatch notification only if status changed
+            if ($request->has('status')) {
+                $employee->user->notify(new \App\Notifications\UserStatusUpdated($employee->user));
+            }
         }
 
         // Update employee information

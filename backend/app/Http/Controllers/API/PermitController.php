@@ -150,7 +150,10 @@ class PermitController extends Controller
             }
 
             $permit->update($updates);
-
+            
+            // Send notification to applicant
+            $permit->applicant->user->notify(new \App\Notifications\PermitStatusUpdated($permit));
+            
             return response()->json([
                 'message' => 'Permit status updated successfully',
                 'data' => $permit->refresh()->load('applicant')
