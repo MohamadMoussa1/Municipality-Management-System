@@ -169,11 +169,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/projects/{project}/status', [ProjectController::class, 'updateStatus']);
     });
     
-    // TODO: Add more project routes as needed
-    // Example (uncomment when implemented):
-    // Route::get('/projects/{project}', [ProjectController::class, 'show']);
-    // Route::put('/projects/{project}', [ProjectController::class, 'update']);
-    // Route::delete('/projects/{project}', [ProjectController::class, 'destroy']);
 });
 
 // Attendace routes
