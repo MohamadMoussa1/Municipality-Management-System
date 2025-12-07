@@ -117,6 +117,10 @@ class citizenRequestController extends Controller
             $citizenRequest->completion_date = now();
         }
         $citizenRequest->save();
+
+        // Send notification to citizen
+        $citizenRequest->citizen->user->notify(new \App\Notifications\CitizenRequestStatusUpdated($citizenRequest));
+        
         return response()->json([
             'message' => 'Request status updated successfully.',
             'request' => $citizenRequest
