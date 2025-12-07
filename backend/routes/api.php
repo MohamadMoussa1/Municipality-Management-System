@@ -12,7 +12,7 @@ use App\Http\Controllers\API\BulkPaymentController;
 use App\Http\Controllers\API\ProjectController;
 use App\Http\Controllers\API\AttendanceController;
 use App\Http\Controllers\API\EventController;
-
+use App\Http\Controllers\API\NotificationController;
 // Public routes
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
@@ -199,6 +199,24 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Public routes (for all authenticated users)
         Route::get('/', [EventController::class, 'index']);
         Route::get('/{event}', [EventController::class, 'show']);
+    });
+});
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('notifications')->group(function () {
+    // Get all notifications
+    Route::get('/', [NotificationController::class, 'index']);
+
+    // Get unread notifications
+    Route::get('/unread', [NotificationController::class, 'unread']);
+
+    // Mark one notification as read
+    Route::post('/{id}/read', [NotificationController::class, 'markAsRead']);
+
+    // Mark all notifications as read
+    Route::post('/read-all', [NotificationController::class, 'markAllAsRead']);
+
+    // Delete one notification
+    Route::delete('/{id}', [NotificationController::class, 'destroy']);
     });
 });
 
