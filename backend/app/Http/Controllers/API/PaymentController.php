@@ -7,6 +7,12 @@ use App\Models\Payment;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\Payment\IndexPaymentsRequest;
 use App\Http\Resources\PaymentsResource\PaymentResource;
+use Stripe\Stripe;
+use Stripe\Checkout\Session as StripeSession;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Log;
+use App\Notifications\PaymentCreated;
+
 
 
 class PaymentController extends Controller
@@ -40,7 +46,10 @@ class PaymentController extends Controller
                 'date'         => now(),
                 'status'       => $validated['status'] ?? 'pending',
             ]);
-
+            // Notify the citizen about the new payment
+            
+            $payment->citizen->user->notify(new \App\Notifications\PaymentCreated($payment));
+            
             return response()->json([
                 'message' => 'Payment created successfully.',
                 'data'    => $payment
@@ -181,6 +190,9 @@ class PaymentController extends Controller
         try {
             $payment->update($validated);
 
+            // Notify the citizen about the payment status update
+            $payment->citizen->user->notify(new \App\Notifications\PaymentStatusUpdated($payment));
+
             return response()->json([
                 'message' => 'Payment updated successfully.',
                 'data'    => $payment
@@ -267,6 +279,58 @@ class PaymentController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to delete payment.',
+                'error'   => config('app.debug') ? $e->getMessage() : 'Server error.',
+            ], 500);
+        }
+    }
+
+    // begin stripe payment process
+    public function beginStripePayment(Request $request, Payment $payment): JsonResponse
+    {
+        $user = $request->user();
+        if ($user->role !== 'citizen' || $payment->citizen_id !==$user->citizen->id) {
+            return response()->json([
+                'message' => 'Unauthorized to initiate payment for this record.'
+            ], 403);
+        }
+
+        // check if payment is already completed
+        if ($payment->status === 'completed') {
+            return response()->json([
+                'message' => 'Payment is already completed.'
+            ], 400);
+        }
+
+        try {
+            Stripe::setApiKey(env('STRIPE_SECRET'));    
+            // Create Stripe Checkout Session
+            $session = StripeSession::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'usd',
+                        'product_data' => [
+                            'name' => 'Municipality Payment #' . $payment->id,
+                        ],
+                        'unit_amount' => $payment->amount * 100, 
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'metadata' => [
+                    'payment_id' => $payment->id
+                ],
+                // Redirect URLs
+                'success_url' => URL::to('/payment-success/' . $payment->id),
+                'cancel_url' => URL::to('/payment-cancel/' . $payment->id),
+            ]);
+
+            return response()->json([
+                'checkout_url' => $session->url,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to initiate payment.',
                 'error'   => config('app.debug') ? $e->getMessage() : 'Server error.',
             ], 500);
         }

@@ -16,4 +16,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 });
 
+Route::get('/payment-success/{id}', function ($id) {
+    return "Payment $id succeeded!";
+});
+
+Route::get('/payment-cancel/{id}', function ($id) {
+    return "Payment $id was cancelled.";
+});
+
 require __DIR__.'/settings.php';

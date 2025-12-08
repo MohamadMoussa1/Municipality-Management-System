@@ -13,6 +13,8 @@ use App\Http\Controllers\API\ProjectController;
 use App\Http\Controllers\API\AttendanceController;
 use App\Http\Controllers\API\EventController;
 use App\Http\Controllers\API\NotificationController;
+use App\Http\Controllers\API\StripeWebhookController;
+
 // Public routes
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
@@ -127,6 +129,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 // Payment routes
+
+// Stripe webhook endpoint
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleStripeWebhook']);
+
 Route::middleware(['auth:sanctum'])->group(function () {
 
     // citizen payments
@@ -151,6 +157,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/payments/{payment}', [PaymentController::class, 'destroy']);
 
     // we still need payment process integration here
+    Route::post('/payments/{payment}/pay', [PaymentController::class, 'beginStripePayment']);
+
+    
 });
 
 // Project routes
