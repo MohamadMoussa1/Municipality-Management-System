@@ -8,6 +8,7 @@ use App\Models\Payment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\PaymentCreated;
 
 
 class BulkPaymentController extends Controller
@@ -42,21 +43,27 @@ class BulkPaymentController extends Controller
          try {
         $created = DB::transaction(function () 
             use ($citizenIds, $amount, $paymentType, $date) 
-        {
-            $records = [];
+            {
+                $records = [];
 
-            foreach ($citizenIds as $id) {
-                $records[] = Payment::create([
-                    'citizen_id'   => $id,
-                    'amount'       => $amount,
-                    'payment_type' => $paymentType,
-                    'date'         => $date,
-                    'status'       => 'pending',
-                ]);
+                foreach ($citizenIds as $id) {
+                    $records[] = Payment::create([
+                        'citizen_id'   => $id,
+                        'amount'       => $amount,
+                        'payment_type' => $paymentType,
+                        'date'         => $date,
+                        'status'       => 'pending',
+                    ]);
+                }
+
+                return $records;
+            });
+            foreach ($created as $payment) {
+                $citizen = $payment->citizen;
+                if ($citizen && $citizen->user) {
+                    $payment->citizen->user->notify(new \App\Notifications\PaymentCreated($payment));
+                }
             }
-
-            return $records;
-        });
 
         return response()->json([
             'message' => 'Payments created successfully.',

@@ -11,6 +11,7 @@ use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\PaymentCreated;
 
 
 
@@ -45,7 +46,10 @@ class PaymentController extends Controller
                 'date'         => now(),
                 'status'       => $validated['status'] ?? 'pending',
             ]);
-
+            // Notify the citizen about the new payment
+            
+            $payment->citizen->user->notify(new \App\Notifications\PaymentCreated($payment));
+            
             return response()->json([
                 'message' => 'Payment created successfully.',
                 'data'    => $payment
@@ -185,6 +189,9 @@ class PaymentController extends Controller
         }
         try {
             $payment->update($validated);
+
+            // Notify the citizen about the payment status update
+            $payment->citizen->user->notify(new \App\Notifications\PaymentStatusUpdated($payment));
 
             return response()->json([
                 'message' => 'Payment updated successfully.',
