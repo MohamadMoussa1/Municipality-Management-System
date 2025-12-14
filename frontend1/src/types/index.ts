@@ -43,6 +43,23 @@ export interface CitizenRequest {
   citizenName?: string;
   assignedTo?: string;
 }
+export interface ProfileCitzen {
+  id: string;
+  user_id:string;
+  name:string;
+  email:string;
+  role:string;
+  national_id: string;
+  type: RequestType;
+  address:string;
+  contact:string;
+  date_of_birth:string;
+  status: string;
+  created_at:string;
+  updated_at:string;
+  
+  
+}
 
 export interface Permit {
   id: string;

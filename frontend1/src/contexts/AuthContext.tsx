@@ -26,14 +26,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Save to storage any time they change
   useEffect(() => {
     if (user) localStorage.setItem("mms_user", JSON.stringify(user));
-    if (role) localStorage.setItem("mms_role", role);
+    if (role) localStorage.setItem("role", role);
   }, [user, role]);
 
   const logout = () => {
     setUser(null);
     setRole(null);
     localStorage.removeItem("mms_user");
-    localStorage.removeItem("mms_role");
+    localStorage.removeItem("role");
     
 
   };

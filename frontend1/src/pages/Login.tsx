@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -56,9 +57,10 @@ export default function Login() {
            setRole(result.user.role);
            setUser(result.user.name);
            localStorage.setItem("token",result.access_token);
+           toast.success(result.message,{ duration: 4000 });
            navigate("/dashboard");
   }   else {
-      alert(result.message);
+        toast.error(result.message,{ duration: 4000 });
   }      
 }
   
@@ -233,7 +235,7 @@ export default function Login() {
                     <Input
                       id="NID"
                       name="national_id"
-                      type="text"
+                      type="number"
                       placeholder="national ID"
                       value={Data.national_id}
                       onChange={handleChangeSignIn}

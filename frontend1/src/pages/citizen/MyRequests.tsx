@@ -6,6 +6,8 @@ import { Plus, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { mockRequests } from '@/lib/mockData';
 import { CitizenRequest } from '@/types';
 import { toast } from 'sonner';
+import { useEffect } from "react";
+import {useNavigate} from 'react-router-dom'
 import {
   Dialog,
   DialogContent,
@@ -27,9 +29,58 @@ import {
 } from '@/components/ui/select';
 
 export default function MyRequests() {
+  const navigate=useNavigate();
   const [requests, setRequests] = useState<CitizenRequest[]>(mockRequests);
   const [selectedRequest, setSelectedRequest] = useState<CitizenRequest | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+   const [details, setDetails] = useState(false);
+  const [Value, setValue] = useState("");
+  const [Clicked, setClicked] = useState(false);
+  const [R, setR] = useState([]);
+  useEffect(() => {
+    setClicked(false);
+    const fetchData = async () => {
+        const token=localStorage.getItem("token");
+        const response = await fetch("http://127.0.0.1:8000/api/requests/my-requests", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization":`Bearer ${token}`
+          },
+        });
+        let res=await response.json();
+       
+          setR(res.requests);
+        
+    };
+  
+    fetchData();
+  }, [Clicked]);
+  const handleSubmit = async (e: React.FormEvent) => {
+       e.preventDefault();
+      setDetails(false);
+  if (!Value) { return;}
+    const token=localStorage.getItem("token");
+    const response = await fetch("http://127.0.0.1:8000/api/citizen/requests", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization":`Bearer ${token}`,
+          },
+         body: JSON.stringify({
+            'type':Value ,      
+      }),
+      });
+
+       const result = await response.json();
+       navigate('/citizen/requests');
+       setClicked(true);
+       toast.message (result.message);
+       
+
+  }
 
   const handleViewDetails = (request: CitizenRequest) => {
     setSelectedRequest(request);
@@ -62,10 +113,10 @@ export default function MyRequests() {
   };
 
   const stats = {
-    total: requests.length,
-    pending: requests.filter(r => r.status === 'pending').length,
-    inReview: requests.filter(r => r.status === 'in_review').length,
-    completed: requests.filter(r => r.status === 'completed' || r.status === 'approved').length,
+    total: R.length,
+    pending: R.filter(r => r.status === 'pending').length,
+    inReview: R.filter(r => r.status === 'in_review').length,
+    completed: R.filter(r => r.status === 'completed' || r.status === 'approved').length,
   };
 
   return (
@@ -75,7 +126,7 @@ export default function MyRequests() {
             <h1 className="text-3xl font-bold text-foreground">My Requests</h1>
             <p className="text-muted-foreground">Track and manage your service requests</p>
           </div>
-          <Dialog>
+          <Dialog open={details} onOpenChange={setDetails}>
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -92,25 +143,25 @@ export default function MyRequests() {
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="type">Request Type</Label>
-                  <Select>
+                  <Select  value={Value} onValueChange={setValue}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select request type" />
+                      <SelectValue  placeholder="Select request type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="residency">Residency Certificate</SelectItem>
-                      <SelectItem value="birth">Birth Certificate</SelectItem>
-                      <SelectItem value="death">Death Certificate</SelectItem>
-                      <SelectItem value="marriage">Marriage Certificate</SelectItem>
-                      <SelectItem value="garbage">Garbage Collection</SelectItem>
+                      <SelectItem value="residency_certificate">Residency Certificate</SelectItem>
+                      <SelectItem value="birth_certificate">Birth Certificate</SelectItem>
+                      <SelectItem value="death_certificate">Death Certificate</SelectItem>
+                      <SelectItem value="marriage_certificate">Marriage Certificate</SelectItem>
+                      <SelectItem value="garbage_collection">Garbage Collection</SelectItem>
                       <SelectItem value="street_repair">Street Repair</SelectItem>
-                      <SelectItem value="complaint">Public Complaint</SelectItem>
+                      <SelectItem value="public_complaint">Public Complaint</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               
               </div>
               <DialogFooter>
-                <Button type="submit">Submit Request</Button>
+                <Button type="submit"  onClick={handleSubmit} >Submit Request</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -158,7 +209,7 @@ export default function MyRequests() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {requests.map((request) => (
+              {R.map((request) => (
                 <Card key={request.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex flex-col sm:flex-row justify-between gap-4">
@@ -172,12 +223,12 @@ export default function MyRequests() {
                             </span>
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground">{request.description}</p>
+                       
                         <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                           <span>ID: {request.id}</span>
-                          <span>Submitted: {new Date(request.submission_date).toLocaleDateString()}</span>
-                          {request.completion_date && <span>Completed: {new Date(request.completion_date).toLocaleDateString()}</span>}
-                          {request.assignedTo && <span>Assigned to: {request.assignedTo}</span>}
+                          <span>Submitted:{request.submission_date}</span>
+                           <span>Completed: {request.completion_date}</span>
+                         
                         </div>
                       </div>
                       <div className="flex sm:flex-col gap-2">
@@ -221,12 +272,12 @@ export default function MyRequests() {
                 
                 <div>
                   <Label>Submission Date</Label>
-                  <p className="text-sm mt-1">{new Date(selectedRequest.submission_date).toLocaleDateString()}</p>
+                  <p className="text-sm mt-1">{selectedRequest.submission_date}</p>
                 </div>
                 {selectedRequest.completion_date && (
                   <div>
                     <Label>Completion Date</Label>
-                    <p className="text-sm mt-1">{new Date(selectedRequest.completion_date).toLocaleDateString()}</p>
+                    <p className="text-sm mt-1">{selectedRequest.completion_date}</p>
                   </div>
                 )}
               </div>

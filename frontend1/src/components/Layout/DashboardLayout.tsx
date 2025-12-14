@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { getRolePhoto } from '@/lib/rolePhotos';
-
+import { toast } from 'sonner';
 interface DashboardLayoutProps {
   children: ReactNode;
 }
@@ -43,8 +43,9 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
        res=await response.json();
       }
       catch(e){
-      console.log(token);
+          console.log("an error happened");
       }
+      toast.success(res.message,{ duration: 4000 });
       localStorage.removeItem("token");
     navigate('/login');
   };

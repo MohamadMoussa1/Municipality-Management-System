@@ -1,184 +1,208 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { Mail, Building, Calendar, User } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getRolePhoto } from '@/lib/rolePhotos';
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
+
 export default function Profile() {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const { user } = useAuth();
-  const { role } = useAuth();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handlePhotoChange = () => {
-    fileInputRef.current?.click();
+  const [form, setForm] = useState({
+    id: '',
+    name: '',
+    email: '',
+    national_id: '',
+    address: '',
+    contact: '',
+    date_of_birth: '',
+    role: '',
+    created_at: '',
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
   };
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      toast.success('Profile photo updated successfully');
-    }
-  };
 
-  const handleSaveProfile= async(e: React.FormEvent) => {
-     e.preventDefault();
-     const token=localStorage.getItem("token");
-     const response = await fetch("http://127.0.0.1:8000/api/citizens/me/update", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "Authorization":`Bearer ${token}`,
-          },
-         body: JSON.stringify({
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem('token');
 
-          }
-        ),
+      const response = await fetch('http://127.0.0.1:8000/api/citizens/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
       });
 
+      const res = await response.json();
+
+      setForm({
+        id: res.data.id ?? '',
+        name: res.data.name ?? '',
+        email: res.data.email ?? '',
+        national_id: res.data.national_id ?? '',
+        address: res.data.address ?? '',
+        contact: res.data.contact ?? '',
+        date_of_birth: res.data.date_of_birth ?? '',
+        role: res.data.role ?? '',
+        created_at: res.data.created_at ?? '',
+      });
+
+      setLoading(false);
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+
+    const response = await fetch(
+      'http://127.0.0.1:8000/api/citizens/me/update',
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          national_id: form.national_id,
+          address: form.address,
+          contact: form.contact,
+          date_of_birth: form.date_of_birth,
+        }),
+      }
+    );
+
     const result = await response.json();
-    console.log(result.message);
-    
+    toast.success(result.message);
     navigate(-1);
-    toast.success('Profile updated successfully');
   };
 
-  const handleUpdatePassword =async (e: React.FormEvent) => {
-     e.preventDefault();
-    //  const token=localStorage.getItem("token");
-    //  const response = await fetch("http://127.0.0.1:8000/api/citizens/me/update", {
-    //       method: "PUT",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //         "Accept": "application/json",
-    //         "Authorization":`Bearer ${token}`,
-    //       },
-    //      body: JSON.stringify({
-
-    //       }
-    //     ),
-    //   });
-
-    // const result = await response.json();
-    // console.log(result.message);
-    
-    navigate(-1);
-    toast.success('Password updated successfully');
-  };
+  if (loading) {
+    return <p>Loading profile...</p>;
+  }
 
   return (
     <div className="space-y-6 max-w-4xl">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Profile</h1>
-          <p className="text-muted-foreground">Manage your account information</p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold">Profile</h1>
+        <p className="text-muted-foreground">Manage your account information</p>
+      </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          <Card className="md:col-span-1">
-            <CardContent className="pt-6">
-              <div className="flex flex-col items-center space-y-4">
-                <Avatar className="h-32 w-32">
-                  <AvatarImage src={getRolePhoto(user?.role || 'citizen')} alt={user?.name} />
-                  <AvatarFallback className="text-2xl">
-                    {/* {user?.name?.split(' ').map(n => n[0]).join('') || 'U'} */}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="text-center space-y-1">
-                  <h2 className="text-xl font-semibold">{user?.name}</h2>
-                </div>
-              
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
-              <CardDescription>Update your personal details</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input id="name" defaultValue={user?.name} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" defaultValue={user?.email} />
-                </div>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" type="tel" placeholder="+1-555-0123" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
-                  {/* <Input id="role" value={user?.role.replace('_', ' ')} disabled /> */}
-                  {role}
-                </div>
-              </div>
-              <Separator />
-              <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
-                <Input id="address" placeholder="123 Main Street" />
-              </div>
-             
-              <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={(e) => { e.preventDefault(); navigate(-1); toast.info('Changes cancelled'); }}>Cancel</Button>
-                <Button type="button" onClick={handleSaveProfile}>Save Changes</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Account Details</CardTitle>
-            <CardDescription>View your account information</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <Mail className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="font-medium">{user?.email}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <User className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">User ID</p>
-                  <p className="font-medium">{user?.id}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <Building className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Department</p>
-                  {/* <p className="font-medium capitalize">{user?.role.replace('_', ' ')}</p> */}
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <Calendar className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Member Since</p>
-                  <p className="font-medium">January 2024</p>
-                </div>
-              </div>
-            </div>
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="md:col-span-1">
+          <CardContent className="pt-6 flex flex-col items-center gap-4">
+            <Avatar className="h-32 w-32">
+              <AvatarImage
+                src={getRolePhoto(user?.role || 'citizen')}
+                alt={form.name}
+              />
+              <AvatarFallback>{form.name[0]}</AvatarFallback>
+            </Avatar>
+            <h2 className="text-xl font-semibold">{form.name}</h2>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>Personal Information</CardTitle>
+            <CardDescription>Update your personal details</CardDescription>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <Label>Full Name</Label>
+                <Input name="name" value={form.name} onChange={handleChange} />
+              </div>
+
+              <div>
+                <Label>Email</Label>
+                <Input name="email" value={form.email} onChange={handleChange} />
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <Label>Phone</Label>
+                <Input
+                  name="contact"
+                  value={form.contact}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <Label>Role</Label>
+                <Input value={form.role.replace('_', ' ')} disabled />
+              </div>
+            </div>
+
+            <Separator />
+
+            <div>
+              <Label>Address</Label>
+              <Input
+                name="address"
+                value={form.address}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => navigate(-1)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleSaveProfile}>Save Changes</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Account Details</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          <div className="flex items-center gap-3">
+            <Mail className="h-5 w-5" />
+            <span>{form.email}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <User className="h-5 w-5" />
+            <span>{form.id}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Calendar className="h-5 w-5" />
+            <span>{form.created_at}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Building className="h-5 w-5" />
+            <span>{form.role}</span>
+          </div>
+        </CardContent>
+      </Card>
+      
+ <Card>
           <CardHeader>
             <CardTitle>Security Settings</CardTitle>
             <CardDescription>Manage your password and security preferences</CardDescription>
@@ -200,10 +224,10 @@ export default function Profile() {
             </div>
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={(e) => { e.preventDefault(); navigate(-1); toast.info('Password change cancelled'); }}>Cancel</Button>
-              <Button type="button" onClick={handleUpdatePassword}>Update Password</Button>
+              <Button type="button" >Update Password</Button>
             </div>
           </CardContent>
         </Card>
-      </div>
+    </div>
   );
 }
