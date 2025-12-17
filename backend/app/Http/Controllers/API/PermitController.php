@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Permit;
 use App\Models\Citizen;
+use App\Models\Document;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,49 +24,106 @@ class PermitController extends Controller
     {
         $validated = $request->validate([
             'type' => ['required', 'string', Rule::in(['business', 'construction', 'vehicle', 'public_event'])],
-            'related_documents' => 'nullable|array',
-            'related_documents.*' => 'exists:documents,id',
+            'documents' => 'nullable|array',
+            'documents.*' => 'file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
+            'existing_documents' => 'nullable|array',
+            'existing_documents.*' => 'exists:documents,id,uploaded_by,' . Auth::id(),
         ]);
 
+        \DB::beginTransaction();
+        $uploadedFiles = []; // Track uploaded temp files for cleanup
+
         try {
-            // Check if all documents belong to the authenticated user
-            if (!empty($validated['related_documents'])) {
-                $invalidDocuments = \App\Models\Document::whereIn('id', $validated['related_documents'])
-                    ->where('uploaded_by', '!=', Auth::id())
-                    ->pluck('id')
-                    ->toArray();
-                
-                if (!empty($invalidDocuments)) {
-                    return response()->json([
-                        'message' => 'Some documents do not belong to you',
-                        'invalid_documents' => $invalidDocuments
-                    ], 422);
+            $documentIds = $validated['existing_documents'] ?? [];
+            $tempFiles = []; // Store temp file info for moving later
+
+            // Handle new file uploads
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $file) {
+                    try {
+                        // Store in temp directory first
+                        $tempPath = $file->store('temp/' . Auth::id(), 'local');
+                        $uploadedFiles[] = $tempPath;
+                        
+                        // Store temp file info
+                        $tempFiles[] = [
+                            'temp_path' => $tempPath,
+                            'original_name' => $file->getClientOriginalName(),
+                            'extension' => $file->getClientOriginalExtension(),
+                        ];
+                    } catch (\Exception $e) {
+                        // Cleanup any uploaded temp files if one fails
+                        foreach ($uploadedFiles as $filePath) {
+                            \Storage::disk('local')->delete($filePath);
+                        }
+                        throw $e;
+                    }
                 }
             }
-
-            $permit = Auth::user()->citizen->permits()->create([
+            // Get the authenticated citizen
+            $citizen = Auth::user()->citizen;
+            // Create the permit first
+            $permit = $citizen->permits()->create([
                 'type' => $validated['type'],
                 'status' => 'pending',
-                'related_documents' => $validated['related_documents'] ?? null,
-                // issue_date and expiry_date will be set when the permit is approved
+                'related_documents' => $documentIds,
             ]);
+            // Now process the temp files and move them to permanent storage
+            foreach ($tempFiles as $tempFile) {
+                // Generate permanent path
+                $permanentPath = 'documents/' . date('Y/m') . '/' . \Str::random(40) . '.' . $tempFile['extension'];
+                
+                // Move from temp to permanent storage
+                \Storage::disk('public')->writeStream(
+                    $permanentPath,
+                    \Storage::disk('local')->readStream($tempFile['temp_path'])
+                );
+                
+                // Delete the temp file
+                \Storage::disk('local')->delete($tempFile['temp_path']);
+                
+                // Create document record
+                $document = Document::create([
+                    'title' => $tempFile['original_name'],
+                    'link' => $permanentPath,
+                    'uploaded_by' => Auth::id(),
+                    'related_entity' => 'permit',
+                ]);
+                
+                $documentIds[] = $document->id;
+            }
+
+            // Update the permit with all document IDs
+            $permit->update(['related_documents' => $documentIds]);
+
+            \DB::commit();
 
             return response()->json([
+                'success' => true,
                 'message' => 'Permit application submitted successfully',
-                'data' => $permit->load('applicant')
+                'data' => [
+                    'permit' => $permit->load('applicant'),
+                    'documents' => Document::whereIn('id', $documentIds)->get()
+                ]
             ], 201);
+
         } catch (\Exception $e) {
-            Log::error('Error creating permit: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
+            \DB::rollBack();
+            // Cleanup any uploaded temp files on error
+            foreach ($uploadedFiles as $filePath) {
+                \Storage::disk('local')->delete($filePath);
+            }
+            \Log::error('Error creating permit: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            
             return response()->json([
+                'success' => false,
                 'message' => 'Failed to submit permit application',
                 'error' => config('app.debug') ? $e->getMessage() : 'An error occurred',
-                'file' => config('app.debug') ? $e->getFile() : null,
-                'line' => config('app.debug') ? $e->getLine() : null,
             ], 500);
         }
     }
-    
+        
 
     /**
      * Get authenticated citizen's permits
@@ -114,6 +172,8 @@ class PermitController extends Controller
             ->latest();
 
         $permits = $query->get();
+        
+        
 
         return response()->json([
             'data' => $permits
@@ -174,8 +234,42 @@ class PermitController extends Controller
         // Check and update status if expired
         $this->checkAndUpdateExpiredStatus($permit);
         
+        
+         // Eager load the applicant with user data
+        $permit->load(['applicant.user']);
+        // Manually load documents
+        $documents = Document::whereIn('id', $permit->related_documents ?? [])
+            ->where('related_entity', 'permit')
+            ->get(['id', 'title', 'link']);
+    
+
         return response()->json([
-            'data' => $permit->load('applicant')
+            'success' => true,
+            'message' => 'Permit retrieved successfully',
+            'data' => [
+                'permit' => [
+                    'id' => $permit->id,
+                    'type' => $permit->type,
+                    'status' => $permit->status,
+                    'issue_date' => $permit->issue_date?->toDateString(),
+                    'expiry_date' => $permit->expiry_date?->toDateString(),
+                    'created_at' => $permit->created_at,
+                    'updated_at' => $permit->updated_at,
+                ],
+                'applicant' => [
+                    'id' => $permit->applicant->id,
+                    'name' => $permit->applicant->user->name,
+                    'contact' => $permit->applicant->contact,
+                ],
+                'documents' => $documents->map(function($document) {
+                    return [
+                        'id' => $document->id,
+                        'title' => $document->title,
+                        'url' => \Storage::disk('public')->url($document->link),
+                        'type' => \Str::afterLast($document->link, '.')
+                    ];
+                })
+            ]
         ]);
     }
 

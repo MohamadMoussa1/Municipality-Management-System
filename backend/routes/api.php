@@ -35,7 +35,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Update authenticated user's profile
         Route::put('/me/update', [CitizenController::class, 'updateProfile']);
         
-        Route::middleware(['role:admin|hr_manager'])->group(function () {
+        Route::middleware(['role:admin|finance_officer'])->group(function () {
         // Get all citizens (admin only)
             Route::get('/', [CitizenController::class, 'index']);
             
