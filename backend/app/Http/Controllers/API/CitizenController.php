@@ -20,10 +20,10 @@ class CitizenController extends Controller
     {
         $user = Auth::user();
         
-        // Only allow admin to list all citizens
-        if (!$user->hasRole('admin')) {
+        // Only allow admin and finance officer to list all citizens
+        if (!$user->hasRole('admin') && !$user->hasRole('finance_officer')) {
             return response()->json([
-                'message' => 'Unauthorized. Only administrators can view all citizens.'
+                'message' => 'Unauthorized. Only administrators and finance officers can view all citizens.'
             ], 403);
         }
 
@@ -38,35 +38,35 @@ class CitizenController extends Controller
      * Display the authenticated citizen's information.
      */
     /**
- * Display the specified citizen's information.
+ * Display the specified citizen's information.(admin or finance_officer)
  */
-    public function show(string $identifier)
+   public function show(string $identifier)
     {
         $user = Auth::user();
-        
-        // Find citizen by ID, name, or email
-        $query = Citizen::with('user');
-        
-        if (is_numeric($identifier)) {
-            $query->where('id', $identifier);
-        } else {
-            $query->whereHas('user', function($q) use ($identifier) {
-                $q->where('email', $identifier)
-                ->orWhere('name', 'like', '%' . $identifier . '%');
-            });
-        }
-        
-        $citizen = $query->firstOrFail();
 
-        // Check if the user is authorized to view this citizen
-        if (!$user->hasRole('admin')) {
+        // Authorization
+        $allowed = $user->hasRole('admin')
+            || (
+                $user->hasRole('finance_officer')
+                && optional($user->employee)->department === 'finance'
+            );
+
+        if (! $allowed) {
             return response()->json([
-                'message' => 'Unauthorized. You can only view your own information.'
+                'message' => 'Unauthorized.'
             ], 403);
         }
 
+        $citizen = Citizen::with('user')
+            ->where('id', $identifier)                 // citizen ID
+            ->orWhere('national_id', $identifier)     // national ID
+            ->orWhereHas('user', function ($q) use ($identifier) {
+                $q->where('email', $identifier)        // email
+                ->orWhere('name', 'like', '%' . $identifier . '%'); // name
+            })
+            ->firstOrFail();
+
         return new CitizenResource($citizen);
-    
     }
 
     /**
