@@ -1,4 +1,5 @@
-export type UserRole = 'admin' | 'finance' | 'project_manager' | 'hr_manager' | 'clerk' | 'citizen';
+export const ROLES = ['admin','clerk','finance_officer','project_manager','hr_manager','citizen'] as const;
+export type UserRole = typeof ROLES[number];
 
 export interface User {
   id: string;

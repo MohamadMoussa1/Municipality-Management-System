@@ -51,7 +51,7 @@ export default function Dashboard() {
     switch (role) {
       case 'admin':
         return <AdminDashboard />;
-      case 'finance':
+      case 'finance_officer':
         return <FinanceDashboard />;
       case 'project_manager':
         return <ProjectDashboard />;

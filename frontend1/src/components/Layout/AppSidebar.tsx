@@ -57,8 +57,6 @@ export const AppSidebar = () => {
     const financeItems = [
       { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
       { title: 'Finance', url: '/admin/finance', icon: DollarSign },
-      { title: 'Events', url: '/employee/events', icon: Calendar },
-      { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
       { title: 'Notifications', url: '/notifications', icon: Bell },
     ];
 
@@ -91,7 +89,7 @@ export const AppSidebar = () => {
         return citizenItems;
       case 'admin':
         return adminItems;
-      case 'finance':
+      case 'finance_officer':
         return financeItems;
       case 'project_manager':
         return projectItems;
