@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Search, MapPin, Users, Clock, Filter } from 'lucide-react';
-import { mockEvents } from '@/lib/mockData';
-import { Event } from '@/types';
+import { Calendar, Search, Filter, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import axios from 'axios';
 import {
   Select,
   SelectContent,
@@ -13,149 +13,189 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+interface Event {
+  id: number;
+  title: string;
+  description: string;
+  date: string;
+  target_audience: 'public' | 'staff' | 'citizens';
+  created_at: string;
+  updated_at: string;
+}
+
 export default function CitizenEvents() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
-  // Citizens can only see public and citizen-specific events
-  const accessibleEvents = mockEvents.filter(
-    (event) => event.target_audience === 'public' || event.target_audience === 'citizen'
-  );
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/events', {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        setEvents(response.data);
+      } catch (err) {
+        console.error('Error fetching events:', err);
+        setError('Failed to load events. Please try again later.');
+        toast.error('Failed to load events');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const filteredEvents = accessibleEvents.filter((event) => {
+    fetchEvents();
+  }, []);
+
+  // Filter events based on search and filters
+  const filteredEvents = events.filter((event) => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          event.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = filterType === 'all' || event.type === filterType;
-    const matchesStatus = filterStatus === 'all' || event.status === filterStatus;
+    const matchesType = filterType === 'all' || event.target_audience === filterType;
+    const isPast = new Date(event.date) < new Date();
+    const matchesStatus = filterStatus === 'all' || 
+                         (filterStatus === 'past' && isPast) || 
+                         (filterStatus === 'upcoming' && !isPast);
+    
     return matchesSearch && matchesType && matchesStatus;
   });
 
-  const getStatusColor = (status: Event['status']) => {
-    switch (status) {
-      case 'upcoming': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-      case 'ongoing': return 'bg-green-500/10 text-green-500 border-green-500/20';
-      case 'completed': return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
-      case 'cancelled': return 'bg-red-500/10 text-red-500 border-red-500/20';
-      default: return 'bg-muted text-muted-foreground';
+  const getStatusColor = (eventDate: string) => {
+    const today = new Date();
+    const eventDateObj = new Date(eventDate);
+    
+    if (eventDateObj < today) {
+      return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
     }
+    return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
   };
 
-  const getTypeColor = (type: Event['type']) => {
-    switch (type) {
+  const getTypeColor = (audience: Event['target_audience']) => {
+    switch (audience) {
       case 'public': return 'bg-purple-500/10 text-purple-500';
-      case 'official': return 'bg-blue-500/10 text-blue-500';
-      case 'cultural': return 'bg-pink-500/10 text-pink-500';
-      case 'sports': return 'bg-orange-500/10 text-orange-500';
+      case 'citizens': return 'bg-blue-500/10 text-blue-500';
+      case 'staff': return 'bg-pink-500/10 text-pink-500';
       default: return 'bg-muted text-muted-foreground';
     }
-  };
-
-  const getAudienceBadge = (audience: Event['target_audience']) => {
-    if (audience === 'citizen') {
-      return <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Citizens Only</Badge>;
-    }
-    return null;
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Community Events</h1>
-          <p className="text-muted-foreground">View upcoming events and activities</p>
+    <div className="container mx-auto px-4 py-8">
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2">Loading events...</span>
         </div>
-      </div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{error}</span>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Upcoming Events</h1>
+              <p className="text-muted-foreground">Find and participate in local community events</p>
+            </div>
+          </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search events..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="w-[140px]">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="public">Public</SelectItem>
-                  <SelectItem value="official">Official</SelectItem>
-                  <SelectItem value="cultural">Cultural</SelectItem>
-                  <SelectItem value="sports">Sports</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="upcoming">Upcoming</SelectItem>
-                  <SelectItem value="ongoing">Ongoing</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4">
-            {filteredEvents.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No events found matching your criteria</p>
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search events..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Select value={filterType} onValueChange={setFilterType}>
+                    <SelectTrigger className="w-[140px]">
+                      <Filter className="h-4 w-4 mr-2" />
+                      <SelectValue placeholder="Filter by type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="public">Public</SelectItem>
+                      <SelectItem value="citizens">Citizens</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Events</SelectItem>
+                      <SelectItem value="upcoming">Upcoming</SelectItem>
+                      <SelectItem value="past">Past</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            ) : (
-              filteredEvents.map((event) => (
-                <Card key={event.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-lg font-semibold">{event.title}</h3>
-                        <Badge variant="outline" className={getStatusColor(event.status)}>
-                          {event.status}
-                        </Badge>
-                        <Badge variant="secondary" className={getTypeColor(event.type)}>
-                          {event.type}
-                        </Badge>
-                        {getAudienceBadge(event.target_audience)}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{event.description}</p>
-                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {new Date(event.date).toLocaleDateString()}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          {event.location}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Users className="h-4 w-4" />
-                          {event.registered || 0} / {event.capacity || 'Unlimited'}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {event.organizer}
-                        </div>
-                      </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4">
+                {filteredEvents.length === 0 ? (
+                  <div className="col-span-full text-center py-12">
+                    <div className="mx-auto h-24 w-24 text-muted-foreground/40 mb-4">
+                      <Calendar className="w-full h-full" />
                     </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                    <h3 className="text-lg font-medium">No events found</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {events.length === 0 
+                        ? 'There are no events at the moment.' 
+                        : 'Try adjusting your search or filter to find what you\'re looking for.'}
+                    </p>
+                  </div>
+                ) : (
+                  filteredEvents.map((event) => (
+                    <Card key={event.id} className="hover:shadow-md transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="text-lg font-semibold">{event.title}</h3>
+                            <div className="flex items-center mt-1 space-x-2">
+                              <Badge className={`${getTypeColor(event.target_audience)} capitalize`}>
+                                {event.target_audience}
+                              </Badge>
+                              <Badge className={`${getStatusColor(event.date)} capitalize`}>
+                                {new Date(event.date) < new Date() ? 'Past' : 'Upcoming'}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <p className="text-muted-foreground mb-4">{event.description}</p>
+                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            {new Date(event.date).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            })}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }
