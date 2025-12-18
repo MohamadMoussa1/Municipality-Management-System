@@ -29,7 +29,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 
 export const AppSidebar = () => {
-  const { role } = useAuth();
+  const { role,loading} = useAuth();
   const { open } = useSidebar();
   const { unreadCount } = useNotifications();
   const getMenuItems = () => {
@@ -45,6 +45,7 @@ export const AppSidebar = () => {
     const adminItems = [
       { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
       { title: 'Citizen Services', url: '/admin/citizen-services', icon: Users },
+      { title: 'Citizen', url: '/admin/citizen-view', icon: Users },
       { title: 'Permits', url: '/admin/permits', icon: FileText },
       { title: 'Finance', url: '/admin/finance', icon: DollarSign },
       { title: 'Projects', url: '/admin/projects', icon: Building2 },
@@ -85,15 +86,15 @@ export const AppSidebar = () => {
       { title: 'Events', url: '/employee/events', icon: Calendar },
       { title: 'Notifications', url: '/notifications', icon: Bell },
     ];
-
+    
     switch (role) {
       case 'citizen':
         return citizenItems;
       case 'admin':
         return adminItems;
-      case 'finance':
+      case 'finance_officer':
         return financeItems;
-      case 'project_manager':
+      case 'urban_planner':
         return projectItems;
       case 'hr_manager':
         return hrItems;
@@ -105,8 +106,8 @@ export const AppSidebar = () => {
   };
 
   const menuItems = getMenuItems();
-
   return (
+   
     <Sidebar className={open ? 'w-64' : 'w-14'} collapsible="icon">
       <SidebarContent>
         <div className="p-4 border-b flex items-center gap-2">

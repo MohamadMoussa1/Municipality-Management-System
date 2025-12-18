@@ -22,13 +22,26 @@ interface DashboardLayoutProps {
 }
 
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  const { user, logout } = useAuth();
+  const { role, user,logout } = useAuth();
   const { unreadCount } = useNotifications();
   const navigate = useNavigate();
-
-  
+  const  handleProfile=() => {
+      switch (role) {
+      case 'citizen':
+        navigate('/profile');
+        return;
+      default:
+        navigate('/profileEmployee');
+        return ;
+      
+  }
+}
+let isAdmin=null;
+if(role == "admin"){
+  isAdmin=true;
+}
   const  handleLogout =async () => {
-    //logout();
+    
     const token=localStorage.getItem("token");
       const response = await fetch("http://127.0.0.1:8000/api/auth/logout", {
         method: "POST",
@@ -45,9 +58,11 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       catch(e){
           console.log("an error happened");
       }
+
       toast.success(res.message,{ duration: 4000 });
       localStorage.removeItem("token");
-    navigate('/login');
+      logout();
+      navigate('/login');
   };
   return (
     <SidebarProvider>
@@ -90,12 +105,12 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2">
                     <img 
-                      src={getRolePhoto(user?.role || 'citizen')} 
+                      src={getRolePhoto(role || 'citizen')} 
                       alt="Profile" 
                       className="h-8 w-8 rounded-full"
                     />
                     <div className="text-left hidden md:block">
-                      <p className="text-sm font-medium">{user?.name}</p>
+                      <p className="text-sm font-medium">{user}</p>
                       {/* <p className="text-xs text-muted-foreground capitalize">{user?.role.replace('_', ' ')}</p> */}
                     </div>
                   </Button>
@@ -103,10 +118,10 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  {!isAdmin &&<DropdownMenuItem onClick={handleProfile}>
                     <User className="mr-2 h-4 w-4" />
                     Profile
-                  </DropdownMenuItem>
+                  </DropdownMenuItem>}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
