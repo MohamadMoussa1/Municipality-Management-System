@@ -181,11 +181,16 @@ export interface Document {
 
 export interface Notification {
   id: string;
-  userId: string;
-  title: string;
-  message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  read: boolean;
-  timestamp: string;
-  link?: string;
+  type: string;
+  notifiable_type: string;
+  notifiable_id: string;
+  data: {
+    title: string;
+    message: string;
+    type?: 'info' | 'success' | 'warning' | 'error';
+    link?: string;
+  };
+  read_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
