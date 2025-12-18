@@ -23,7 +23,7 @@ interface DashboardLayoutProps {
 
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { role, user,logout } = useAuth();
-  const { unreadCount } = useNotifications();
+  const { unreadCount, clearNotifications } = useNotifications();
   const navigate = useNavigate();
   const  handleProfile=() => {
       switch (role) {
@@ -60,6 +60,7 @@ if(role == "admin"){
       }
 
       toast.success(res.message,{ duration: 4000 });
+      clearNotifications();
       localStorage.removeItem("token");
       logout();
       navigate('/login');

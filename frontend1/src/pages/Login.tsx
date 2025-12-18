@@ -60,6 +60,8 @@ export default function Login() {
            localStorage.setItem("token",result.access_token);
            setRole(result.user.role);
            setUser(result.user.name);
+           // Dispatch custom event to trigger notification fetch
+           window.dispatchEvent(new Event('userLoggedIn'));
            toast.success(result.message,{ duration: 4000 });
            navigate("/dashboard");
         }
