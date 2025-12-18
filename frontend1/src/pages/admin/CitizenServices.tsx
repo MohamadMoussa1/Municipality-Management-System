@@ -89,8 +89,7 @@ export default function CitizenServices() {
           }),
         });
          res=await response.json();
-         setClicked(true);
-       
+         setClicked(true);      
       }
       fetchData();
     toast({
@@ -98,9 +97,6 @@ export default function CitizenServices() {
       description: `Permit ${Id} status changed to ${newStatus.replace('_', ' ')}.`,
     });
   };
-
-
-
 
   useEffect(() => {
       setClicked(false);
@@ -115,7 +111,9 @@ export default function CitizenServices() {
             },
           });
           const res=await response.json();
+
           setR(res.requests);
+          console.log(res.message);
           setLoading(false);        
       };
     
@@ -253,25 +251,25 @@ export default function CitizenServices() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
         <Card>
           <CardContent className="p-2.5 sm:p-4 md:p-6">
-            <div className="text-base sm:text-xl md:text-2xl font-bold">{R.length}</div>
+            <div className="text-base sm:text-xl md:text-2xl font-bold">{R?.length}</div>
             <div className="text-[9px] sm:text-xs md:text-sm text-muted-foreground leading-tight">Total Requests</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-2.5 sm:p-4 md:p-6">
-            <div className="text-base sm:text-xl md:text-2xl font-bold text-warning">{R.filter(r => r.status === 'pending').length}</div>
+            <div className="text-base sm:text-xl md:text-2xl font-bold text-warning">{R?.filter(r => r.status === 'pending').length}</div>
             <div className="text-[9px] sm:text-xs md:text-sm text-muted-foreground leading-tight">Pending</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-2.5 sm:p-4 md:p-6">
-            <div className="text-base sm:text-xl md:text-2xl font-bold text-accent">{R.filter(r => r.status === 'in_review').length}</div>
+            <div className="text-base sm:text-xl md:text-2xl font-bold text-accent">{R?.filter(r => r.status === 'in_review').length}</div>
             <div className="text-[9px] sm:text-xs md:text-sm text-muted-foreground leading-tight">In Review</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-2.5 sm:p-4 md:p-6">
-            <div className="text-base sm:text-xl md:text-2xl font-bold text-success">{R.filter(r => r.status === 'completed' || r.status === 'approved').length}</div>
+            <div className="text-base sm:text-xl md:text-2xl font-bold text-success">{R?.filter(r => r.status === 'completed' || r.status === 'approved').length}</div>
             <div className="text-[9px] sm:text-xs md:text-sm text-muted-foreground leading-tight">Completed</div>
           </CardContent>
         </Card>
@@ -317,7 +315,7 @@ export default function CitizenServices() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {R.map((request) => (
+                {R?.map((request) => (
                   <TableRow key={request.id}>
                     <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4">{request.id}</TableCell>
                     <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[80px] sm:max-w-none truncate">{request.citizenName}</TableCell>

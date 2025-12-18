@@ -29,7 +29,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 
 export const AppSidebar = () => {
-  const { role } = useAuth();
+  const { role,loading} = useAuth();
   const { open } = useSidebar();
   const { unreadCount } = useNotifications();
   const getMenuItems = () => {
@@ -86,15 +86,15 @@ export const AppSidebar = () => {
       { title: 'Events', url: '/employee/events', icon: Calendar },
       { title: 'Notifications', url: '/notifications', icon: Bell },
     ];
-
+    
     switch (role) {
       case 'citizen':
         return citizenItems;
       case 'admin':
         return adminItems;
-      case 'finance':
+      case 'finance_officer':
         return financeItems;
-      case 'project_manager':
+      case 'urban_planner':
         return projectItems;
       case 'hr_manager':
         return hrItems;
@@ -106,7 +106,6 @@ export const AppSidebar = () => {
   };
 
   const menuItems = getMenuItems();
-
   return (
    
     <Sidebar className={open ? 'w-64' : 'w-14'} collapsible="icon">

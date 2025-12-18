@@ -283,7 +283,7 @@ export function CitizenList() {
         <Card className="border-border/50">
           <CardContent className="flex items-center justify-between p-4 sm:p-6">
             <div>
-              <p className="text-2xl sm:text-3xl font-bold text-foreground">{C.length}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">{C?.length}</p>
               <p className="text-xs sm:text-sm text-muted-foreground">Total Citizens</p>
             </div>
             <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -296,7 +296,7 @@ export function CitizenList() {
           <CardContent className="flex items-center justify-between p-4 sm:p-6">
             <div>
               <p className="text-2xl sm:text-3xl font-bold text-foreground">
-                {C.filter(r => r.status === 'active').length}
+                {C?.filter(r => r.status === 'active').length}
               </p>
               <p className="text-xs sm:text-sm text-muted-foreground">Active</p>
             </div>
@@ -310,7 +310,7 @@ export function CitizenList() {
           <CardContent className="flex items-center justify-between p-4 sm:p-6">
             <div>
               <p className="text-2xl sm:text-3xl font-bold text-foreground">
-                {C.filter(r => r.status === 'inactive').length} 
+                {C?.filter(r => r.status === 'inactive').length} 
               </p>
               <p className="text-xs sm:text-sm text-muted-foreground">Inactive</p>
             </div>
@@ -323,7 +323,7 @@ export function CitizenList() {
         <Card className="border-border/50">
           <CardContent className="flex items-center justify-between p-4 sm:p-6">
             <div>
-              <p className="text-2xl sm:text-3xl font-bold text-foreground">{C.length}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-foreground">{C?.length}</p>
               <p className="text-xs sm:text-sm text-muted-foreground">Showing</p>
             </div>
            
@@ -343,7 +343,7 @@ export function CitizenList() {
         <CardContent className="space-y-4">
           {/* Citizen List */}
           <div className="space-y-3">
-            {C.map((citizen) => (
+            {C?.map((citizen) => (
               <div
                 key={citizen.id}
                 className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-secondary/30 rounded-lg border border-border/50 hover:bg-secondary/50 transition-colors gap-3 sm:gap-4"
@@ -400,7 +400,7 @@ export function CitizenList() {
               </div>
             ))}
 
-            {C.length === 0 && (
+            {C?.length === 0 && (
               <div className="text-center py-8 sm:py-12 text-muted-foreground">
                 <Users className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-4 opacity-50" />
                 <p className="text-sm sm:text-base">No citizens found</p>

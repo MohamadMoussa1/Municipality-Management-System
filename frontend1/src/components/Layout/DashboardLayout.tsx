@@ -22,7 +22,7 @@ interface DashboardLayoutProps {
 }
 
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  const { role, user } = useAuth();
+  const { role, user,logout } = useAuth();
   const { unreadCount } = useNotifications();
   const navigate = useNavigate();
   const  handleProfile=() => {
@@ -41,7 +41,7 @@ if(role == "admin"){
   isAdmin=true;
 }
   const  handleLogout =async () => {
-    //logout();
+    
     const token=localStorage.getItem("token");
       const response = await fetch("http://127.0.0.1:8000/api/auth/logout", {
         method: "POST",
@@ -58,10 +58,11 @@ if(role == "admin"){
       catch(e){
           console.log("an error happened");
       }
-      
+
       toast.success(res.message,{ duration: 4000 });
       localStorage.removeItem("token");
-    navigate('/login');
+      logout();
+      navigate('/login');
   };
   return (
     <SidebarProvider>

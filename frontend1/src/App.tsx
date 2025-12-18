@@ -54,13 +54,13 @@ const App = () => (
             
             {/* Admin Routes */}
             <Route path="/admin/citizen-services" element={<ProtectedRoute allowedRoles={['admin', 'clerk']}><DashboardLayout><CitizenServices /></DashboardLayout></ProtectedRoute>} />
-             <Route path="/admin/citizen-view" element={<ProtectedRoute allowedRoles={['admin', 'clerk']}><DashboardLayout><CitizenList /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/admin/citizen-view" element={<ProtectedRoute allowedRoles={['admin', 'clerk']}><DashboardLayout><CitizenList /></DashboardLayout></ProtectedRoute>} />
             <Route path="/admin/permits" element={<ProtectedRoute allowedRoles={['admin', 'clerk']}><DashboardLayout><Permits /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/admin/finance" element={<ProtectedRoute allowedRoles={['admin', 'finance']}><DashboardLayout><Finance /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/admin/projects" element={<ProtectedRoute allowedRoles={['admin', 'project_manager']}><DashboardLayout><Projects /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/admin/finance" element={<ProtectedRoute allowedRoles={['admin', 'finance_officer']}><DashboardLayout><Finance /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/admin/projects" element={<ProtectedRoute allowedRoles={['admin', 'urban_planner']}><DashboardLayout><Projects /></DashboardLayout></ProtectedRoute>} />
             <Route path="/admin/hr" element={<ProtectedRoute allowedRoles={['admin', 'hr_manager']}><DashboardLayout><HumanResources /></DashboardLayout></ProtectedRoute>} />
             <Route path="/admin/events" element={<ProtectedRoute allowedRoles={['admin']}><DashboardLayout><Events /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['admin', 'finance', 'project_manager', 'hr_manager']}><DashboardLayout><Reports /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['admin', 'finance_officer', 'urban_planner', 'hr_manager']}><DashboardLayout><Reports /></DashboardLayout></ProtectedRoute>} />
             
             {/* Citizen Routes */}
             <Route path="/citizen/requests" element={<ProtectedRoute allowedRoles={['citizen']}><DashboardLayout><MyRequests /></DashboardLayout></ProtectedRoute>} />
@@ -69,7 +69,7 @@ const App = () => (
             <Route path="/citizen/events" element={<ProtectedRoute allowedRoles={['citizen']}><DashboardLayout><CitizenEvents /></DashboardLayout></ProtectedRoute>} />
             
             {/* Employee Events Route */}
-            <Route path="/employee/events" element={<ProtectedRoute allowedRoles={['finance', 'project_manager', 'hr_manager', 'clerk']}><DashboardLayout><EmployeeEvents /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/employee/events" element={<ProtectedRoute allowedRoles={['finance_officer', 'urban_planner', 'hr_manager', 'clerk']}><DashboardLayout><EmployeeEvents /></DashboardLayout></ProtectedRoute>} />
             
             {/* Shared Routes */}
             <Route path="/notifications" element={<ProtectedRoute><DashboardLayout><Notifications /></DashboardLayout></ProtectedRoute>} />

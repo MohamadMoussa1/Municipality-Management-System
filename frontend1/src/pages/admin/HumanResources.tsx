@@ -353,12 +353,21 @@ export default function HumanResources() {
             </div>
             <div>
               <Label htmlFor="emp-department">Department</Label>
-              <Input 
-                id="emp-department"
+              <Select
                 value={newEmployee.department}
-                onChange={(e) => setNewEmployee({...newEmployee, department: e.target.value})}
-                placeholder="Engineering"
-              />
+                onValueChange={(value) => setNewEmployee({...newEmployee, department: value})}
+              >
+                <SelectTrigger id="depar">
+                  <SelectValue placeholder="Select Department" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="finance">Finance</SelectItem>
+                  <SelectItem value="it">IT</SelectItem>
+                  <SelectItem value="planning">planning</SelectItem>
+                  <SelectItem value="hr">HR</SelectItem>
+                  <SelectItem value="public_services">public services</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="emp-role">Role</Label>

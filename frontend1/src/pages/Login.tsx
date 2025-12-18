@@ -57,7 +57,7 @@ export default function Login() {
        if(result.message == "Login successful") {      
            localStorage.setItem("role",result.user.role);
            localStorage.setItem("user",result.user.name);
-           
+    
            localStorage.setItem("token",result.access_token);
            toast.success(result.message,{ duration: 4000 });
            navigate("/dashboard");
