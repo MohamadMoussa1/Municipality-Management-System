@@ -8,11 +8,11 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user } = useAuth();
+  const { role } = useAuth();
 
-  if (!user) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  // if (role == null) {
+  //   return <Navigate to="/login" replace />;
+  // }
 
   return <>{children}</>;
 };

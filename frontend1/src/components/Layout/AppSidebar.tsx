@@ -45,6 +45,7 @@ export const AppSidebar = () => {
     const adminItems = [
       { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
       { title: 'Citizen Services', url: '/admin/citizen-services', icon: Users },
+      { title: 'Citizen', url: '/admin/citizen-view', icon: Users },
       { title: 'Permits', url: '/admin/permits', icon: FileText },
       { title: 'Finance', url: '/admin/finance', icon: DollarSign },
       { title: 'Projects', url: '/admin/projects', icon: Building2 },
@@ -107,6 +108,7 @@ export const AppSidebar = () => {
   const menuItems = getMenuItems();
 
   return (
+   
     <Sidebar className={open ? 'w-64' : 'w-14'} collapsible="icon">
       <SidebarContent>
         <div className="p-4 border-b flex items-center gap-2">

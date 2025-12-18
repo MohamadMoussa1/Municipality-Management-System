@@ -7,7 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardLayout } from "@/components/Layout/DashboardLayout";
-
+import ProfileEmployee  from "@/pages/employee/profileEmployee";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -25,6 +25,8 @@ import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import CitizenEvents from "./pages/citizen/Events";
 import EmployeeEvents from "./pages/employee/Events";
+import {CitizenList} from "./pages/admin/citizenView";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -52,6 +54,7 @@ const App = () => (
             
             {/* Admin Routes */}
             <Route path="/admin/citizen-services" element={<ProtectedRoute allowedRoles={['admin', 'clerk']}><DashboardLayout><CitizenServices /></DashboardLayout></ProtectedRoute>} />
+             <Route path="/admin/citizen-view" element={<ProtectedRoute allowedRoles={['admin', 'clerk']}><DashboardLayout><CitizenList /></DashboardLayout></ProtectedRoute>} />
             <Route path="/admin/permits" element={<ProtectedRoute allowedRoles={['admin', 'clerk']}><DashboardLayout><Permits /></DashboardLayout></ProtectedRoute>} />
             <Route path="/admin/finance" element={<ProtectedRoute allowedRoles={['admin', 'finance']}><DashboardLayout><Finance /></DashboardLayout></ProtectedRoute>} />
             <Route path="/admin/projects" element={<ProtectedRoute allowedRoles={['admin', 'project_manager']}><DashboardLayout><Projects /></DashboardLayout></ProtectedRoute>} />
@@ -71,7 +74,7 @@ const App = () => (
             {/* Shared Routes */}
             <Route path="/notifications" element={<ProtectedRoute><DashboardLayout><Notifications /></DashboardLayout></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><DashboardLayout><Profile /></DashboardLayout></ProtectedRoute>} />
-            
+            <Route path="/profileEmployee" element={<ProtectedRoute><DashboardLayout><ProfileEmployee/></DashboardLayout></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </BrowserRouter>
