@@ -32,6 +32,9 @@ export const AppSidebar = () => {
   const { role,loading} = useAuth();
   const { open } = useSidebar();
   const { unreadCount } = useNotifications();
+  
+  if (loading) return null;
+  
   const getMenuItems = () => {
     const citizenItems = [
       { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
