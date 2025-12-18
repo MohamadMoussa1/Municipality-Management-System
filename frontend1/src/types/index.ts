@@ -1,4 +1,4 @@
-export const ROLES = ['admin','clerk','finance_officer','project_manager','hr_manager','citizen'] as const;
+export const ROLES = ['admin','clerk','finance_officer','urban_planner','hr','citizen'] as const;
 export type UserRole = typeof ROLES[number];
 
 export interface User {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -52,50 +53,67 @@ export default function Finance() {
   const [bulkCitizenLoading, setBulkCitizenLoading] = useState(false);
   const [bulkPermissionError, setBulkPermissionError] = useState(null);
 
-  // Fetch all payments and citizens (for bulk)
-  useEffect(() => {
-    const fetchData = async () => {
-      const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
-      // Payments
-      try {
-        const paymentsRes = await fetch("http://127.0.0.1:8000/api/payments", {
-          headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
-        });
-        if (paymentsRes.ok) {
-          const paymentsData = await paymentsRes.json().catch(() => null);
-          setPayments(paymentsData?.data || paymentsData || []);
-        } else {
-          const err = await paymentsRes.json().catch(() => null);
-          toast.error(err?.message || "Failed to fetch payments");
-          setPayments([]);
-        }
-      } catch (e) {
-        toast.error("Failed to fetch payments. Please try again later.");
+  // Fetch all payments and citizens (for bulk)
+  const fetchData = async () => {
+    const token = localStorage.getItem("token");
+
+    // Payments
+    try {
+      const paymentsRes = await fetch("http://127.0.0.1:8000/api/payments", {
+        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
+      });
+
+      if (paymentsRes.status === 401) {
+        toast.error("Session expired. Please login again.");
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
+
+      if (paymentsRes.ok) {
+        const paymentsData = await paymentsRes.json().catch(() => null);
+        setPayments(paymentsData?.data || paymentsData || []);
+      } else {
+        const err = await paymentsRes.json().catch(() => null);
+        toast.error(err?.message || "Failed to fetch payments");
         setPayments([]);
       }
+    } catch (e) {
+      toast.error("Failed to fetch payments. Please try again later.");
+      setPayments([]);
+    }
 
-      // Citizens (for bulk selection)
-      try {
-        const citizensRes = await fetch("http://127.0.0.1:8000/api/citizens", {
-          headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
-        });
-        if (citizensRes.ok) {
-          const citizensData = await citizensRes.json().catch(() => null);
-          setCitizens(citizensData?.data || citizensData || []);
-        } else if (citizensRes.status === 403) {
-          // Not authorized to list all citizens - allow search instead
-          setCitizens([]);
-          toast.warning("You do not have permission to list all citizens. Use the search box to add citizens individually.");
-        } else {
-          const err = await citizensRes.json().catch(() => null);
-          toast.error(err?.message || "Failed to fetch citizens");
-          setCitizens([]);
-        }
-      } catch (e) {
+    // Citizens (for bulk selection)
+    try {
+      const citizensRes = await fetch("http://127.0.0.1:8000/api/citizens", {
+        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
+      });
+      if (citizensRes.status === 401) {
+        toast.error("Session expired. Please login again.");
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
+      if (citizensRes.ok) {
+        const citizensData = await citizensRes.json().catch(() => null);
+        setCitizens(citizensData?.data || citizensData || []);
+      } else if (citizensRes.status === 403) {
+        // Not authorized to list all citizens - allow search instead
+        setCitizens([]);
+        toast.warning("You do not have permission to list all citizens. Use the search box to add citizens individually.");
+      } else {
+        const err = await citizensRes.json().catch(() => null);
+        toast.error(err?.message || "Failed to fetch citizens");
         setCitizens([]);
       }
-    };
+    } catch (e) {
+      setCitizens([]);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -200,22 +218,36 @@ export default function Finance() {
       return;
     }
     const token = localStorage.getItem("token");
-    const res = await fetch("http://127.0.0.1:8000/api/payments", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json", "Authorization": `Bearer ${token}` },
-      body: JSON.stringify({
-        citizen_id: Number(form.citizen_id),
-        amount: Number(form.amount),
-        payment_type: form.payment_type,
-      }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      toast.success(data.message || "Payment created");
-      setCreateDialogOpen(false);
-      window.location.reload();
-    } else {
-      toast.error(data.message || "Failed to create payment");
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({
+          citizen_id: Number(form.citizen_id),
+          amount: Number(form.amount),
+          payment_type: form.payment_type,
+        }),
+      });
+
+      if (res.status === 401) {
+        toast.error("Session expired. Please login again.");
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
+
+      const data = await res.json().catch(() => null);
+      if (res.ok) {
+        toast.success(data?.message || "Payment created");
+        setCreateDialogOpen(false);
+        // Add created payment to UI without reloading
+        const created = data?.data || data;
+        if (created) setPayments(p => [created, ...p]);
+      } else {
+        toast.error(data?.message || "Failed to create payment");
+      }
+    } catch (e) {
+      toast.error("Failed to create payment. Please try again.");
     }
   };
 
@@ -226,22 +258,33 @@ export default function Finance() {
       return;
     }
     const token = localStorage.getItem("token");
-    const res = await fetch("http://127.0.0.1:8000/api/payments/bulk", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json", "Authorization": `Bearer ${token}` },
-      body: JSON.stringify({
-        citizen_ids: bulkForm.citizen_ids.map(Number),
-        amount: Number(bulkForm.amount),
-        payment_type: bulkForm.payment_type,
-      }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      toast.success(data.message || "Bulk payments created");
-      setBulkDialogOpen(false);
-      window.location.reload();
-    } else {
-      toast.error(data.message || "Failed to create bulk payments");
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/payments/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({
+          citizen_ids: bulkForm.citizen_ids.map(Number),
+          amount: Number(bulkForm.amount),
+          payment_type: bulkForm.payment_type,
+        }),
+      });
+      if (res.status === 401) {
+        toast.error("Session expired. Please login again.");
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
+      const data = await res.json().catch(() => null);
+      if (res.ok) {
+        toast.success(data?.message || "Bulk payments created");
+        setBulkDialogOpen(false);
+        // Refresh list
+        fetchData();
+      } else {
+        toast.error(data?.message || "Failed to create bulk payments");
+      }
+    } catch (e) {
+      toast.error("Failed to create bulk payments. Please try again.");
     }
   };
 
@@ -261,7 +304,7 @@ export default function Finance() {
     if (res.ok) {
       toast.success(data.message || "Payment updated");
       setEditDialogOpen(false);
-      window.location.reload();
+      fetchData();
     } else {
       toast.error(data.message || "Failed to update payment");
     }
@@ -281,7 +324,8 @@ export default function Finance() {
     const data = await res.json();
     if (res.ok) {
       toast.success(data.message || "Payment deleted");
-      window.location.reload();
+      // remove from state
+      setPayments(p => p.filter(item => item.id !== id));
     } else {
       toast.error(data.message || "Failed to delete payment");
     }
@@ -414,10 +458,10 @@ export default function Finance() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Search Citizen (ID, name, or email)</Label>
+              <Label>Search Citizen (ID, name, national ID, or email)</Label>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Enter ID, name, or email"
+                  placeholder="Enter ID, name, national ID, or email"
                   value={citizenSearch}
                   onChange={e => setCitizenSearch(e.target.value)}
                 />

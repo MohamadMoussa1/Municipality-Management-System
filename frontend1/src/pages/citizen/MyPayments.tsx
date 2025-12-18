@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,9 +22,15 @@ export default function MyPayments() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [payDialogOpen, setPayDialogOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchPayments = async () => {
-      const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [payLoading, setPayLoading] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+
+  const fetchData = async () => {
+    setLoading(true);
+    const token = localStorage.getItem("token");
+    try {
       const response = await fetch("http://127.0.0.1:8000/api/payments/my-payments", {
         method: "GET",
         headers: {
@@ -32,13 +39,85 @@ export default function MyPayments() {
           "Authorization": `Bearer ${token}`
         },
       });
-      const res = await response.json();
-      setPayments(res.data || []);
-    };
-    fetchPayments();
+      if (response.status === 401) {
+        toast.error("Session expired. Please login again.");
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
+      const res = await response.json().catch(() => null);
+      setPayments(res?.data || []);
+    } catch (e) {
+      toast.error("Failed to fetch payments. Please try again.");
+      setPayments([]);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
+  // Handle redirect back from Stripe (success/cancel)
+  const location = useLocation();
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const status = params.get('payment');
+    const id = params.get('id');
+    if (!status) return;
+
+    if (status === 'success') {
+      toast.success('Payment successful');
+      // Try polling the payment until webhook marks it completed, then refresh
+      if (id) {
+        let attempts = 0;
+        const maxAttempts = 8;
+        const interval = 1000;
+        const poll = async () => {
+          attempts++;
+          try {
+            const token = localStorage.getItem('token');
+            const r = await fetch(`http://127.0.0.1:8000/api/payments/${id}`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+            if (r.status === 401) {
+              toast.error('Session expired. Please login again.');
+              localStorage.removeItem('token');
+              navigate('/login');
+              return;
+            }
+            if (r.ok) {
+              const body = await r.json().catch(() => null);
+              const p = body?.data || body;
+              if (p && p.status === 'completed') {
+                fetchData();
+                return;
+              }
+            }
+          } catch (e) {
+            // ignore
+          }
+          if (attempts < maxAttempts) {
+            setTimeout(poll, interval);
+          } else {
+            // give up and refresh list anyway
+            fetchData();
+          }
+        };
+        poll();
+      } else {
+        fetchData();
+      }
+    } else if (status === 'failed') {
+      toast.error('Payment failed');
+      fetchData();
+    }
+
+    // Remove query params from URL to avoid repeating the toast
+    navigate(location.pathname, { replace: true });
+  }, [location.search, navigate, location.pathname]);
+
   const handlePayNow = async (payment) => {
+    if (payLoading) return;
+    setPayLoading(true);
     const token = localStorage.getItem("token");
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/payments/${payment.id}/pay`, {
@@ -49,16 +128,23 @@ export default function MyPayments() {
           "Authorization": `Bearer ${token}`
         },
       });
-      const res = await response.json();
-      if (res.checkout_url) {
+      if (response.status === 401) {
+        toast.error("Session expired. Please login again.");
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
+      const res = await response.json().catch(() => null);
+      if (res?.checkout_url) {
         window.location.href = res.checkout_url;
       } else {
-        toast.error(res.message || "Failed to initiate payment.");
+        toast.error(res?.message || "Failed to initiate payment.");
       }
-    } catch {
+    } catch (e) {
       toast.error("Failed to initiate payment.");
     }
-  };
+    setPayLoading(false);
+  }; 
 
   const handleDownloadReceipt = (payment) => {
     const receiptData = `Municipality Management System
@@ -84,6 +170,37 @@ Thank you for your payment!
     toast.success('Receipt downloaded successfully');
   };
 
+  const fetchPaymentDetails = async (id) => {
+    setDetailsLoading(true);
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/payments/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+      });
+      if (response.status === 401) {
+        toast.error("Session expired. Please login again.");
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
+      const res = await response.json().catch(() => null);
+      if (response.ok) {
+        setSelectedPayment(res?.data || res);
+        setDetailsOpen(true);
+      } else {
+        toast.error(res?.message || "Failed to fetch payment details");
+      }
+    } catch (e) {
+      toast.error("Failed to fetch payment details.");
+    }
+    setDetailsLoading(false);
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'pending': return <Clock className="h-4 w-4" />;
@@ -92,7 +209,7 @@ Thank you for your payment!
       case 'refunded': return <AlertCircle className="h-4 w-4" />;
       default: return null;
     }
-  };
+  }; 
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -117,6 +234,9 @@ Thank you for your payment!
         <div>
           <h1 className="text-3xl font-bold text-foreground">My Payments</h1>
           <p className="text-muted-foreground">Manage bills and payment history</p>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={fetchData} variant="outline">Refresh</Button>
         </div>
       </div>
 
@@ -183,9 +303,12 @@ Thank you for your payment!
                       </div>
                     </div>
                     <div className="flex sm:flex-col gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSelectedPayment(payment); setDetailsOpen(true); }}>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => fetchPaymentDetails(payment.id)}>
                         View Details
                       </Button>
+
+                      {/* fetch fresh details */}
+                      
                       {payment.status === 'pending' && (
                         <Button variant="outline" size="sm" className="flex-1" onClick={() => handlePayNow(payment)}>
                           <CreditCard className="h-4 w-4" /> Pay Now
