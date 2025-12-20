@@ -25,6 +25,7 @@ export default function Login() {
     email: ""
     , password: ""
   });
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
   const handleChangeLogin = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLogin(prev => ({
       ...prev,
@@ -39,8 +40,8 @@ export default function Login() {
   };
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-
+    setLoadingSubmit(true);
+    try{
       const response = await fetch("http://127.0.0.1:8000/api/auth/login", {
         method: "POST",
         headers: {
@@ -53,15 +54,25 @@ export default function Login() {
         })
       });
       const result = await response.json();
-       if(result.message == "Login successful") {       
+       if(result.message == "Login successful") {      
+           localStorage.setItem("role",result.user.role);
+           localStorage.setItem("user",result.user.name);
+           localStorage.setItem("token",result.access_token);
            setRole(result.user.role);
            setUser(result.user.name);
-           localStorage.setItem("token",result.access_token);
+           // Dispatch custom event to trigger notification fetch
+           window.dispatchEvent(new Event('userLoggedIn'));
            toast.success(result.message,{ duration: 4000 });
            navigate("/dashboard");
-  }   else {
-        toast.error(result.message,{ duration: 4000 });
-  }      
+        }
+        else{
+          toast.error(result.message,{ duration: 4000 });
+        }    
+      }catch(e){
+        console.log("error");
+      }finally{
+      setLoadingSubmit(false);
+    }
 }
   
   const handleSignup = async (e: React.FormEvent) => {
@@ -172,8 +183,8 @@ export default function Login() {
                     />
                   </div>
 
-                  <Button type="submit" className="w-full">
-                    login
+                  <Button type="submit" className="w-full" disabled={loadingSubmit}>
+                     {loadingSubmit ? "Logining...":"Login"}
                   </Button>
 
                 </form>
@@ -278,12 +289,9 @@ export default function Login() {
                     />
                   </div>
 
-                  <Button type="submit" className="w-full bg-blue-400 text-white" >
-                    Create account
+                  <Button type="submit" className="w-full  text-white" disabled={loadingSubmit}>
+                    {loadingSubmit ? "Signing up...":"Sign up"}
                   </Button>
-                  {/* <p className="max-w-lg mx-auto mt-6 text-center text-gray-800 dark:text-gray-200 text-base sm:text-lg">
-                      {message}
-                  </p> */}
                 </form>
               </TabsContent>
             </Tabs>

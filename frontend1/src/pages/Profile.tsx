@@ -1,4 +1,4 @@
- import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,7 +14,8 @@ import { useNavigate } from 'react-router-dom';
 export default function Profile() {
   const navigate = useNavigate();
   const { user } = useAuth();
-
+  const [loading, setLoading] = useState(true);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [form, setForm] = useState({
     id: '',
     name: '',
@@ -27,7 +28,6 @@ export default function Profile() {
     created_at: '',
   });
 
-  const [loading, setLoading] = useState(true);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -36,67 +36,82 @@ export default function Profile() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const token = localStorage.getItem('token');
+      try {
+        const token = localStorage.getItem('token');
 
-      const response = await fetch('http://127.0.0.1:8000/api/citizens/me', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
-      });
+        const response = await fetch('http://127.0.0.1:8000/api/citizens/me', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+        });
 
-      const res = await response.json();
+        const res = await response.json();
 
-      setForm({
-        id: res.data.id ?? '',
-        name: res.data.name ?? '',
-        email: res.data.email ?? '',
-        national_id: res.data.national_id ?? '',
-        address: res.data.address ?? '',
-        contact: res.data.contact ?? '',
-        date_of_birth: res.data.date_of_birth ?? '',
-        role: res.data.role ?? '',
-        created_at: res.data.created_at ?? '',
-      });
-
+     
+        setForm({
+          id: res?.data?.id ?? '',
+          name: res?.data?.name ?? '',
+          email: res?.data?.email ?? '',
+          national_id: res?.data?.national_id ?? '',
+          address: res?.data?.address ?? '',
+          contact: res?.data?.contact ?? '',
+          date_of_birth: res?.data?.date_of_birth ?? '',
+          role: res?.data?.role ?? '',
+          created_at: res?.data?.created_at ?? '',
+        });
+      } catch (error) {
+        toast.error('Failed to load profile');
+      }  
       setLoading(false);
+      
     };
 
     fetchProfile();
   }, []);
 
-  const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const token = localStorage.getItem('token');
-
-    const response = await fetch(
-      'http://127.0.0.1:8000/api/citizens/me/update',
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          national_id: form.national_id,
-          address: form.address,
-          contact: form.contact,
-          date_of_birth: form.date_of_birth,
-        }),
-      }
-    );
-
-    const result = await response.json();
-    toast.success(result.message);
-    navigate(-1);
-  };
 
   if (loading) {
     return <p>Loading profile...</p>;
   }
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoadingSubmit(true);
+    try {
+      const token = localStorage.getItem('token');
+
+      const response = await fetch(
+        'http://127.0.0.1:8000/api/citizens/me/update',
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            name: form.name,
+            email: form.email,
+            national_id: form.national_id,
+            address: form.address,
+            contact: form.contact,
+            date_of_birth: form.date_of_birth,
+          }),
+        }
+      );
+
+      const result = await response.json();
+      toast.success(result.message || 'Profile updated');
+      navigate(-1);
+    } catch (error) {
+      toast.error('Update failed');
+    }finally{
+      setLoadingSubmit(false);
+    }
+  };
+
+  
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -113,7 +128,9 @@ export default function Profile() {
                 src={getRolePhoto(user?.role || 'citizen')}
                 alt={form.name}
               />
-              <AvatarFallback>{form.name[0]}</AvatarFallback>
+              <AvatarFallback>
+                {form.name ? form.name.charAt(0).toUpperCase() : 'U'}
+              </AvatarFallback>
             </Avatar>
             <h2 className="text-xl font-semibold">{form.name}</h2>
           </CardContent>
@@ -141,11 +158,7 @@ export default function Profile() {
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <Label>Phone</Label>
-                <Input
-                  name="contact"
-                  value={form.contact}
-                  onChange={handleChange}
-                />
+                <Input name="contact" value={form.contact} onChange={handleChange} />
               </div>
 
               <div>
@@ -158,21 +171,16 @@ export default function Profile() {
 
             <div>
               <Label>Address</Label>
-              <Input
-                name="address"
-                value={form.address}
-                onChange={handleChange}
-              />
+              <Input name="address" value={form.address} onChange={handleChange} />
             </div>
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button
-                variant="outline"
-                onClick={() => navigate(-1)}
-              >
+              <Button type="button" variant="outline" onClick={() => navigate(-1)}>
                 Cancel
               </Button>
-              <Button onClick={handleSaveProfile}>Save Changes</Button>
+              <Button type="button" onClick={handleSaveProfile} disabled={loadingSubmit}>
+                {loadingSubmit ? "saving changes...":"Save Changes"}
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -201,33 +209,43 @@ export default function Profile() {
           </div>
         </CardContent>
       </Card>
-      
- <Card>
-          <CardHeader>
-            <CardTitle>Security Settings</CardTitle>
-            <CardDescription>Manage your password and security preferences</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Security Settings</CardTitle>
+          <CardDescription>Manage your password and security preferences</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="current-password">Current Password</Label>
+            <Input id="current-password" type="password" />
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="current-password">Current Password</Label>
-              <Input id="current-password" type="password" />
+              <Label htmlFor="new-password">New Password</Label>
+              <Input id="new-password" type="password" />
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="new-password">New Password</Label>
-                <Input id="new-password" type="password" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirm Password</Label>
-                <Input id="confirm-password" type="password" />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Input id="confirm-password" type="password" />
             </div>
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={(e) => { e.preventDefault(); navigate(-1); toast.info('Password change cancelled'); }}>Cancel</Button>
-              <Button type="button" >Update Password</Button>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(-1);
+                toast.info('Password change cancelled');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button type="button">Update Password</Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

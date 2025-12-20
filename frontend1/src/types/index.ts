@@ -1,5 +1,4 @@
-export const ROLES = ['admin','clerk','finance_officer','urban_planner','hr','citizen'] as const;
-export type UserRole = typeof ROLES[number];
+export type UserRole = 'admin' | 'finance_officer' | 'urban_planner' | 'hr_manager' | 'clerk' | 'citizen';
 
 export interface User {
   id: string;
@@ -28,7 +27,7 @@ export interface Citizen {
   date_of_birth: string;
 }
 
-export type RequestStatus = 'pending' | 'in_review' | 'approved' | 'rejected' | 'completed';
+export type RequestStatus = 'pending' | 'in_progress'| 'rejected' | 'completed';
 export type PermitType = 'business' | 'construction' | 'vehicle' | 'event';
 export type RequestType = 'residency' | 'birth' | 'death' | 'marriage' | 'garbage' | 'street_repair' | 'complaint';
 
@@ -121,15 +120,13 @@ export interface Employee {
   id: string;
   user_id: string;
   position: string;
-  department_id: string;
+  department: string;
   hire_date: string;
   salary: number;
-  // Display fields (from joins)
-  name?: string;
-  email?: string;
-  phone?: string;
-  status?: 'active' | 'on_leave' | 'inactive';
-  departmentName?: string;
+  name: string;
+  email: string;
+  contact: string;
+  status: 'active' | 'on_leave' | 'inactive';
 }
 
 export interface Attendance {
@@ -184,11 +181,16 @@ export interface Document {
 
 export interface Notification {
   id: string;
-  userId: string;
-  title: string;
-  message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  read: boolean;
-  timestamp: string;
-  link?: string;
+  type: string;
+  notifiable_type: string;
+  notifiable_id: string;
+  data: {
+    title: string;
+    message: string;
+    type?: 'info' | 'success' | 'warning' | 'error';
+    link?: string;
+  };
+  read_at: string | null;
+  created_at: string;
+  updated_at: string;
 }

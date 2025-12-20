@@ -45,15 +45,15 @@ const projectData = [
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 export default function Dashboard() {
-  const { role } = useAuth();
-
+  const { role,loading} = useAuth();
+  if (loading) return <div>Loading...</div>;
   const getDashboardContent = () => {
     switch (role) {
       case 'admin':
         return <AdminDashboard />;
       case 'finance_officer':
         return <FinanceDashboard />;
-      case 'project_manager':
+      case 'urban_planner':
         return <ProjectDashboard />;
       case 'hr_manager':
         return <HRDashboard />;

@@ -37,6 +37,9 @@ export default function MyRequests() {
   const [Value, setValue] = useState("");
   const [Clicked, setClicked] = useState(false);
   const [R, setR] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+
   useEffect(() => {
     setClicked(false);
     const fetchData = async () => {
@@ -49,18 +52,24 @@ export default function MyRequests() {
             "Authorization":`Bearer ${token}`
           },
         });
-        let res=await response.json();
+        const res=await response.json();
        
           setR(res.requests);
-        
-    };
-  
+          setLoading(false);       
+    }; 
     fetchData();
   }, [Clicked]);
+
+  if (loading) {
+    return <p>Loading requests...</p>;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
        e.preventDefault();
-      setDetails(false);
+       setLoadingSubmit(true);
+       setDetails(false);
   if (!Value) { return;}
+  try{
     const token=localStorage.getItem("token");
     const response = await fetch("http://127.0.0.1:8000/api/citizen/requests", {
           method: "POST",
@@ -78,9 +87,13 @@ export default function MyRequests() {
        navigate('/citizen/requests');
        setClicked(true);
        toast.message (result.message);
-       
+    }catch(e){
+      console.log("error");
+    }finally{
+      setLoadingSubmit(false);
+    }     
 
-  }
+}
 
   const handleViewDetails = (request: CitizenRequest) => {
     setSelectedRequest(request);
@@ -88,15 +101,31 @@ export default function MyRequests() {
   };
 
   const handleCancelRequest = (requestId: string) => {
+    let res=null;
     setRequests(prev => prev.filter(r => r.id !== requestId));
-    toast.success('Request cancelled successfully');
+     const fetchData = async () => {
+        const token=localStorage.getItem("token");
+        const response = await fetch("http://127.0.0.1:8000/api/requests/"+requestId, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization":`Bearer ${token}`
+          },
+        });
+         res=await response.json();
+        console.log(res.message);
+        toast.success(res.message);
+      }
+      fetchData();
+      setClicked(true);
+      
   };
 
   const getStatusIcon = (status: CitizenRequest['status']) => {
     switch (status) {
       case 'pending': return <Clock className="h-4 w-4" />;
-      case 'in_review': return <AlertCircle className="h-4 w-4" />;
-      case 'approved': return <CheckCircle className="h-4 w-4" />;
+      case 'in_progress': return <AlertCircle className="h-4 w-4" />;
       case 'rejected': return <XCircle className="h-4 w-4" />;
       case 'completed': return <CheckCircle className="h-4 w-4" />;
     }
@@ -105,8 +134,8 @@ export default function MyRequests() {
   const getStatusColor = (status: CitizenRequest['status']) => {
     switch (status) {
       case 'pending': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-      case 'in_review': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-      case 'approved': return 'bg-green-500/10 text-green-500 border-green-500/20';
+      case 'in_progress': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+     
       case 'rejected': return 'bg-red-500/10 text-red-500 border-red-500/20';
       case 'completed': return 'bg-green-500/10 text-green-500 border-green-500/20';
     }
@@ -161,7 +190,9 @@ export default function MyRequests() {
               
               </div>
               <DialogFooter>
-                <Button type="submit"  onClick={handleSubmit} >Submit Request</Button>
+                <Button type="submit"  onClick={handleSubmit} disabled={loadingSubmit}>
+                   {loadingSubmit ? "Submitting the request...":"Submit"}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

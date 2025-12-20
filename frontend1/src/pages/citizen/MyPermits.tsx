@@ -32,7 +32,27 @@ export default function MyPermits() {
   const [selectedPermit, setSelectedPermit] = useState<Permit | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const token=localStorage.getItem("token");
+  const [openSubmit, setSubmitOpen] = useState(false);
+  const [value, setvalue] = useState("");
+   const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setSubmitOpen(false);
+     
+      const token=localStorage.getItem("token");
+      const response = await fetch("http://127.0.0.1:8000/api/permits", {
+            method: "POST",
+            headers: {
+              "Content-Type": "multipart/form-data",
+              "Accept": "application/json",
+              "Authorization":`Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                'type':value ,      
+          }),
+        });
+        const res=await response.json();
 
+ }
 useEffect(() => {
   const fetchData = async () => {
      
@@ -50,7 +70,7 @@ useEffect(() => {
       
       }
       catch(e){
-        console.log(token);
+        console.log("errorr");
       }
   };
 
@@ -117,7 +137,7 @@ This is an official permit issued by the municipality.
             <h1 className="text-3xl font-bold text-foreground">My Permits</h1>
             <p className="text-muted-foreground">Manage your permits and licenses</p>
           </div>
-          <Dialog>
+          <Dialog  open={openSubmit} onOpenChange={setSubmitOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -134,7 +154,7 @@ This is an official permit issued by the municipality.
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="type">Permit Type</Label>
-                  <Select>
+                  <Select value={value} onValueChange={setvalue}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select permit type" />
                     </SelectTrigger>
@@ -155,7 +175,7 @@ This is an official permit issued by the municipality.
                 </div>
               </div>
               <DialogFooter>
-                <Button type="submit">Submit Application</Button>
+                <Button type="submit" onClick={handleSubmit}>Submit Application</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
