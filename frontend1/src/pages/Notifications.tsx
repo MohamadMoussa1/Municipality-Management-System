@@ -1,62 +1,80 @@
+import { useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bell, CheckCheck, Trash2, Info, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { Bell, CheckCheck, Trash2, Info, AlertTriangle, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import { Notification } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNotifications } from '@/contexts/NotificationContext';
 
 export default function Notifications() {
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
+  const { 
+    notifications, 
+    unreadCount, 
+    markAsRead, 
+    markAllAsRead, 
+    deleteNotification,
+    fetchNotifications,
+    loading 
+  } = useNotifications();
 
-  const getTypeIcon = (type: Notification['type']) => {
+  // Fetch notifications when page mounts
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const getTypeIcon = (type?: 'info' | 'success' | 'warning' | 'error') => {
     switch (type) {
       case 'info': return <Info className="h-4 w-4 text-blue-500" />;
       case 'success': return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'warning': return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
       case 'error': return <XCircle className="h-4 w-4 text-red-500" />;
+      default: return <Info className="h-4 w-4 text-blue-500" />;
     }
   };
 
-  const getTypeColor = (type: Notification['type']) => {
+  const getTypeColor = (type?: 'info' | 'success' | 'warning' | 'error') => {
     switch (type) {
       case 'info': return 'bg-blue-500/10 text-blue-500';
       case 'success': return 'bg-green-500/10 text-green-500';
       case 'warning': return 'bg-yellow-500/10 text-yellow-500';
       case 'error': return 'bg-red-500/10 text-red-500';
+      default: return 'bg-blue-500/10 text-blue-500';
     }
   };
 
   const NotificationCard = ({ notification }: { notification: Notification }) => (
     <Card 
-      className={`hover:shadow-md transition-shadow ${!notification.read ? 'border-primary/50 bg-primary/5' : ''}`}
+      className={`hover:shadow-md transition-shadow ${!notification.read_at ? 'border-primary/50 bg-primary/5' : ''}`}
     >
       <CardContent className="p-4">
         <div className="flex gap-3">
           <div className="mt-1">
-            {getTypeIcon(notification.type)}
+            {getTypeIcon(notification.data.type)}
           </div>
           <div className="flex-1 space-y-2">
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-1 flex-1">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-semibold">{notification.title}</h3>
-                  {!notification.read && (
+                  <h3 className="font-semibold">{notification.data.title}</h3>
+                  {!notification.read_at && (
                     <Badge variant="secondary" className="bg-primary/20 text-primary">
                       New
                     </Badge>
                   )}
-                  <Badge variant="secondary" className={getTypeColor(notification.type)}>
-                    {notification.type}
-                  </Badge>
+                  {notification.data.type && (
+                    <Badge variant="secondary" className={getTypeColor(notification.data.type)}>
+                      {notification.data.type}
+                    </Badge>
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground">{notification.message}</p>
+                <p className="text-sm text-muted-foreground">{notification.data.message}</p>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(notification.timestamp).toLocaleString()}
+                  {new Date(notification.created_at).toLocaleString()}
                 </p>
               </div>
               <div className="flex gap-1">
-                {!notification.read && (
+                {!notification.read_at && (
                   <Button 
                     variant="ghost" 
                     size="icon" 
@@ -76,7 +94,7 @@ export default function Notifications() {
                 </Button>
               </div>
             </div>
-            {notification.link && (
+            {notification.data.link && (
               <Button variant="link" className="h-auto p-0 text-sm">
                 View Details →
               </Button>
@@ -87,8 +105,8 @@ export default function Notifications() {
     </Card>
   );
 
-  const unreadNotifications = notifications.filter(n => !n.read);
-  const readNotifications = notifications.filter(n => n.read);
+  const unreadNotifications = notifications.filter(n => !n.read_at);
+  const readNotifications = notifications.filter(n => n.read_at);
 
   return (
     <div className="space-y-6">
@@ -102,10 +120,24 @@ export default function Notifications() {
               You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
             </p>
           </div>
-          <Button variant="outline" onClick={markAllAsRead} disabled={unreadCount === 0}>
-            <CheckCheck className="h-4 w-4 mr-2" />
-            Mark All as Read
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={fetchNotifications} 
+              disabled={loading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={markAllAsRead} 
+              disabled={unreadCount === 0 || loading}
+            >
+              <CheckCheck className="h-4 w-4 mr-2" />
+              Mark All as Read
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="all" className="space-y-4">
@@ -122,7 +154,14 @@ export default function Notifications() {
           </TabsList>
 
           <TabsContent value="all" className="space-y-4">
-            {notifications.length === 0 ? (
+            {loading ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <RefreshCw className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
+                  <p className="text-muted-foreground">Loading notifications...</p>
+                </CardContent>
+              </Card>
+            ) : notifications.length === 0 ? (
               <Card>
                 <CardContent className="p-12 text-center">
                   <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -137,7 +176,14 @@ export default function Notifications() {
           </TabsContent>
 
           <TabsContent value="unread" className="space-y-4">
-            {unreadNotifications.length === 0 ? (
+            {loading ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <RefreshCw className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
+                  <p className="text-muted-foreground">Loading notifications...</p>
+                </CardContent>
+              </Card>
+            ) : unreadNotifications.length === 0 ? (
               <Card>
                 <CardContent className="p-12 text-center">
                   <CheckCheck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -152,7 +198,14 @@ export default function Notifications() {
           </TabsContent>
 
           <TabsContent value="read" className="space-y-4">
-            {readNotifications.length === 0 ? (
+            {loading ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <RefreshCw className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
+                  <p className="text-muted-foreground">Loading notifications...</p>
+                </CardContent>
+              </Card>
+            ) : readNotifications.length === 0 ? (
               <Card>
                 <CardContent className="p-12 text-center">
                   <Info className="h-12 w-12 mx-auto text-muted-foreground mb-4" />

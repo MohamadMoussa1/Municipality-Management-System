@@ -1,45 +1,49 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 export type AuthContextType = {
-  user: any;
+  user: string | null;       
   role: string | null;
-  setUser: (user: any) => void;
+  setUser: (user: string | null) => void;
   setRole: (role: string | null) => void;
   logout: () => void;
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
-
+  const [loading, setLoading] = useState(true);
   // Load saved user/role on refresh
   useEffect(() => {
-    const savedUser = localStorage.getItem("mms_user");
-    const savedRole = localStorage.getItem("mms_role");
+    const savedUser = localStorage.getItem("user");
+    const savedRole = localStorage.getItem("role");
 
-    if (savedUser) setUser(JSON.parse(savedUser));
+    if (savedUser) setUser(savedUser); 
     if (savedRole) setRole(savedRole);
+    setLoading(false);
   }, []);
 
   // Save to storage any time they change
   useEffect(() => {
-    if (user) localStorage.setItem("mms_user", JSON.stringify(user));
+    if (user) localStorage.setItem("user", user); 
+    else localStorage.removeItem("user");
+
     if (role) localStorage.setItem("role", role);
+    else localStorage.removeItem("role");
   }, [user, role]);
 
   const logout = () => {
     setUser(null);
     setRole(null);
-    localStorage.removeItem("mms_user");
+    localStorage.removeItem("user");
     localStorage.removeItem("role");
-    
-
   };
 
   return (
-    <AuthContext.Provider value={{ user, role, setUser, setRole, logout }}>
+    <AuthContext.Provider value={{ user, role, setUser, setRole, logout,loading,setLoading }}>
       {children}
     </AuthContext.Provider>
   );
