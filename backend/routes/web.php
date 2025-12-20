@@ -17,7 +17,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Frontend URL (override in .env with FRONTEND_URL if needed)
-$frontend = env('FRONTEND_URL', 'http://127.0.0.1:5173');
+$frontend = env('FRONTEND_URL', 'http://localhost:8000');
 
 Route::get('/payment-success/{id}', function ($id) use ($frontend) {
     return redirect($frontend . '/citizen/payments?payment=success&id=' . $id);
@@ -25,14 +25,10 @@ Route::get('/payment-success/{id}', function ($id) use ($frontend) {
 
 Route::get('/payment-cancel/{id}', function ($id) use ($frontend) {
     $payment = Payment::findOrFail($id);
-
     if ($payment->status !== 'failed') {
-        $payment->update([
-            'status' => 'failed',
-        ]);
+        $payment->update(['status' => 'failed']);
     }
-    return redirect($frontend . '/citizen/payments?payment=cancel&id=' . $id);
-
+    return redirect($frontend . '/citizen/payments?payment=failed&id=' . $id);
 });
 
 
