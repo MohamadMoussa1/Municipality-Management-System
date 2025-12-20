@@ -28,6 +28,8 @@ export interface Citizen {
 }
 
 export type RequestStatus = 'pending' | 'in_progress'| 'rejected' | 'completed';
+export type RequestPermitStatus = 'pending' | 'expired'| 'rejected' | 'approved';
+
 export type PermitType = 'business' | 'construction' | 'vehicle' | 'event';
 export type RequestType = 'residency' | 'birth' | 'death' | 'marriage' | 'garbage' | 'street_repair' | 'complaint';
 

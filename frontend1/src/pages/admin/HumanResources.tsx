@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Users, UserCheck, Clock, AlertCircle, Calendar } from 'lucide-react';
+import { Users, UserCheck, Clock, AlertCircle,Loader2 } from 'lucide-react';
 import { mockEmployees, mockLeaves } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
 import type { Employee, Leave } from '@/types';
@@ -71,7 +71,12 @@ export default function HumanResources() {
     }, [Clicked]);
 
     if (loading) {
-    return <p>Loading empolyee list...</p>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading emplyees list...</span>
+      </div>
+    );
   }
   
   const handleAddEmployee = async () => {
@@ -442,7 +447,14 @@ export default function HumanResources() {
               />
             </div>
             <Button onClick={handleAddEmployee} className="w-full" disabled={loadingSubmit}>
-              {loadingSubmit ? "Adding an employee...":"Add Employee"}
+             {loadingSubmit ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Adding...
+                  </>
+                ) : (
+                  'Add Employee'
+                )}
             </Button>
           </div>
         </DialogContent>

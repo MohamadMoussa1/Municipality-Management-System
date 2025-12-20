@@ -1,30 +1,17 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Table,
   TableBody,
@@ -40,30 +27,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Filter, Eye, CheckCircle, XCircle, FileText, Calendar, User } from 'lucide-react';
-import { mockRequests } from '@/lib/mockData';
-import { RequestStatus, CitizenRequest, RequestType } from '@/types';
+import { Filter, Eye,XCircle, FileText, Calendar, User, Loader2 } from 'lucide-react';
+
+import { RequestStatus } from '@/types';
 import { useEffect } from "react";
 export default function CitizenServices() {
   const { toast } = useToast();
-  const [requests, setRequests] = useState(mockRequests);
-  const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<RequestStatus | 'all'>('all');
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
-  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
-  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
-  const [actionRequest, setActionRequest] = useState<CitizenRequest | null>(null);
-  
-  const [newRequest, setNewRequest] = useState({
-    citizenName: '',
-    type: '' as RequestType,
-    description: '',
-  });
   const [Clicked, setClicked] = useState(false);
   const [R, setR] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { role } = useAuth();
+  let isAdminClerk = null;
+  if (role == 'admin' || role == 'clerk') {
+    isAdminClerk = true;
+  }
   const getStatusColor = (status: RequestStatus) => {
     switch (status) {
       case 'in_progress': return 'bg-accent';
@@ -73,25 +53,48 @@ export default function CitizenServices() {
       default: return 'bg-muted';
     }
   };
-  const handleStatusChange = (Id: string, newStatus: RequestStatus) => {
-    let res=null;
+
+  const handleDeleteRequest = (Rid: string) => {
+    let res = null;
     const fetchData = async () => {
-        const token=localStorage.getItem("token");
-        const response = await fetch("http://127.0.0.1:8000/api/requests/"+Id+"/status", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "Authorization":`Bearer ${token}`
-          },
-          body: JSON.stringify({
-            'status':newStatus
-          }),
-        });
-         res=await response.json();
-         setClicked(true);      
-      }
-      fetchData();
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://127.0.0.1:8000/api/requests/" + Rid, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+      });
+      res = await response.json();
+      toast({
+        title: "Success",
+        description: res.message,
+      });
+    }
+    fetchData();
+    setClicked(true);
+
+  };
+  const handleStatusChange = (Id: string, newStatus: RequestStatus) => {
+    let res = null;
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://127.0.0.1:8000/api/requests/" + Id + "/status", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          'status': newStatus
+        }),
+      });
+      res = await response.json();
+      setClicked(true);
+    }
+    fetchData();
     toast({
       title: "Status Updated",
       description: `Permit ${Id} status changed to ${newStatus.replace('_', ' ')}.`,
@@ -99,134 +102,46 @@ export default function CitizenServices() {
   };
 
   useEffect(() => {
-      setClicked(false);
-      const fetchData = async () => {
-          const token=localStorage.getItem("token");
-          const response = await fetch("http://127.0.0.1:8000/api/requests/department", {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Accept": "application/json",
-              "Authorization":`Bearer ${token}`
-            },
-          });
-          const res=await response.json();
+    setClicked(false);
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://127.0.0.1:8000/api/requests/department", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+      });
+      const res = await response.json();
 
-          setR(res.requests);
-          console.log(res.message);
-          setLoading(false);        
-      };
-    
-      fetchData();
-    }, [Clicked]);
+      setR(res.requests);
+      setLoading(false);
+    };
 
-    
-    if (loading) {
-    return <p>Loading citizen requests...</p>;
+    fetchData();
+  }, [Clicked]);
+
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading requests citizens...</span>
+      </div>
+    );
   }
 
 
- 
 
-  const handleViewRequest = (request:any) => {
+  const handleViewRequest = (request: any) => {
     setSelectedRequest(request);
     setViewDialogOpen(true);
   };
 
-  const handleApproveRequest = (request: CitizenRequest) => {
-    setActionRequest(request);
-    setApproveDialogOpen(true);
-  };
 
-  const handleRejectRequest = (request: CitizenRequest) => {
-    setActionRequest(request);
-    setRejectDialogOpen(true);
-  };
 
-  const confirmApprove = () => {
-    if (!actionRequest) return;
-    
-    const updatedRequest = { 
-      ...actionRequest, 
-      status: 'approved' as RequestStatus, 
-      completion_date: new Date().toISOString() 
-    };
-    
-    setRequests(prev => {
-      const newRequests = prev.map(req => 
-        req.id === actionRequest.id ? updatedRequest : req
-      );
-      // Save to localStorage for persistence
-      localStorage.setItem('citizenRequests', JSON.stringify(newRequests));
-      return newRequests;
-    });
-    
-    toast({
-      title: "Request Approved",
-      description: `Request ${actionRequest.id} has been approved successfully.`,
-    });
-    
-    setApproveDialogOpen(false);
-    setActionRequest(null);
-  };
 
-  const confirmReject = () => {
-    if (!actionRequest) return;
-    
-    const updatedRequest = { 
-      ...actionRequest, 
-      status: 'rejected' as RequestStatus,
-      completion_date: new Date().toISOString()
-    };
-    
-    setRequests(prev => {
-      const newRequests = prev.map(req => 
-        req.id === actionRequest.id ? updatedRequest : req
-      );
-      localStorage.setItem('citizenRequests', JSON.stringify(newRequests));
-      return newRequests;
-    });
-    
-    toast({
-      title: "Request Rejected",
-      description: `Request ${actionRequest.id} has been rejected.`,
-      variant: "destructive",
-    });
-    
-    setRejectDialogOpen(false);
-    setActionRequest(null);
-  };
-
-  const handleCreateRequest = () => {
-    if (!newRequest.citizenName || !newRequest.type || !newRequest.description) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const request: CitizenRequest = {
-      id: `REQ${String(requests.length + 1).padStart(3, '0')}`,
-      citizen_id: `CIT${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
-      citizenName: newRequest.citizenName,
-      type: newRequest.type,
-      status: 'pending',
-      submission_date: new Date().toISOString(),
-      
-    };
-
-    setRequests(prev => [request, ...prev]);
-    
-    toast({
-      title: "Request Created",
-      description: `New request ${request.id} has been created successfully.`,
-    });
-
-    setNewRequest({ citizenName: '', type: '' as RequestType, description: '' });
-    setCreateDialogOpen(false);
-  };
 
   const getStatusBadge = (status: RequestStatus) => {
     switch (status) {
@@ -285,7 +200,7 @@ export default function CitizenServices() {
           </div>
         </CardHeader>
         <CardContent className="p-3 sm:p-6">
-          <div className="flex flex-col gap-2 mb-3 sm:mb-4">           
+          <div className="flex flex-col gap-2 mb-3 sm:mb-4">
             <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
               <SelectTrigger className="w-full sm:w-[180px] text-[11px] sm:text-sm h-8 sm:h-9">
                 <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -318,21 +233,20 @@ export default function CitizenServices() {
                 {R?.map((request) => (
                   <TableRow key={request.id}>
                     <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4">{request.id}</TableCell>
-                    <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[80px] sm:max-w-none truncate">{request.citizenName}</TableCell>
+                    <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[80px] sm:max-w-none truncate">{request.name}</TableCell>
                     <TableCell className="capitalize text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">{request.type.replace('_', ' ')}</TableCell>
                     <TableCell className="px-2 sm:px-4">{getStatusBadge(request.status)}</TableCell>
                     <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell">{new Date(request.submission_date).toLocaleDateString()}</TableCell>
                     <TableCell className="px-2 sm:px-4">
-                      <div className="flex gap-0.5 sm:gap-2">
-                        <Button 
-                          variant="ghost" 
+                      <div className="flex gap-0.5 sm:gap-4">
+                        <Button
+                          variant="ghost"
                           size="icon"
                           className="h-7 w-7 sm:h-8 sm:w-8"
                           onClick={() => handleViewRequest(request)}
                         >
                           <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
-                        <TableCell>
                         <Select
                           value={request.status}
                           onValueChange={(value: RequestStatus) => handleStatusChange(request.id, value)}
@@ -359,7 +273,17 @@ export default function CitizenServices() {
                             </SelectItem>
                           </SelectContent>
                         </Select>
-                      </TableCell>
+                        {isAdminClerk && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="h-8 px-2 bg-gradient-to-r from-destructive to-destructive/80 hover:from-destructive/90 hover:to-destructive/70 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 border-0 rounded-md flex items-center gap-1.5 self-center"
+                            onClick={() => handleDeleteRequest(request.id)}
+                          >
+                            <XCircle className="h-3 w-3" />
+                            Delete
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -375,7 +299,7 @@ export default function CitizenServices() {
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Request Details</DialogTitle>
-           
+
           </DialogHeader>
           {selectedRequest && (
             <div className="space-y-4">
@@ -429,7 +353,7 @@ export default function CitizenServices() {
             <Button variant="outline" onClick={() => setViewDialogOpen(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog> 
+      </Dialog>
     </div>
   );
 }
