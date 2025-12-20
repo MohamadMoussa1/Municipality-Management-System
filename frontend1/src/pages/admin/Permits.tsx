@@ -108,6 +108,7 @@ export default function Permits() {
 
           const res = await response.json();
           console.log(res.message);
+          setClicked(true); // Trigger data refetch
           toast({
             title: "Status Updated",
             description: `Permit ${Id} status changed to ${newStatus.replace("_", " ")}${formData.date ? ` (Expiry: ${formData.date})` : ""
@@ -146,6 +147,7 @@ export default function Permits() {
 
           const res = await response.json();
           console.log(res.message);
+          setClicked(true); // Trigger data refetch
 
           toast({
             title: "Status Updated",
