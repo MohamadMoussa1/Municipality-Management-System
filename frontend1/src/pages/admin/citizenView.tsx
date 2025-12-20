@@ -135,7 +135,7 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setLoadingSubmit(false);
     }
   };
-const CitizenFormFields = () => (
+const citizenFormFields = (
   <>
     <div className="grid gap-4 py-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -367,7 +367,7 @@ const CitizenFormFields = () => (
               Update the citizen's information. Leave password fields empty to keep current password.
             </DialogDescription>
           </DialogHeader>
-          <CitizenFormFields />
+           {citizenFormFields}
           <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="w-full sm:w-auto">
               Cancel

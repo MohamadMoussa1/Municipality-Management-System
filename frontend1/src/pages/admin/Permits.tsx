@@ -14,7 +14,7 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Download, FileText, Loader2, BadgeCheck, Calendar, Clock, Phone, User, Plus, AlertCircle, CheckCircle, XCircle, Eye } from 'lucide-react';;
 import { useToast } from '@/hooks/use-toast';
-import type { Permit, RequestPermitStatus, RequestStatus } from '@/types';
+import type { RequestPermitStatus, RequestStatus } from '@/types';
 import {
   Select,
   SelectContent,
@@ -37,7 +37,7 @@ export default function Permits() {
     title: '',
     description: '',
     target_audience: '',
-    date: null,
+    date: '',
   });
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>("pending");
@@ -47,8 +47,8 @@ export default function Permits() {
     isAdmin = true;
   }
   useEffect(() => {
-    setClicked(false);
-    const fetchData = async () => {
+    const fetchD = async () => {
+      setClicked(false);
       try {
         const token = localStorage.getItem("token");
         const response = await fetch("http://127.0.0.1:8000/api/permits", {
@@ -78,7 +78,7 @@ export default function Permits() {
         setLoading(false);
       }
     };
-    fetchData();
+    fetchD();
   }, [Clicked]);
 
   if (loading) {
@@ -90,7 +90,7 @@ export default function Permits() {
     );
   }
   const handleStatusChange = (Id: string, newStatus: any) => {
-    if (formData.date == null) {
+    if (formData.date == '') {
       const fetchData = async () => {
         try {
           const token = localStorage.getItem("token");
@@ -108,8 +108,6 @@ export default function Permits() {
 
           const res = await response.json();
           console.log(res.message);
-          setClicked(true);
-
           toast({
             title: "Status Updated",
             description: `Permit ${Id} status changed to ${newStatus.replace("_", " ")}${formData.date ? ` (Expiry: ${formData.date})` : ""
@@ -148,7 +146,6 @@ export default function Permits() {
 
           const res = await response.json();
           console.log(res.message);
-          setClicked(true);
 
           toast({
             title: "Status Updated",
@@ -202,7 +199,6 @@ export default function Permits() {
     }
     fetchData();
     setClicked(true);
-
   };
   const handleViewPermit = async (p: string) => {
     setLoading(true);
@@ -244,27 +240,17 @@ export default function Permits() {
       </div>
     );
   }
-  const handleDownloadPermit = (permit: Permit) => {
+  const handleDownloadPermit = (url: string) => {
     toast({
       title: "Download Started",
-      description: `Downloading permit ${permit.id} document...`,
+      description: `Downloading permit  document...`,
     });
   };
 
-  const handleDownloadDocument = (docName: string) => {
-    toast({
-      title: "Download Started",
-      description: `Downloading ${docName}...`,
-    });
-  };
   const handleDownload = (link: string, id: string) => {
+    console.log(link)
     try {
-      const a = document.createElement('a');
-      a.href = link;
-      a.download = `permit-${id}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      window.open(link,"_blank")
 
       toast({
         title: "Success",
@@ -379,7 +365,7 @@ export default function Permits() {
                           <Button variant="ghost" size="icon" onClick={() => handleViewPermit(p.id)}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDownloadPermit(p.id)}>
+                          <Button variant="ghost" size="icon" onClick={() => handleDownloadPermit(p.related_documents)}>
                             <Download className="h-4 w-4" />
                           </Button>
                           {isAdmin && (
@@ -535,7 +521,7 @@ export default function Permits() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setDetailsOpen(false)}>Close</Button>
             {selectedPermit?.status === 'completed' && (
-              <Button onClick={() => handleDownload(selectedPermit.related_document.link, selectedPermit.appliant.id)}>Download Permit</Button>
+              <Button onClick={() => handleDownload(selectedPermit.documents.url, selectedPermit.appliant.id)}>Download Permit</Button>
             )}
           </DialogFooter>
         </DialogContent>
@@ -554,7 +540,7 @@ export default function Permits() {
                 });
                 return;
               }
-              handleStatusChange(Id, selectedStatus)
+               handleStatusChange(Id, selectedStatus)
             }}
             className="space-y-6"
           >
