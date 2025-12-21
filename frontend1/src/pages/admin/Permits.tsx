@@ -48,8 +48,7 @@ export default function Permits() {
   }
   useEffect(() => {
     const f = async () => {
-      setClicked(false);
-      setClicked(false)
+      setClicked(false);    
       try {
         const token = localStorage.getItem("token");
         const response = await fetch("http://127.0.0.1:8000/api/permits", {
@@ -109,7 +108,6 @@ export default function Permits() {
 
           const res = await response.json();
           setClicked(true)
-         
           toast({
             title: "Status Updated",
             description: `Permit ${Id} status changed to ${newStatus.replace("_", " ")}${formData.date ? ` (Expiry: ${formData.date})` : ""
@@ -351,8 +349,7 @@ export default function Permits() {
                       </TableCell>
                       <TableCell>
                         <Select
-                          value={p.status}
-                          
+                          value={p.status}   
                         >
                           <SelectValue> 
                             <Badge className={getStatusColor(p.status)}>
