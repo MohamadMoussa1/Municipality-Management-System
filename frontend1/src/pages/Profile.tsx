@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
-import { Mail, Building, Calendar, User } from 'lucide-react';
+import { Mail, Building, Calendar, User,Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { role } = useAuth();
   const [loading, setLoading] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [form, setForm] = useState({
@@ -73,7 +73,12 @@ export default function Profile() {
 
 
   if (loading) {
-    return <p>Loading profile...</p>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading Profile...</span>
+      </div>
+    );
   }
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,7 +130,7 @@ export default function Profile() {
           <CardContent className="pt-6 flex flex-col items-center gap-4">
             <Avatar className="h-32 w-32">
               <AvatarImage
-                src={getRolePhoto(user?.role || 'citizen')}
+                src={getRolePhoto(role || 'citizen')}
                 alt={form.name}
               />
               <AvatarFallback>
@@ -179,7 +184,14 @@ export default function Profile() {
                 Cancel
               </Button>
               <Button type="button" onClick={handleSaveProfile} disabled={loadingSubmit}>
-                {loadingSubmit ? "saving changes...":"Save Changes"}
+               {loadingSubmit ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save changes'
+                )}
               </Button>
             </div>
           </CardContent>

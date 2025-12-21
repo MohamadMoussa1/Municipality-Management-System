@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import { mockRequests } from '@/lib/mockData';
+import { Plus, Clock, CheckCircle, XCircle, AlertCircle,Loader2} from 'lucide-react';
 import { CitizenRequest } from '@/types';
 import { toast } from 'sonner';
-import { useEffect } from "react";
+
 import {useNavigate} from 'react-router-dom'
 import {
   Dialog,
@@ -18,8 +17,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -30,7 +27,6 @@ import {
 
 export default function MyRequests() {
   const navigate=useNavigate();
-  const [requests, setRequests] = useState<CitizenRequest[]>(mockRequests);
   const [selectedRequest, setSelectedRequest] = useState<CitizenRequest | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
    const [details, setDetails] = useState(false);
@@ -61,9 +57,13 @@ export default function MyRequests() {
   }, [Clicked]);
 
   if (loading) {
-    return <p>Loading requests...</p>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading requests...</span>
+      </div>
+    );
   }
-
   const handleSubmit = async (e: React.FormEvent) => {
        e.preventDefault();
        setLoadingSubmit(true);
@@ -102,7 +102,6 @@ export default function MyRequests() {
 
   const handleCancelRequest = (requestId: string) => {
     let res=null;
-    setRequests(prev => prev.filter(r => r.id !== requestId));
      const fetchData = async () => {
         const token=localStorage.getItem("token");
         const response = await fetch("http://127.0.0.1:8000/api/requests/"+requestId, {
@@ -191,7 +190,14 @@ export default function MyRequests() {
               </div>
               <DialogFooter>
                 <Button type="submit"  onClick={handleSubmit} disabled={loadingSubmit}>
-                   {loadingSubmit ? "Submitting the request...":"Submit"}
+                   {loadingSubmit ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  'Submit Request'
+                )}
                 </Button>
               </DialogFooter>
             </DialogContent>

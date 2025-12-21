@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Building2 } from 'lucide-react';
+import { Building2,Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 export default function Login() {
   const { setUser, setRole } = useAuth();
@@ -184,7 +184,14 @@ export default function Login() {
                   </div>
 
                   <Button type="submit" className="w-full" disabled={loadingSubmit}>
-                     {loadingSubmit ? "Logining...":"Login"}
+                    {loadingSubmit ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Logining in...
+                  </>
+                ) : (
+                  'Login in'
+                )}
                   </Button>
 
                 </form>
@@ -290,7 +297,14 @@ export default function Login() {
                   </div>
 
                   <Button type="submit" className="w-full  text-white" disabled={loadingSubmit}>
-                    {loadingSubmit ? "Signing up...":"Sign up"}
+                    {loadingSubmit ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing in...
+                  </>
+                ) : (
+                  'Sign up'
+                )}
                   </Button>
                 </form>
               </TabsContent>
