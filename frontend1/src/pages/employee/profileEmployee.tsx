@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
-import { Mail, Clock, Calendar, User,Briefcase,Building2,CalendarCheck,CheckCircle,DollarSign } from 'lucide-react';
+import { Mail, Clock, Calendar, User,Briefcase,Building2,CalendarCheck,CheckCircle,DollarSign,Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
@@ -78,8 +78,13 @@ export default function ProfileEmployee() {
 
     fetchProfile();
   }, []);
-  if (loading) {
-    return <p>Loading empolyee profile...</p>;
+ if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading employee profile...</span>
+      </div>
+    );
   }
 
   const handleSaveProfile = async (e: React.FormEvent) => {
@@ -189,7 +194,14 @@ export default function ProfileEmployee() {
                 Cancel
               </Button>
               <Button type="button" onClick={handleSaveProfile} disabled={loadingSubmit}>
-                {loadingSubmit ? "saving changes...":"Save changes"}
+               {loadingSubmit ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save changes'
+                )}
               </Button>
             </div>
           </CardContent>
