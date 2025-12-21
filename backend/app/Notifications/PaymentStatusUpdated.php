@@ -49,11 +49,13 @@ class PaymentStatusUpdated extends Notification
      */
     public function toArray(object $notifiable): array
     {
-        return [
-           'payment_id'   => $this->payment->id,
+       return [
+           'id'   => $this->payment->id,
             'amount'       => $this->payment->amount,
-            'payment_type' => $this->payment->payment_type,
+            'message'      => "Your payment status has been updated.",
+            'type' => $this->payment->payment_type,
             'status'       => $this->payment->status,
+            'created_at'   => now()->toISOString(),
         ];
     }
 }
