@@ -36,9 +36,10 @@ class PermitStatusUpdated extends Notification
     // Database format
     public function toArray($notifiable)
     {
-        return [
-            'permit_id' => $this->permit->id,
+       return [
+            'id' => $this->permit->id,
             'status' => $this->permit->status,
+            'type' => $this->permit->type,
             'message' => "Your {$this->permit->type} permit status is now: {$this->permit->status}. Expiry date: {$this->permit->expiry_date}",
             'created_at' => now()->toISOString(),
         ];

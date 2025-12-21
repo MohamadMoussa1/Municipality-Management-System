@@ -50,7 +50,7 @@ class UserStatusUpdated extends Notification
     public function toArray($notifiable)
     {
         return [
-            'user_id' => $this->user->id,
+            'id' => $this->user->id,
             'status' => $this->user->status,    
             'message' => "Your account status has been updated to: " . ucfirst($this->user->status),
             'updated_at' => now()->toISOString(),

@@ -61,8 +61,6 @@ export const AppSidebar = () => {
     const financeItems = [
       { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
       { title: 'Finance', url: '/admin/finance', icon: DollarSign },
-      { title: 'Events', url: '/employee/events', icon: Calendar },
-      { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
       { title: 'Notifications', url: '/notifications', icon: Bell },
     ];
 

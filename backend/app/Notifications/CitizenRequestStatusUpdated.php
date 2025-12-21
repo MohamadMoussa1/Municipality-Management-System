@@ -51,8 +51,8 @@ class CitizenRequestStatusUpdated extends Notification
      */
     public function toArray($notifiable)
     {
-        return [
-            'request_id' => $this->citizenRequest->id,
+      return [
+            'id' => $this->citizenRequest->id,
             'status' => $this->citizenRequest->status,
             'message' => "Your {$this->citizenRequest->type} request status is now: {$this->citizenRequest->status}. Submitted on: {$this->citizenRequest->submission_date}",
             'created_at' => now()->toISOString(),
