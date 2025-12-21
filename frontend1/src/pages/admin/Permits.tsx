@@ -47,8 +47,9 @@ export default function Permits() {
     isAdmin = true;
   }
   useEffect(() => {
-    const fetchD = async () => {
+    const f = async () => {
       setClicked(false);
+      setClicked(false)
       try {
         const token = localStorage.getItem("token");
         const response = await fetch("http://127.0.0.1:8000/api/permits", {
@@ -78,7 +79,7 @@ export default function Permits() {
         setLoading(false);
       }
     };
-    fetchD();
+    f();
   }, [Clicked]);
 
   if (loading) {
@@ -107,7 +108,8 @@ export default function Permits() {
           });
 
           const res = await response.json();
-          console.log(res.message);
+          setClicked(true)
+         
           toast({
             title: "Status Updated",
             description: `Permit ${Id} status changed to ${newStatus.replace("_", " ")}${formData.date ? ` (Expiry: ${formData.date})` : ""
@@ -145,8 +147,7 @@ export default function Permits() {
           });
 
           const res = await response.json();
-          console.log(res.message);
-
+          setClicked(true)
           toast({
             title: "Status Updated",
             description: `Permit ${Id} status changed to ${newStatus.replace("_", " ")}${formData.date ? ` (Expiry: ${formData.date})` : ""
@@ -351,9 +352,9 @@ export default function Permits() {
                       <TableCell>
                         <Select
                           value={p.status}
-                          onValueChange={(value: RequestStatus) => handleStatusChange(p.id, value)}
+                          
                         >
-                          <SelectValue>
+                          <SelectValue> 
                             <Badge className={getStatusColor(p.status)}>
                               {p.status === 'in_review' ? 'In Review' : p.status.charAt(0).toUpperCase() + p.status.slice(1)}
                             </Badge>
