@@ -290,20 +290,20 @@ export default function Permits() {
         </Card>
         <Card>
           <CardContent className="p-6">
-            <div className="text-2xl font-bold text-warning">{P.filter(r => r.status === 'in_review').length}</div>
-            <div className="text-sm text-muted-foreground">In Review</div>
+            <div className="text-2xl font-bold text-warning">{P.filter(r => r.status === 'expired').length}</div>
+            <div className="text-sm text-muted-foreground">EXpirde</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
-            <div className="text-2xl font-bold text-success">85</div>
-            <div className="text-sm text-muted-foreground">Active</div>
+            <div className="text-2xl font-bold text-success">{P.filter(r => r.status === 'approved').length}</div>
+            <div className="text-sm text-muted-foreground">Approved</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
-            <div className="text-2xl font-bold text-destructive">11</div>
-            <div className="text-sm text-muted-foreground">Expiring Soon</div>
+            <div className="text-2xl font-bold text-destructive">{P.filter(r => r.status === 'rejected').length}</div>
+            <div className="text-sm text-muted-foreground">rejected</div>
           </CardContent>
         </Card>
       </div>
