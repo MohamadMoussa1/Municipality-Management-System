@@ -51,10 +51,12 @@ class PaymentCreated extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'payment_id' => $this->payment->id,
+            'id' => $this->payment->id,
             'amount' => $this->payment->amount,
-            'payment_type' => $this->payment->payment_type,
+            'message' => "A new payment was created for you.",
+            'type' => $this->payment->payment_type,
             'status' => $this->payment->status,
+            'created_at' => now()->toISOString(),
         ];
     }
 }
