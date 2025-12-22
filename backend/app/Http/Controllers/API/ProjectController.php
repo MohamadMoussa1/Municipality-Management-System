@@ -101,7 +101,7 @@ class ProjectController extends Controller
         }
 
         return response()->json([
-            'data' => $project->load('tasks') // Eager load tasks relationship
+            'data' => $project->load('tasks')->load('tasks.assignee.user') // Eager load tasks relationship
         ]);
     }
     /**
