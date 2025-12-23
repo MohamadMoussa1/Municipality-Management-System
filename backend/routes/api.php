@@ -62,7 +62,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/tasks/{task}/status', [EmployeeController::class, 'updateTaskStatus']);
         
         // Admin-only employee routes
-        Route::middleware(['role:admin|hr_manager'])->group(function () {
+        Route::middleware(['role:admin|hr_manager|urban_planner'])->group(function () {
             // Get all employees (admin only)
             Route::get('/', [EmployeeController::class, 'index']);
             
