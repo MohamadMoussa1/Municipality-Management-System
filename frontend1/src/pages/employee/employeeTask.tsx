@@ -107,18 +107,18 @@ export default function EmployeeTasks() {
     setSelectedTask(task);
     setViewDialogOpen(true);
   };
-  const getStatusBadge = (status: RequestTaskStatus) => {
-    switch (status) {
-      case 'in_review':
-        return <Badge variant="outline">In review</Badge>;
+  const getStatusBadge = (status: RequestProjectStatus) => {
+      switch (status) {
       case 'in_progress':
         return <Badge className="bg-accent">In Progress</Badge>;
-      case 'blocked':
-        return <Badge variant="destructive">Blocked</Badge>;
+      case 'on_hold':
+        return <Badge className="bg-muted text-black">On Hold</Badge>;
       case 'completed':
-        return <Badge className="bg-primary">Completed</Badge>;
-      case 'todo':
-        return <Badge className="bg-yellow">To Do</Badge>;
+        return <Badge className="bg-success">Completed</Badge>;
+      case 'cancelled':
+        return <Badge className="bg-destructive">Cancelled</Badge>;
+      case 'planned':
+        return <Badge className="bg-primary">Planned</Badge>;
     }
   };
 

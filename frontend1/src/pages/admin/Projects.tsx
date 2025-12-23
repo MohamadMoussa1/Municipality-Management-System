@@ -40,18 +40,19 @@ export default function Projects() {
   });
   const getStatusColor = (status: RequestProjectStatus) => {
     switch (status) {
-      case 'in_progress': return 'bg-accent';
-      case 'on_hold': return 'bg-outline text-black';
+      case 'planned': return 'bg-accent';
+      case 'in_progress': return 'bg-warning';
+      case 'on_hold': return 'bg-muted text-black';
       case 'cancelled': return 'bg-destructive';
-      case 'completed': return 'bg-primary';
-      default: return 'bg-muted';
+      case 'completed': return 'bg-success';
+      default: return 'bg-accent';
     }
   };
   const handleStatusChange = (Id: string, newStatus: RequestProjectStatus) => {
     let res = null;
     const fetchData = async () => {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://127.0.0.1:8000/api/employees/tasks/" + Id + "/status", {
+      const response = await fetch("http://127.0.0.1:8000/api/projects/" + Id + "/status", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -68,7 +69,7 @@ export default function Projects() {
     fetchData();
     toast({
       title: "Status Updated",
-      description: `Permit ${Id} status changed to ${newStatus.replace('_', ' ')}.`,
+      description: `Project ${Id} status changed to ${newStatus.replace('_', ' ')}.`,
     });
   };
 
@@ -193,6 +194,7 @@ export default function Projects() {
       console.log("error");
     } finally {
       setLoadingSubmit(false);
+      setTasksDialogOpen(false);
     }
 
   }
@@ -352,11 +354,16 @@ export default function Projects() {
                       </div>
 
                       <div className="flex flex-wrap gap-4 text-sm">
-
+                        <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <span>Start:
+                              {project.start_date.split("T")[0]}
+                            </span>
+                          </div>
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>
-                            {project.created_at.split("T")[0]}
+                          <span>End:
+                            {project.end_date.split("T")[0]}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -367,7 +374,7 @@ export default function Projects() {
                         </div>
                         <Select
                           value={project.status}
-                          onValueChange={(value: RequestProjectStatus) => handleStatusChange(project.project_id, value)}
+                          onValueChange={(value: RequestProjectStatus) => handleStatusChange(project.id, value)}
                         >
                           <SelectTrigger className="w-[130px] h-8">
                             <SelectValue>
@@ -382,12 +389,12 @@ export default function Projects() {
                             </SelectItem>
                             <SelectItem value="in_progress">
                               <Badge className="bg-warning">In progress</Badge>
+                            </SelectItem> 
+                            <SelectItem value="on_hold">
+                              <Badge className="bg-muted text-black">on_hold</Badge>
                             </SelectItem>
-                            <SelectItem value="pending">
-                              <Badge className="bg-accent">Pending</Badge>
-                            </SelectItem>
-                            <SelectItem value="rejected">
-                              <Badge className="bg-destructive">rejected</Badge>
+                            <SelectItem value="cancelled">
+                              <Badge className="bg-destructive">cancelled</Badge>
                             </SelectItem>
                           </SelectContent>
                         </Select>
@@ -618,11 +625,11 @@ export default function Projects() {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
                                   <div className="flex items-center gap-1">
                                     <Calendar className="h-3 w-3" />
-                                    <span>Start: {employee.start_date}</span>
+                                    <span>Start: {employee.start_date.split("T")[0]}</span>
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <Clock className="h-3 w-3" />
-                                    <span>End: {employee.end_date}</span>
+                                    <span>End: {employee.end_date.split("T")[0]}</span>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
