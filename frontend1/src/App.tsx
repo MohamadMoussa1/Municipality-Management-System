@@ -26,6 +26,9 @@ import Profile from "./pages/Profile";
 import CitizenEvents from "./pages/citizen/Events";
 import EmployeeEvents from "./pages/employee/Events";
 import {CitizenList} from "./pages/admin/citizenView";
+import Attendences from "./pages/admin/Attendances";
+import MyAttendence from "./pages/employee/MyAttendances";
+import MyAttendances from "./pages/employee/MyAttendances";
 import EmployeeTasks from "./pages/employee/employeeTask";
 
 const queryClient = new QueryClient();
@@ -62,6 +65,7 @@ const App = () => (
             <Route path="/admin/hr" element={<ProtectedRoute allowedRoles={['admin', 'hr_manager']}><DashboardLayout><HumanResources /></DashboardLayout></ProtectedRoute>} />
             <Route path="/admin/events" element={<ProtectedRoute allowedRoles={['admin']}><DashboardLayout><Events /></DashboardLayout></ProtectedRoute>} />
             <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['admin', 'finance_officer', 'urban_planner', 'hr_manager']}><DashboardLayout><Reports /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/admin/attendences" element={<ProtectedRoute allowedRoles={['admin','hr_manager']}><DashboardLayout><Attendences /></DashboardLayout></ProtectedRoute>}/>
             
             {/* Citizen Routes */}
             <Route path="/citizen/requests" element={<ProtectedRoute allowedRoles={['citizen']}><DashboardLayout><MyRequests /></DashboardLayout></ProtectedRoute>} />
@@ -71,6 +75,7 @@ const App = () => (
             
             {/* Employee Events Route */}
             <Route path="/employee/events" element={<ProtectedRoute allowedRoles={['finance_officer', 'urban_planner', 'hr_manager', 'clerk']}><DashboardLayout><EmployeeEvents /></DashboardLayout></ProtectedRoute>} />
+            <Route path="/employee/attendences" element={<ProtectedRoute allowedRoles={['finance_officer', 'urban_planner', 'clerk']}><DashboardLayout><MyAttendances /></DashboardLayout></ProtectedRoute>}/>
             <Route path="/employee/tasks" element={<ProtectedRoute allowedRoles={['finance_officer', 'urban_planner', 'hr_manager', 'clerk']}><DashboardLayout><EmployeeTasks/></DashboardLayout></ProtectedRoute>} />
             
             {/* Shared Routes */}

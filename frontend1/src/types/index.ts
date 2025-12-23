@@ -133,14 +133,13 @@ export interface Employee {
 
 export interface Attendance {
   id: string;
-  employee_id: string;
+  employee_id: number;
   date: string;
-  check_in?: string;
-  check_out?: string;
+  check_in?: string | null;
+  check_out?: string | null;
   hours_worked?: number;
   // Display fields
   employeeName?: string;
-  status?: 'present' | 'absent' | 'late' | 'half_day' | 'leave';
 }
 
 export interface Leave {

@@ -57,6 +57,7 @@ export const AppSidebar = () => {
       { title: 'Events', url: '/admin/events', icon: Calendar },
       { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
       { title: 'Notifications', url: '/notifications', icon: Bell },
+      { title: 'Attendances', url: '/admin/attendences', icon: ClipboardList },
     ];
 
     const financeItems = [
@@ -64,6 +65,7 @@ export const AppSidebar = () => {
       { title: 'Finance', url: '/admin/finance', icon: DollarSign },
       { title: 'Tasks', url: '/employee/tasks', icon: DollarSign },
       { title: 'Notifications', url: '/notifications', icon: Bell },
+      {title: 'My Attendances', url: '/employee/attendences', icon: ClipboardList},
     ];
 
     const projectItems = [
@@ -72,6 +74,7 @@ export const AppSidebar = () => {
       { title: 'Events', url: '/employee/events', icon: Calendar },
       { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
       { title: 'Notifications', url: '/notifications', icon: Bell },
+      {title: 'My Attendances', url: '/employee/attendences', icon: ClipboardList},
     ];
 
     const hrItems = [
@@ -81,6 +84,7 @@ export const AppSidebar = () => {
       { title: 'Tasks', url: '/employee/tasks', icon: Calendar },
       { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
       { title: 'Notifications', url: '/notifications', icon: Bell },
+      { title: 'Attendances', url: '/admin/attendences', icon: ClipboardList },
     ];
 
     const clerkItems = [
@@ -90,6 +94,7 @@ export const AppSidebar = () => {
       { title: 'Tasks', url: '/employee/tasks', icon: ListTodo },
       { title: 'Events', url: '/employee/events', icon: Calendar },
       { title: 'Notifications', url: '/notifications', icon: Bell },
+      {title: 'My Attendances', url: '/employee/attendences', icon: ClipboardList},
     ];
     
     switch (role) {
