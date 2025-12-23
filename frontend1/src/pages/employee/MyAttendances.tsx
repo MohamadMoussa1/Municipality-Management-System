@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, CheckCircle, XCircle, LogIn, LogOut } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, LogIn, LogOut ,Loader2} from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -273,6 +273,14 @@ export default function MyAttendances() {
     const hrs = diffMs / (1000 * 60 * 60);
     return Math.round(hrs * 100) / 100;
   };
+   if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading my attendances...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -339,7 +347,7 @@ export default function MyAttendances() {
                       <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                         <span>Check-in: {fmt(a.check_in)}</span>
                         <span>Check-out: {fmt(a.check_out)}</span>
-                        <span>ID: {a.id}</span>
+                        
                       </div>
                     </div>
                     <div className="flex sm:flex-col gap-2">
