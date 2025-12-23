@@ -26,7 +26,7 @@ export interface Citizen {
   contact: string;
   date_of_birth: string;
 }
-
+export type RequestProjectStatus = 'cancelled' | 'in_progress'| 'on_hold' | 'completed' |'planned';
 export type RequestStatus = 'pending' | 'in_progress'| 'rejected' | 'completed';
 export type RequestPermitStatus = 'pending' | 'expired'| 'rejected' | 'approved';
 
