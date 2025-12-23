@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Clock, CheckCircle, XCircle, AlertCircle, Trash2, Edit, Search } from 'lucide-react';
+import { Plus, Clock, CheckCircle, XCircle, AlertCircle, Trash2, Edit, Search, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -26,6 +26,7 @@ const paymentTypes = [
 ];
 
 export default function Finance() {
+   const [loading, setLoading] = useState(true);
   const [payments, setPayments] = useState([]);
   const [citizens, setCitizens] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null);
@@ -99,6 +100,7 @@ export default function Finance() {
       if (citizensRes.ok) {
         const citizensData = await citizensRes.json().catch(() => null);
         setCitizens(citizensData?.data || citizensData || []);
+        setLoading(false);
       } else if (citizensRes.status === 403) {
         // Not authorized to list all citizens - allow search instead
         setCitizens([]);
@@ -116,7 +118,14 @@ export default function Finance() {
   useEffect(() => {
     fetchData();
   }, []);
-
+if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading payments...</span>
+      </div>
+    );
+  }
   // Search for a single citizen (by name/email/ID)
   const handleCitizenSearch = async () => {
     if (!citizenSearch) return;
