@@ -80,10 +80,13 @@ class AttendanceController extends Controller
             return response()->json(['message' => 'Already checked out.'], 400);
         }
 
-        // 5.Calculate hours worked
-        $checkIn =$attendance->check_in;
+        // 5.Calculate hours worked (decimal hours rounded to 2 places)
+        $checkIn = $attendance->check_in;
         $checkOut = now();
-        $hoursWorked = $checkIn->diffInHours($checkOut);
+        $hoursWorked = 0;
+        if ($checkIn) {
+            $hoursWorked = round(($checkOut->getTimestamp() - $checkIn->getTimestamp()) / 3600, 2);
+        }
 
          // 6. Update row
         $attendance->update([
@@ -98,23 +101,29 @@ class AttendanceController extends Controller
 
     }
 
-    // Get attendance records for authenticated employee or admin or HR manager [ check the depatment later ]
+    // Get attendance records for authenticated employee or admin or HR manager
+    // - Admins and hr_manager can list and filter all records
+    // - Regular employees can only see their own attendance records
     public function index(Request $request)
     {
         $user = $request->user();
 
-    //    Check permissions
-        if (!auth()->user()->hasAnyRole(['admin', 'hr_manager'])) {
-            return response()->json([
-                'message' => 'Unauthorized. Only administrators and urban planners can view all projects.'
-            ], 403);
-        }
-
         // Base query
         $query = Attendance::with(['employee.user'])
             ->orderBy('date', 'desc');
-        
-        // Filter by employee_id: check it later
+
+        if ($user->hasAnyRole(['admin', 'hr_manager'])) {
+            // allowed to query all records
+        } elseif ($user->employee) {
+            // scope to current employee
+            $query->where('employee_id', $user->employee->id);
+        } else {
+            return response()->json([
+                'message' => 'Forbidden'
+            ], 403);
+        }
+
+        // Filter by employee_id (admins/hr can filter by others)
         if ($request->has('employee_id')) {
             $query->where('employee_id', $request->employee_id);
         }
