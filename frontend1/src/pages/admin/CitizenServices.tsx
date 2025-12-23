@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Filter, Eye,XCircle, FileText, Calendar, User, Loader2 } from 'lucide-react';
+import { Filter, Eye, XCircle, FileText, Calendar, User, Loader2 } from 'lucide-react';
 
 import { RequestStatus } from '@/types';
 import { useEffect } from "react";
@@ -114,7 +114,7 @@ export default function CitizenServices() {
         },
       });
       const res = await response.json();
-
+      console.log(res.requests)
       setR(res.requests);
       setLoading(false);
     };
@@ -230,12 +230,41 @@ export default function CitizenServices() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {R?.map((request) => (
+                {R?.filter((request) =>
+                  statusFilter === 'all' || request.status === statusFilter
+                ).map((request) => (
                   <TableRow key={request.id}>
                     <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4">{request.id}</TableCell>
-                    <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[80px] sm:max-w-none truncate">{request.citizen.user.name}</TableCell>
+                    <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[80px] sm:max-w-none truncate">{request?.citizen?.user?.name}</TableCell>
                     <TableCell className="capitalize text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">{request.type.replace('_', ' ')}</TableCell>
-                    <TableCell className="px-2 sm:px-4">{getStatusBadge(request.status)}</TableCell>
+                    <TableCell className="px-2 sm:px-4">
+                      <Select
+                        value={request.status}
+                        onValueChange={(value: RequestStatus) => handleStatusChange(request.id, value)}
+                      >
+                        <SelectTrigger className="w-[130px] h-8">
+                          <SelectValue>
+                            <Badge className={getStatusColor(request.status)}>
+                              {request.status === 'in_review' ? 'In Review' : request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                            </Badge>
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="completed">
+                            <Badge className="bg-success">completed</Badge>
+                          </SelectItem>
+                          <SelectItem value="in_progress">
+                            <Badge className="bg-warning">In progress</Badge>
+                          </SelectItem>
+                          <SelectItem value="pending">
+                            <Badge className="bg-accent">Pending</Badge>
+                          </SelectItem>
+                          <SelectItem value="rejected">
+                            <Badge className="bg-destructive">rejected</Badge>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
                     <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell">{new Date(request.submission_date).toLocaleDateString()}</TableCell>
                     <TableCell className="px-2 sm:px-4">
                       <div className="flex gap-0.5 sm:gap-4">
@@ -247,32 +276,7 @@ export default function CitizenServices() {
                         >
                           <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
-                        <Select
-                          value={request.status}
-                          onValueChange={(value: RequestStatus) => handleStatusChange(request.id, value)}
-                        >
-                          <SelectTrigger className="w-[130px] h-8">
-                            <SelectValue>
-                              <Badge className={getStatusColor(request.status)}>
-                                {request.status === 'in_review' ? 'In Review' : request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                              </Badge>
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="completed">
-                              <Badge className="bg-success">completed</Badge>
-                            </SelectItem>
-                            <SelectItem value="in_progress">
-                              <Badge className="bg-warning">In progress</Badge>
-                            </SelectItem>
-                            <SelectItem value="pending">
-                              <Badge className="bg-accent">Pending</Badge>
-                            </SelectItem>
-                            <SelectItem value="rejected">
-                              <Badge className="bg-destructive">rejected</Badge>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+
                         {isAdminClerk && (
                           <Button
                             variant="destructive"
@@ -321,7 +325,7 @@ export default function CitizenServices() {
                 <Label className="text-muted-foreground">Citizen Name</Label>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium text-sm">{selectedRequest.citizen.user.name}</span>
+                  <span className="font-medium text-sm">{selectedRequest?.citizen?.user?.name}</span>
                 </div>
               </div>
 
@@ -334,7 +338,7 @@ export default function CitizenServices() {
                   <Label className="text-muted-foreground">Submission Date</Label>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{selectedRequest.submission_date}</span>
+                    <span className="text-sm">{selectedRequest.submission_date.split("T")[0]}</span>
                   </div>
                 </div>
                 {selectedRequest.completion_date && (
@@ -342,7 +346,7 @@ export default function CitizenServices() {
                     <Label className="text-muted-foreground">Completion Date</Label>
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{selectedRequest.completion_date}</span>
+                      <span className="text-sm">{selectedRequest.completion_date.split("T")[0]}</span>
                     </div>
                   </div>
                 )}
