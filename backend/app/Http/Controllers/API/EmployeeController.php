@@ -25,7 +25,7 @@ class EmployeeController extends Controller
         $user = Auth::user();
         
         // Only allow admin or hr_manager to list all employees
-        if (!$user->hasAnyRole(['admin', 'hr_manager'])) {
+        if (!$user->hasAnyRole(['admin', 'hr_manager','urban_planner'])) {
             return response()->json([
                 'message' => 'Unauthorized. Only administrators can view all employees.'
             ], 403);
@@ -57,7 +57,7 @@ class EmployeeController extends Controller
         $employee = $query->firstOrFail();
 
         // Check if the user is authorized to view this employee
-        if (!$user->hasAnyRole(['admin', 'hr_manager'])) {
+        if (!$user->hasAnyRole(['admin', 'hr_manager','urban_planner'])) {
             return response()->json([
                 'message' => 'Unauthorized. You can only view your own information.'
             ], 403);
@@ -112,7 +112,10 @@ class EmployeeController extends Controller
         // Reload the task with relationships
         $task->load(['project', 'assignee.user']);
 
-        return new TaskResource($task);
+        return response()->json([
+            'message' => 'Task status updated successfully.',
+            'task' => new TaskResource($task)
+        ], 200);
     }
 
     /**

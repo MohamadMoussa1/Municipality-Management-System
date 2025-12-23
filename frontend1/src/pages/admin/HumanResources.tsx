@@ -386,9 +386,9 @@ export default function HumanResources() {
                 <SelectContent>
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="clerk">Clerk</SelectItem>
-                  <SelectItem value="finance">Finance Officer</SelectItem>
+                  <SelectItem value="finance_officer">Finance Officer</SelectItem>
                   <SelectItem value="hr_manager">HR Manager</SelectItem>
-                  <SelectItem value="project_manager">Project Manager</SelectItem>
+                  <SelectItem value="urban_planner">Project Manager</SelectItem>
                 </SelectContent>
               </Select>
             </div>
