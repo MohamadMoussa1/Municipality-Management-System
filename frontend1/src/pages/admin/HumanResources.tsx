@@ -3,22 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Users, UserCheck, Clock, AlertCircle,Loader2 } from 'lucide-react';
-import { mockEmployees, mockLeaves } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
-import type { Employee, Leave } from '@/types';
+import type { Employee } from '@/types';
 import {
   Select,
   SelectContent,
@@ -32,7 +23,6 @@ export default function HumanResources() {
   const [addEmployeeOpen, setAddEmployeeOpen] = useState(false);
   const [viewProfileOpen, setViewProfileOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const [leaves, setLeaves] = useState(mockLeaves);
   const [Clicked, setClicked] = useState(false);
   const [E, setE] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -93,7 +83,6 @@ export default function HumanResources() {
     }
 
     const token = localStorage.getItem("token");
-
     try {
       const response = await fetch("http://127.0.0.1:8000/api/admin/register", {
         method: "POST",
@@ -150,32 +139,8 @@ export default function HumanResources() {
     setViewProfileOpen(true);
   };
 
-  const handleApproveLeave = (leaveId: string) => {
-    setLeaves(leaves.map(leave => 
-      leave.id === leaveId ? { ...leave, status: 'approved' as const } : leave
-    ));
-    toast({
-      title: "Leave Approved",
-      description: "Leave request has been approved successfully.",
-    });
-  };
 
-  const handleRejectLeave = (leaveId: string) => {
-    setLeaves(leaves.map(leave => 
-      leave.id === leaveId ? { ...leave, status: 'rejected' as const } : leave
-    ));
-    toast({
-      title: "Leave Rejected",
-      description: "Leave request has been rejected.",
-    });
-  };
-
-  const handleProcessPayroll = () => {
-    toast({
-      title: "Payroll Processing",
-      description: "Monthly payroll is being processed. This may take a few minutes.",
-    });
-  };
+  ;
 
   return (
     <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">

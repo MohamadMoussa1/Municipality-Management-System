@@ -29,6 +29,7 @@ import {CitizenList} from "./pages/admin/citizenView";
 import Attendences from "./pages/admin/Attendances";
 import MyAttendence from "./pages/employee/MyAttendances";
 import MyAttendances from "./pages/employee/MyAttendances";
+import EmployeeTasks from "./pages/employee/employeeTask";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,7 @@ const App = () => (
             {/* Employee Events Route */}
             <Route path="/employee/events" element={<ProtectedRoute allowedRoles={['finance_officer', 'urban_planner', 'hr_manager', 'clerk']}><DashboardLayout><EmployeeEvents /></DashboardLayout></ProtectedRoute>} />
             <Route path="/employee/attendences" element={<ProtectedRoute allowedRoles={['finance_officer', 'urban_planner', 'clerk']}><DashboardLayout><MyAttendances /></DashboardLayout></ProtectedRoute>}/>
+            <Route path="/employee/tasks" element={<ProtectedRoute allowedRoles={['finance_officer', 'urban_planner', 'hr_manager', 'clerk']}><DashboardLayout><EmployeeTasks/></DashboardLayout></ProtectedRoute>} />
             
             {/* Shared Routes */}
             <Route path="/notifications" element={<ProtectedRoute><DashboardLayout><Notifications /></DashboardLayout></ProtectedRoute>} />
