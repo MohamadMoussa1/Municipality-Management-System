@@ -25,6 +25,7 @@ import {
   Home,
   Bell,
   CreditCard,
+  ListTodo 
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -61,6 +62,7 @@ export const AppSidebar = () => {
     const financeItems = [
       { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
       { title: 'Finance', url: '/admin/finance', icon: DollarSign },
+      { title: 'Tasks', url: '/employee/tasks', icon: DollarSign },
       { title: 'Notifications', url: '/notifications', icon: Bell },
     ];
 
@@ -76,6 +78,7 @@ export const AppSidebar = () => {
       { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
       { title: 'Human Resources', url: '/admin/hr', icon: UserCog },
       { title: 'Events', url: '/employee/events', icon: Calendar },
+      { title: 'Tasks', url: '/employee/tasks', icon: Calendar },
       { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
       { title: 'Notifications', url: '/notifications', icon: Bell },
     ];
@@ -84,6 +87,7 @@ export const AppSidebar = () => {
       { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
       { title: 'Citizen Services', url: '/admin/citizen-services', icon: Users },
       { title: 'Permits', url: '/admin/permits', icon: FileText },
+      { title: 'Tasks', url: '/employee/tasks', icon: ListTodo },
       { title: 'Events', url: '/employee/events', icon: Calendar },
       { title: 'Notifications', url: '/notifications', icon: Bell },
     ];

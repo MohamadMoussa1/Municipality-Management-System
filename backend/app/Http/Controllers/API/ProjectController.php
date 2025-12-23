@@ -63,7 +63,12 @@ class ProjectController extends Controller
         if ($request->has('end_date_to')) {
             $query->whereDate('end_date', '<=', $request->end_date_to);
         }
-
+        //check if the end date is passed change the status to cancelled
+        foreach($query->get() as $project){
+            if($project->end_date < now() && $project->status != 'completed'){
+                $project->update(['status' => 'cancelled']);
+            }
+        }
         // Apply sorting (default: newest first)
         $sortBy = $request->input('sort_by', 'created_at');
         $sortOrder = $request->input('sort_order', 'desc');
