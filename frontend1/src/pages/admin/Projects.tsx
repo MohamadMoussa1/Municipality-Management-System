@@ -2,13 +2,12 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Building2, Clock, CheckCircle, DollarSign, Users, Search, Loader2, Calendar } from 'lucide-react';
+import { Building2, Clock, CheckCircle, DollarSign, Users, Search, Loader2, Calendar, Target, FileText, AlertCircle, XCircle, CheckSquare } from 'lucide-react';
 import { mockProjects, mockTasks } from '@/lib/mockData';
 import { toast, useToast } from '@/hooks/use-toast';
 import type { Project, RequestProjectStatus } from '@/types';
@@ -20,26 +19,16 @@ export default function Projects() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [tasksDialogOpen, setTasksDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>([]);
-  const [activeTaskTab, setActiveTaskTab] = useState('in_progress');
-  const [payments, setPayments] = useState([]);
-  const [citizens, setCitizens] = useState([]);
-  const [selectedPayment, setSelectedPayment] = useState(null);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-
-
   const [specificPro, setspecificPro] = useState([]);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  // Form states
   const [form, setForm] = useState({ eid: '', task: '', status: '', start_date: '', end_date: '', });
-
-  // Citizen search for single payment
   const [EmployeeSearch, setEmployeeSearch] = useState('');
   const [EmployeeResult, setEmployeeResult] = useState(null);
   const [EmployeeLoading, setEmployeeLoading] = useState(false);
   const [permissionError, setPermissionError] = useState(null);
-
   const [Projects, setProjects] = useState([]);
-
+  const [Clicked, setClicked] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [newProject, setNewProject] = useState({
     name: '',
     department: '',
@@ -62,7 +51,7 @@ export default function Projects() {
     let res = null;
     const fetchData = async () => {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://127.0.0.1:8000/api/projects/" + Id + "/status", {
+      const response = await fetch("http://127.0.0.1:8000/api/employees/tasks/" + Id + "/status", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -83,8 +72,7 @@ export default function Projects() {
     });
   };
 
-  const [Clicked, setClicked] = useState(false);
-  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     setClicked(false);
     const fetchData = async () => {
@@ -161,8 +149,8 @@ export default function Projects() {
           },
         });
         const res = await response.json();
-        setspecificPro(res.tasks);
-        console.log(res.tasks)
+        setspecificPro(res.data.tasks);
+
       } catch (error) {
         console.error("Error fetching project details:", error);
       } finally {
@@ -177,8 +165,7 @@ export default function Projects() {
   const handleAssignTask = async (e: React.FormEvent, id: string) => {
     e.preventDefault();
     setLoadingSubmit(true);
-    setClicked(false)
-    setClicked
+    setClicked(true);
     try {
       const token = localStorage.getItem("token");
       const response = await fetch("http://127.0.0.1:8000/api/projects/" + id + "/tasks", {
@@ -261,7 +248,7 @@ export default function Projects() {
     setDetailsDialogOpen(true);
   };
 
-  const handleViewTasks = (project: Project) => {
+  const handleAssignTasks = (project: Project) => {
     setSelectedProject(project);
     setTasksDialogOpen(true);
   };
@@ -380,7 +367,7 @@ export default function Projects() {
                         </div>
                         <Select
                           value={project.status}
-                          onValueChange={(value: RequestProjectStatus) => handleStatusChange(project.id, value)}
+                          onValueChange={(value: RequestProjectStatus) => handleStatusChange(project.project_id, value)}
                         >
                           <SelectTrigger className="w-[130px] h-8">
                             <SelectValue>
@@ -408,7 +395,7 @@ export default function Projects() {
                     </div>
                     <div className="flex lg:flex-col gap-2">
                       <Button variant="outline" size="sm" onClick={() => handleViewDetails(project)}>View Details</Button>
-                      <Button variant="outline" size="sm" onClick={() => handleViewTasks(project)}>assign a task</Button>
+                      <Button variant="outline" size="sm" onClick={() => handleAssignTasks(project)}>assign a task</Button>
                     </div>
                   </div>
                 </CardContent>
@@ -519,7 +506,7 @@ export default function Projects() {
         </DialogContent>
       </Dialog>
       <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center h-64">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -527,72 +514,124 @@ export default function Projects() {
             </div>
           ) : (
             <>
-              <DialogHeader>
-                <DialogTitle>Project Details</DialogTitle>
+              <DialogHeader className="pb-4 border-b">
+                <DialogTitle className="flex items-center gap-2 text-xl">
+                  <Target className="h-5 w-5 text-primary" />
+                  Project Details
+                </DialogTitle>
                 <DialogDescription>Complete information for {selectedProject?.name}</DialogDescription>
               </DialogHeader>
 
               {selectedProject && (
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm font-medium">Project Name</p>
-                    <p className="text-sm text-muted-foreground">{selectedProject.name}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Department</p>
-                    <p className="text-sm text-muted-foreground">{selectedProject.department}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Status</p>
-                    <Badge className={
-                      selectedProject.status === 'in_progress' ? 'bg-accent' :
-                        selectedProject.status === 'completed' ? 'bg-success' :
-                          selectedProject.status === 'planning' ? 'bg-primary' : 'bg-warning'
-                    }>
-                      {selectedProject?.status?.replace('_', ' ').toUpperCase()}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Project Manager</p>
-                    <p className="text-sm text-muted-foreground">{selectedProject.manager}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Timeline</p>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedProject.end_date}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Budget</p>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedProject.budget}
-                    </p>
+                <div className="space-y-6 py-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Project Name
+                      </Label>
+                      <div className="p-3 bg-muted/50 rounded-lg">
+                        <p className="font-medium text-sm">{selectedProject.name}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                        <Building2 className="h-4 w-4" />
+                        Department
+                      </Label>
+                      <div className="p-3 bg-muted/50 rounded-lg">
+                        <p className="font-medium text-sm">{selectedProject.department}</p>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Employees and Tasks Section */}
-                  <div>
-                    <p className="text-sm font-medium mb-3">Assigned Employees & Tasks</p>
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      Status
+                    </Label>
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <Badge className={getStatusColor(selectedProject?.status)}>
+                        {selectedProject?.status?.charAt(0).toUpperCase() + selectedProject?.status?.slice(1)?.replace('_', ' ')}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        Created At
+                      </Label>
+                      <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                        <Calendar className="h-4 w-4 text-primary" />
+                        <span className="text-sm">
+                          {selectedProject.created_at?.split("T")[0]}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                        <DollarSign className="h-4 w-4" />
+                        Budget
+                      </Label>
+                      <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                        <DollarSign className="h-4 w-4 text-primary" />
+                        <span className="text-sm">
+                          {selectedProject.budget}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      Assigned Employees & Tasks
+                    </Label>
                     <div className="space-y-3 max-h-64 overflow-y-auto">
-
                       {specificPro?.map((employee) => (
-                        <div key={employee.id} className="border border-border/30 rounded-lg p-3 bg-secondary/5">
-                          <div className="flex items-start justify-between mb-2">
-                            <div>
-                              <div className="font-medium text-sm">{employee.user.name}</div>
-                              <div className="text-xs text-muted-foreground">{employee.user.role}</div>
-                              <div className="text-xs text-muted-foreground">{employee.user.email}</div>
+                        <div key={employee.id} className="border border-border/30 rounded-lg p-4 bg-secondary/5">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-primary/10 rounded-full">
+                                <Users className="h-4 w-4 text-primary" />
+                              </div>
+                              <div>
+                                <div className="font-medium text-sm">{employee?.assignee?.user?.name}</div>
+                                <div className="text-xs text-muted-foreground">{employee?.assignee?.user?.role}</div>
+                                <div className="text-xs text-muted-foreground">{employee?.assignee?.user?.email}</div>
+                              </div>
                             </div>
                           </div>
-                          <div className="mt-2">
-                            {/* <p className="text-xs font-medium text-muted-foreground mb-1">Assigned Tasks:</p>
-                            <div className="space-y-1">
-                              {employee.tasks.map((task, index) => (
-                                <div key={index} className="flex items-center gap-2 text-xs">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
-                                  <span className="text-muted-foreground">{task}</span>
+                          <div className="mt-4 space-y-2">
+                            <Label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                              <CheckSquare className="h-3 w-3" />
+                              Assigned Task
+                            </Label>
+                            <div className="p-3 bg-muted/30 rounded-lg">
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-3 w-3 text-primary" />
+                                  <span className="text-sm font-medium">{employee.title}</span>
                                 </div>
-                              ))}
-                            </div> */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    <span>Start: {employee.start_date}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    <span>End: {employee.end_date}</span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge className={`text-xs ${getStatusColor(employee.status)}`}>
+                                    {employee.status?.charAt(0).toUpperCase() + employee.status?.slice(1)?.replace('_', ' ')}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -600,6 +639,12 @@ export default function Projects() {
                   </div>
                 </div>
               )}
+              <DialogFooter className="pt-4 border-t">
+                <Button variant="outline" onClick={() => setDetailsDialogOpen(false)} className="flex items-center gap-2">
+                  <XCircle className="h-4 w-4" />
+                  Close
+                </Button>
+              </DialogFooter>
             </>
           )}
         </DialogContent>
