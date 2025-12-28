@@ -39,8 +39,10 @@ class ProjectController extends Controller
         }
 
         return response()->json([
+            'total_projects' => Project::count(),
             'in_progress_projects' => Project::where('status', 'in_progress')->count(),
             'completed_projects' => Project::where('status', 'completed')->count(),
+            
             'total_budget' => (float) Project::sum('budget'),
             'projects_by_department' => $projectsByDepartment,
         ], 200);
