@@ -17,6 +17,44 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class PermitController extends Controller
 {
      use AuthorizesRequests;
+
+    /**
+     * Get counts of approved and pending permits
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getApprovedAndPendingCounts(Request $request)
+    {
+        $user = $request->user();
+        $baseQuery = \App\Models\Permit::query();
+
+        // If user is a citizen, only show their permits
+        if ($user->role === 'citizen') {
+            if (!$user->citizen) {
+                return response()->json([
+                    'message' => 'Citizen profile not found for this user.'
+                ], 400);
+            }
+            $baseQuery->where('applicant_id', $user->citizen->id);
+        } 
+        // Only allow admin, clerk, and citizen roles
+        elseif (!in_array($user->role, ['admin', 'clerk'])) {
+            return response()->json([
+                'message' => 'Unauthorized.'
+            ], 403);
+        }
+
+        $pendingCount = (clone $baseQuery)->where('status', 'pending')->count();
+        $approvedCount = (clone $baseQuery)->where('status', 'approved')->count();
+
+        return response()->json([
+            'approved_permits' => $approvedCount,
+            'pending_permits' => $pendingCount,
+        ], 200);
+    }
+
+
     /**
      * Create a new permit (Citizen)
      */

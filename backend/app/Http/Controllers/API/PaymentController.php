@@ -16,7 +16,44 @@ use App\Notifications\PaymentCreated;
 
 
 class PaymentController extends Controller
-{
+{   
+    /**
+     * Get the sum of all pending payment amounts
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getPendingPaymentsSum(Request $request)
+    {
+        $user = $request->user();
+        $query = \App\Models\Payment::where('status', 'pending');
+
+        // If user is a citizen, only show their pending payments
+        if ($user->role === 'citizen') {
+            if (!$user->citizen) {
+                return response()->json([
+                    'message' => 'Citizen profile not found.'
+                ], 400);
+            }
+            $query->where('citizen_id', $user->citizen->id);
+        } 
+        // Only allow admin, clerk, and citizen roles
+        elseif (!in_array($user->role, ['admin', 'clerk'])) {
+            return response()->json([
+                'message' => 'Unauthorized.'
+            ], 403);
+        }
+
+        $totalPending = $query->sum('amount');
+        $pendingCount = $query->count();
+
+        return response()->json([
+            'total_pending_amount' => (float) $totalPending,
+            'currency' => 'USD',
+            'pending_payments_count' => $pendingCount
+        ], 200);
+    }
+
 
     public function store(StorePaymentRequest $request):JsonResponse
     {

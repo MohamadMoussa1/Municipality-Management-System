@@ -87,6 +87,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/requests/my-requests', [citizenRequestController::class, 'myRequests']);
     // Get all requests that employees can view
     Route::get('/requests/department', [citizenRequestController::class, 'departmentRequests']);
+
+    // Get count of active and pending requests
+    Route::get('/requests/counts', [citizenRequestController::class, 'getCompletedandPendingRequests']);
+    
+    // Get latest 3 requests
+    Route::get('/requests/latest', [citizenRequestController::class, 'getLatestRequests']);
     
     // Get a specific request for the authenticated citizen
     Route::get('/requests/{id}', [citizenRequestController::class, 'show']);
@@ -104,6 +110,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('/', [PermitController::class, 'store']);
             // Get authenticated citizen's permits
             Route::get('/my-permits', [PermitController::class, 'myPermits']);
+            
+            // Get counts of approved and pending permits
+            Route::get('/permit-counts', [PermitController::class, 'getApprovedAndPendingCounts']);
             
         });
 
@@ -146,6 +155,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // List all payments (admin / finance)
     Route::get('/payments', [PaymentController::class, 'index']);
+    
+    // Get sum of pending payments (admin/clerk only)
+    Route::get('/payments/pending-total', [PaymentController::class, 'getPendingPaymentsSum']);
 
     // Update payment
     Route::put('/payments/{payment}', [PaymentController::class, 'updateStatus']);
@@ -204,7 +216,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('/{event}', [EventController::class, 'update']);
             Route::delete('/{event}', [EventController::class, 'destroy']);
         });
-        
+        //get number all upcoming events
+        Route::get('/upcoming-count', [EventController::class, 'getUpcomingEventsCount']);
         // Public routes (for all authenticated users)
         Route::get('/', [EventController::class, 'index']);
         Route::get('/{event}', [EventController::class, 'show']);

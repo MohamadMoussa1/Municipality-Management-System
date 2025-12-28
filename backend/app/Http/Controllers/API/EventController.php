@@ -9,6 +9,47 @@ use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
+    
+    /**
+     * Get count of upcoming events based on user role
+     * - Admin: All upcoming events
+     * - Staff: Public and staff events
+     * - Citizen: Public and citizen events
+     * - Unauthenticated: Only public events
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getUpcomingEventsCount(Request $request)
+    {
+        $query = Event::where('date', '>=', now());
+        $user = $request->user();
+
+        if ($user) {
+            if ($user->role === 'admin') {
+                // Admin can see all events
+            } elseif ($user->role === 'employee') {
+                // Staff can see public and staff events
+                $query->whereIn('target_audience', ['public', 'staff']);
+            } elseif ($user->role === 'citizen') {
+                // Citizens can see public and citizen events
+                $query->whereIn('target_audience', ['public', 'citizens']);
+            } else {
+                // Other authenticated users only see public events
+                $query->where('target_audience', 'public');
+            }
+        } else {
+            // Unauthenticated users only see public events
+            $query->where('target_audience', 'public');
+        }
+
+        $count = $query->count();
+        
+        return response()->json([
+            'upcoming_events_count' => $count
+        ]);
+    }
+
     /**
      * Display a listing of the events.
      * - Admin: Views all events
