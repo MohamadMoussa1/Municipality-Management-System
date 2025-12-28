@@ -58,6 +58,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Get tasks assigned to the authenticated employee
         Route::get('/me/tasks', [EmployeeController::class, 'myTasks']);
         
+        // Get count of todo tasks for the authenticated employee
+        Route::get('/me/tasks/todo-count', [EmployeeController::class, 'countTodoTasks']);
+        
+        // Get latest 3 todo tasks for the authenticated employee
+        Route::get('/me/tasks/latest-todo', [EmployeeController::class, 'getLatestTodoTasks']);
+        
         // Update task status for assigned tasks
         Route::put('/tasks/{task}/status', [EmployeeController::class, 'updateTaskStatus']);
         
@@ -112,12 +118,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/my-permits', [PermitController::class, 'myPermits']);
             
             // Get counts of approved and pending permits
-            Route::get('/permit-counts', [PermitController::class, 'getApprovedAndPendingCounts']);
+            
             
         });
+        
 
         Route::middleware(['role:admin|clerk|citizen'])->group(function () {
-            
+            Route::get('/permit-counts', [PermitController::class, 'getApprovedAndPendingCounts']);
             // Get a specific permit
             Route::get('/{permit}', [PermitController::class, 'show']);
             
@@ -159,6 +166,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Get sum of pending payments (admin/clerk only)
     Route::get('/payments/pending-total', [PaymentController::class, 'getPendingPaymentsSum']);
 
+        // Get payment summary (admin / finance)
+    Route::get('/payments/summary', [PaymentController::class, 'getPaymentSummary']);
+  
     // Update payment
     Route::put('/payments/{payment}', [PaymentController::class, 'updateStatus']);
 
@@ -170,8 +180,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // we still need payment process integration here
     Route::post('/payments/{payment}/pay', [PaymentController::class, 'beginStripePayment']);
-
     
+  
 });
 
 // Project routes
