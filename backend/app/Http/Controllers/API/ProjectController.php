@@ -13,6 +13,42 @@ use Illuminate\Validation\Rule;
 use App\Http\Requests\Project\AssignTaskRequest;
 class ProjectController extends Controller
 {
+    // i need a method to count all in progress projects count all completed projects sumation of budgets , also it return number of projects assign for each department
+    
+
+    public function getProjectStats(): JsonResponse
+    {
+        if (!auth()->user()->hasAnyRole(['admin', 'urban_planner'])) {
+            return response()->json([
+                'message' => 'Unauthorized. Only administrators and urban planners can view project statistics.'
+            ], 403);
+        }
+
+        $departments = ['finance', 'it', 'hr', 'planning', 'public_services'];
+
+        $projectsByDepartment = collect($departments)->mapWithKeys(function ($department) {
+            return [$department => 0];
+        });
+
+        $dbCounts = Project::selectRaw('department, COUNT(*) as project_count')
+            ->groupBy('department')
+            ->pluck('project_count', 'department');
+
+        foreach ($dbCounts as $department => $count) {
+            $projectsByDepartment[$department] = (int) $count;
+        }
+
+        return response()->json([
+            'total_projects' => Project::count(),
+            'in_progress_projects' => Project::where('status', 'in_progress')->count(),
+            'completed_projects' => Project::where('status', 'completed')->count(),
+            
+            'total_budget' => (float) Project::sum('budget'),
+            'projects_by_department' => $projectsByDepartment,
+        ], 200);
+    }
+
+
     /**
      * Display a listing of the projects with optional filters.
      *

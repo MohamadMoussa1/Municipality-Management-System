@@ -58,6 +58,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Get tasks assigned to the authenticated employee
         Route::get('/me/tasks', [EmployeeController::class, 'myTasks']);
         
+        // Get count of todo tasks for the authenticated employee
+        Route::get('/me/tasks/todo-count', [EmployeeController::class, 'countTodoTasks']);
+        
+        // Get latest 3 todo tasks for the authenticated employee
+        Route::get('/me/tasks/latest-todo', [EmployeeController::class, 'getLatestTodoTasks']);
+        
         // Update task status for assigned tasks
         Route::put('/tasks/{task}/status', [EmployeeController::class, 'updateTaskStatus']);
         
@@ -87,6 +93,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/requests/my-requests', [citizenRequestController::class, 'myRequests']);
     // Get all requests that employees can view
     Route::get('/requests/department', [citizenRequestController::class, 'departmentRequests']);
+
+    // Get count of active and pending requests
+    Route::get('/requests/counts', [citizenRequestController::class, 'getCompletedandPendingRequests']);
+    
+    // Get latest 3 requests
+    Route::get('/requests/latest', [citizenRequestController::class, 'getLatestRequests']);
     
     // Get a specific request for the authenticated citizen
     Route::get('/requests/{id}', [citizenRequestController::class, 'show']);
@@ -105,10 +117,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
             // Get authenticated citizen's permits
             Route::get('/my-permits', [PermitController::class, 'myPermits']);
             
+            // Get counts of approved and pending permits
+            
+            
         });
+        
 
         Route::middleware(['role:admin|clerk|citizen'])->group(function () {
-            
+            Route::get('/permit-counts', [PermitController::class, 'getApprovedAndPendingCounts']);
             // Get a specific permit
             Route::get('/{permit}', [PermitController::class, 'show']);
             
@@ -146,7 +162,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // List all payments (admin / finance)
     Route::get('/payments', [PaymentController::class, 'index']);
+    
+    // Get sum of pending payments (admin/clerk only)
+    Route::get('/payments/pending-total', [PaymentController::class, 'getPendingPaymentsSum']);
 
+        // Get payment summary (admin / finance)
+    Route::get('/payments/summary', [PaymentController::class, 'getPaymentSummary']);
+  
     // Update payment
     Route::put('/payments/{payment}', [PaymentController::class, 'updateStatus']);
 
@@ -158,8 +180,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // we still need payment process integration here
     Route::post('/payments/{payment}/pay', [PaymentController::class, 'beginStripePayment']);
-
     
+  
 });
 
 // Project routes
@@ -168,6 +190,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware(['role:admin|urban_planner'])->group(function () {
         // Get all projects (admin and urban_planner)
         Route::get('/projects', [ProjectController::class, 'index']);
+        // Project stats (admin and urban_planner)
+        Route::get('/projects/stats', [ProjectController::class, 'getProjectStats']);
         // Create a new project (admin and urban_planner)
         Route::post('/projects', [ProjectController::class, 'store']);
         // Get a specific project (admin and urban_planner)
@@ -204,7 +228,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('/{event}', [EventController::class, 'update']);
             Route::delete('/{event}', [EventController::class, 'destroy']);
         });
-        
+        //get number all upcoming events
+        Route::get('/upcoming-count', [EventController::class, 'getUpcomingEventsCount']);
         // Public routes (for all authenticated users)
         Route::get('/', [EventController::class, 'index']);
         Route::get('/{event}', [EventController::class, 'show']);

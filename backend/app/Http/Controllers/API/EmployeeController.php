@@ -17,6 +17,62 @@ use Illuminate\Http\Response;
 
 class EmployeeController extends Controller
 {
+
+    /**
+     * Count the number of 'todo' tasks for the authenticated employee
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function countTodoTasks(Request $request)
+    {
+        $user = $request->user();
+        
+        // Ensure the user is an employee
+        if ($user->role == 'citizen') {
+            return response()->json([
+                'message' => 'Unauthorized. Only employees can view their tasks.'
+            ], 403);
+        }
+
+        $todoCount = Task::where('assignee_id', $user->employee->id)
+            ->where('status', 'todo')
+            ->count();
+
+        return response()->json([
+            'todo_tasks_count' => $todoCount
+        ], 200);
+    }
+
+    /**
+     * Get the latest 3 todo tasks for the authenticated employee
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getLatestTodoTasks(Request $request)
+    {
+        $user = $request->user();
+        
+        if ($user->role == 'citizen') {
+            return response()->json([
+                'message' => 'Unauthorized. Only employees can view their tasks.'
+            ], 403);
+        }
+
+        $tasks = Task::where('assignee_id', $user->employee->id)
+            ->where('status', 'todo')
+            ->latest('created_at')
+            ->take(3)
+            ->get();
+
+        return response()->json([
+            'tasks' => $tasks,
+            'count' => $tasks->count()
+        ], 200);
+    }
+
+
     /**
      * Display a listing of all employees (admin only).
      */

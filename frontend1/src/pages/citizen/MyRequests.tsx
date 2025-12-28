@@ -143,7 +143,7 @@ export default function MyRequests() {
   const stats = {
     total: R.length,
     pending: R.filter(r => r.status === 'pending').length,
-    inReview: R.filter(r => r.status === 'in_review').length,
+    inReview: R.filter(r => r.status === 'in_progress').length,
     completed: R.filter(r => r.status === 'completed' || r.status === 'approved').length,
   };
 
