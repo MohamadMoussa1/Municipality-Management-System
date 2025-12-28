@@ -190,6 +190,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware(['role:admin|urban_planner'])->group(function () {
         // Get all projects (admin and urban_planner)
         Route::get('/projects', [ProjectController::class, 'index']);
+        // Project stats (admin and urban_planner)
+        Route::get('/projects/stats', [ProjectController::class, 'getProjectStats']);
         // Create a new project (admin and urban_planner)
         Route::post('/projects', [ProjectController::class, 'store']);
         // Get a specific project (admin and urban_planner)
