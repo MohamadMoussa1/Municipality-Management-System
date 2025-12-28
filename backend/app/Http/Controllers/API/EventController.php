@@ -28,15 +28,13 @@ class EventController extends Controller
         if ($user) {
             if ($user->role === 'admin') {
                 // Admin can see all events
-            } elseif ($user->role === 'employee') {
-                // Staff can see public and staff events
-                $query->whereIn('target_audience', ['public', 'staff']);
-            } elseif ($user->role === 'citizen') {
+                $query->latest()->get();
+            }elseif ($user->role === 'citizen') {
                 // Citizens can see public and citizen events
                 $query->whereIn('target_audience', ['public', 'citizens']);
             } else {
-                // Other authenticated users only see public events
-                $query->where('target_audience', 'public');
+                 // Staff can see public and staff events
+                $query->whereIn('target_audience', ['public', 'staff']);
             }
         } else {
             // Unauthenticated users only see public events
