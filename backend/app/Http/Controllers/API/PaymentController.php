@@ -38,7 +38,7 @@ class PaymentController extends Controller
             $query->where('citizen_id', $user->citizen->id);
         } 
         // Only allow admin, clerk, and citizen roles
-        elseif (!in_array($user->role, ['admin', 'clerk'])) {
+        elseif (!in_array($user->role, ['admin', 'finance_officer'])) {
             return response()->json([
                 'message' => 'Unauthorized.'
             ], 403);
@@ -53,6 +53,69 @@ class PaymentController extends Controller
             'pending_payments_count' => $pendingCount
         ], 200);
     }
+
+    //get sumation of all payments
+    /**
+ * Get payment summary including totals by status and type
+ *
+ * @param  \Illuminate\Http\Request  $request
+ * @return \Illuminate\Http\JsonResponse
+ */
+public function getPaymentSummary(Request $request)
+{
+    $user = $request->user();
+    $baseQuery = \App\Models\Payment::query();
+
+    // If user is a citizen, only show their payments
+    if ($user->role === 'citizen') {
+        if (!$user->citizen) {
+            return response()->json([
+                'message' => 'Citizen profile not found.'
+            ], 400);
+        }
+        $baseQuery->where('citizen_id', $user->citizen->id);
+    } 
+    // Only allow admin, finance_officer, and citizen roles
+    elseif (!in_array($user->role, ['admin', 'finance_officer'])) {
+        return response()->json([
+            'message' => 'Unauthorized.'
+        ], 403);
+    }
+
+    // Get all possible payment types
+    $paymentTypes = ['property_tax', 'water_bill', 'electricity_bill', 'waste_management', 'other'];
+    
+    // Initialize default values for all payment types
+    $totalsByType = collect($paymentTypes)->mapWithKeys(function($type) {
+        return [$type => ['total_amount' => 0, 'count' => 0]];
+    });
+
+    // Get and merge actual data for completed payments
+    $completedPayments = (clone $baseQuery)
+        ->where('status', 'completed')
+        ->selectRaw('payment_type, COALESCE(SUM(amount), 0) as total_amount, COUNT(*) as count')
+        ->groupBy('payment_type')
+        ->get()
+        ->keyBy('payment_type')
+        ->toArray();
+
+    // Merge actual data with default values
+    foreach ($completedPayments as $type => $data) {
+        $totalsByType[$type] = [
+            'total_amount' => (float) $data['total_amount'],
+            'count' => (int) $data['count']
+        ];
+    }
+
+    return response()->json([
+        'total_amount' => (float) ($baseQuery->sum('amount') ?? 0),
+        'total_completed' => (float) ((clone $baseQuery)->where('status', 'completed')->sum('amount') ?? 0),
+        'total_pending' => (float) ((clone $baseQuery)->where('status', 'pending')->sum('amount') ?? 0),
+        'total_failed' => (float) ((clone $baseQuery)->where('status', 'failed')->sum('amount') ?? 0),
+        'by_type' => $totalsByType,
+        'currency' => 'USD'
+    ], 200);
+}
 
 
     public function store(StorePaymentRequest $request):JsonResponse
