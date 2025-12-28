@@ -11,6 +11,75 @@ use App\Http\Resources\CitizenRequest\CitizenRequestResource;
 
 class citizenRequestController extends Controller
 {
+    // get count of completed and pending requests
+    public function getCompletedandPendingRequests(Request $request){
+        $user = $request->user();
+
+        $baseQuery = CitizenRequest::query();
+
+        if ($user->role === 'citizen') {
+            if (!$user->citizen) {
+                return response()->json([
+                    'message' => 'Citizen profile not found for this user.'
+                ], 400);
+            } 
+
+            $baseQuery->where('citizen_id', $user->citizen->id);
+        } elseif (!in_array($user->role, ['admin', 'clerk'])) {
+            return response()->json([
+                'message' => 'Unauthorized.'
+            ], 403);
+        }
+
+        $pendingCount = (clone $baseQuery)->where('status', 'pending')->count();
+        $activeCount = (clone $baseQuery)->where('status', 'completed')->count();
+
+        return response()->json([
+            'active_requests' => $activeCount,
+            'pending_requests' => $pendingCount,
+        ], 200);
+    }
+
+    /**
+     * Get the 3 most recent requests
+     * - Citizens see their own requests
+     * - Admins/Clerks see all requests
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getLatestRequests(Request $request)
+    {
+        $user = $request->user();
+        $query = CitizenRequest::with('citizen.user') // Eager load citizen and user data
+            ->latest('submission_date')
+            ->limit(3);
+
+        if ($user->role === 'citizen') {
+            if (!$user->citizen) {
+                return response()->json([
+                    'message' => 'Citizen profile not found.'
+                ], 400);
+            }
+            $query->where('citizen_id', $user->citizen->id);
+        } elseif (!in_array($user->role, ['admin', 'clerk'])) {
+            return response()->json([
+                'message' => 'Unauthorized.'
+            ], 403);
+        }
+
+        $latestRequests = $query->get();
+
+        return response()->json([
+            'message' => 'Latest requests retrieved successfully.',
+            'requests' => CitizenRequestResource::collection($latestRequests)
+        ], 200);
+    }
+
+    //get last 3 requests
+
+
+    
     public function store(StoreRequestRequest $request)
     {
         // The request validation is handled by StoreRequestRequest
