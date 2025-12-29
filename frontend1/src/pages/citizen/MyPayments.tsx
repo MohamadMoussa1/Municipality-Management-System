@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, CreditCard, Download, AlertCircle, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { DollarSign, CreditCard, Download, AlertCircle, Clock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -57,7 +57,7 @@ export default function MyPayments() {
   useEffect(() => {
     fetchData();
   }, []);
-
+ 
   // Handle redirect back from Stripe (success/cancel)
   const location = useLocation();
   useEffect(() => {
@@ -227,7 +227,14 @@ Thank you for your payment!
     completed: payments.filter(p => p.status === 'completed').length,
     failed: payments.filter(p => p.status === 'failed').length,
   };
-
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading payments...</span>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
