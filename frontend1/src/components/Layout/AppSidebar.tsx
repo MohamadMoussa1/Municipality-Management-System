@@ -28,6 +28,7 @@ import {
   ListTodo 
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { title } from 'process';
 
 export const AppSidebar = () => {
   const { role,loading} = useAuth();
@@ -66,6 +67,8 @@ export const AppSidebar = () => {
       { title: 'Tasks', url: '/employee/tasks', icon: DollarSign },
       { title: 'Notifications', url: '/notifications', icon: Bell },
       {title: 'My Attendances', url: '/employee/attendences', icon: ClipboardList},
+      {title: 'My Leaves', url: '/employee/MyLeaves', icon: ClipboardList},
+      {title: 'My Payroll', url: '/employee/MyPayroll', icon: ClipboardList},
     ];
 
     const projectItems = [
@@ -75,6 +78,8 @@ export const AppSidebar = () => {
       { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
       { title: 'Notifications', url: '/notifications', icon: Bell },
       {title: 'My Attendances', url: '/employee/attendences', icon: ClipboardList},
+      {title: 'My Leaves', url: '/employee/MyLeaves', icon: ClipboardList},
+       {title: 'My Payroll', url: '/employee/MyPayroll', icon: ClipboardList}
     ];
 
     const hrItems = [
@@ -85,6 +90,8 @@ export const AppSidebar = () => {
       { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
       { title: 'Notifications', url: '/notifications', icon: Bell },
       { title: 'Attendances', url: '/admin/attendences', icon: ClipboardList },
+      {title: 'My Leaves', url: '/employee/MyLeaves', icon: ClipboardList},
+       {title: 'My Payroll', url: '/employee/MyPayroll', icon: ClipboardList}
     ];
 
     const clerkItems = [
@@ -95,6 +102,8 @@ export const AppSidebar = () => {
       { title: 'Events', url: '/employee/events', icon: Calendar },
       { title: 'Notifications', url: '/notifications', icon: Bell },
       {title: 'My Attendances', url: '/employee/attendences', icon: ClipboardList},
+      {title: 'My Leaves', url: '/employee/MyLeaves', icon: ClipboardList},
+       {title: 'My Payroll', url: '/employee/MyPayroll', icon: ClipboardList}
     ];
     
     switch (role) {

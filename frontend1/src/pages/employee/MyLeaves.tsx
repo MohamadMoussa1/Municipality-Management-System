@@ -255,287 +255,287 @@ export default function MyLeaves() {
         );
     }
 
-    return (
-        <div className="space-y-6">
-            {/* Header + New Leave Dialog */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground">My Leave Requests</h1>
-                    <p className="text-muted-foreground">
-                        Submit and track your leave requests
-                    </p>
-                </div>
-
-                <Dialog open={newDialogOpen} onOpenChange={setNewDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button className="gap-2">
-                            <Plus className="h-4 w-4" />
-                            New Leave Request
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[525px]">
-                        <DialogHeader>
-                            <DialogTitle>Submit New Leave Request</DialogTitle>
-                            <DialogDescription>
-                                Choose leave type and dates, and optionally add a reason.
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        <form className="grid gap-4 py-4" onSubmit={handleSubmit}>
-                            <div className="space-y-2">
-                                <Label htmlFor="leave-type">Leave Type</Label>
-                                <Select value={leaveType} onValueChange={setLeaveType}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select leave type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="annual">Annual Leave</SelectItem>
-                                        <SelectItem value="sick">Sick Leave</SelectItem>
-                                        <SelectItem value="unpaid">Unpaid Leave</SelectItem>
-                                        <SelectItem value="other">Other</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="start-date">Start Date</Label>
-                                    <Input
-                                        id="start-date"
-                                        type="date"
-                                        value={startDate}
-                                        onChange={(e) => setStartDate(e.target.value)}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="end-date">End Date</Label>
-                                    <Input
-                                        id="end-date"
-                                        type="date"
-                                        value={endDate}
-                                        onChange={(e) => setEndDate(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="reason">Reason (optional)</Label>
-                                <Textarea
-                                    id="reason"
-                                    rows={3}
-                                    placeholder="Add any additional details about your leave"
-                                    value={reason}
-                                    onChange={(e) => setReason(e.target.value)}
-                                />
-                            </div>
-
-                            <DialogFooter>
-                                <Button
-                                    type="submit"
-                                    disabled={loadingSubmit}
-                                >
-                                    {loadingSubmit ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Submitting...
-                                        </>
-                                    ) : (
-                                        'Submit Request'
-                                    )}
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+return (
+    <div className="space-y-6">
+        {/* Header + New Leave Dialog */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 className="text-3xl font-bold text-foreground">My Leave Requests</h1>
+                <p className="text-muted-foreground">
+                    Submit and track your leave requests
+                </p>
             </div>
 
-            {/* Stats */}
-            <div className="grid gap-4 md:grid-cols-4">
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.total}</div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium">Pending</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-yellow-500">
-                            {stats.pending}
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium">Approved</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-green-500">
-                            {stats.approved}
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-red-500">
-                            {stats.rejected}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Leave list */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Leave Request History</CardTitle>
-                    <CardDescription>
-                        View the status and details of all your leave requests
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {leaves.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">
-                            You have not submitted any leave requests yet.
-                        </p>
-                    ) : (
-                        <div className="space-y-4">
-                            {leaves.map((leave) => (
-                                <Card
-                                    key={leave.id}
-                                    className="hover:shadow-md transition-shadow"
-                                >
-                                    <CardContent className="p-4">
-                                        <div className="flex flex-col sm:flex-row justify-between gap-4">
-                                            <div className="space-y-2 flex-1">
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <h3 className="font-semibold">
-                                                        {leave.type.replace('_', ' ').toUpperCase()}
-                                                    </h3>
-                                                    <Badge
-                                                        variant="outline"
-                                                        className={getStatusColor(leave.status)}
-                                                    >
-                                                        <span className="flex items-center gap-1">
-                                                            {getStatusIcon(leave.status)}
-                                                            {leave.status.replace('_', ' ')}
-                                                        </span>
-                                                    </Badge>
-                                                </div>
-
-                                                <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                                                    <span>
-                                                        ID: {leave.id}
-                                                    </span>
-                                                    <span>
-                                                        From:{' '}
-                                                        <span className="font-medium">
-                                                            {formatDate(leave.start_date)}
-                                                        </span>
-                                                    </span>
-                                                    <span>
-                                                        To:{' '}
-                                                        <span className="font-medium">
-                                                            {formatDate(leave.end_date)}
-                                                        </span>
-                                                    </span>
-                                                    {leave.created_at && (
-                                                        <span>
-                                                            Submitted:{' '}
-                                                            <span className="font-medium">
-                                                                {formatDate(leave.created_at)}
-                                                            </span>
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div className="flex sm:flex-col gap-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="flex-1"
-                                                    onClick={() => handleViewDetails(leave)}
-                                                >
-                                                    View Details
-                                                </Button>
-                                                {/* If later you add cancel endpoint, you can put a Cancel button here for pending status */}
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-
-            {/* Details Dialog */}
-            <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+            <Dialog open={newDialogOpen} onOpenChange={setNewDialogOpen}>
+                <DialogTrigger asChild>
+                    <Button className="gap-2">
+                        <Plus className="h-4 w-4" />
+                        New Leave Request
+                    </Button>
+                </DialogTrigger>
                 <DialogContent className="sm:max-w-[525px]">
                     <DialogHeader>
-                        <DialogTitle>Leave Request Details</DialogTitle>
+                        <DialogTitle>Submit New Leave Request</DialogTitle>
                         <DialogDescription>
-                            Complete information about your leave request
+                            Choose leave type and dates, and optionally add a reason.
                         </DialogDescription>
                     </DialogHeader>
 
-                    {selectedLeave && (
-                        <div className="space-y-4 text-sm">
-                            <div>
-                                <Label>Leave Type</Label>
-                                <p className="text-sm font-medium mt-1">
-                                    {selectedLeave.type.replace('_', ' ').toUpperCase()}
-                                </p>
-                            </div>
-                            <div>
-                                <Label>Status</Label>
-                                <Badge
-                                    variant="outline"
-                                    className={getStatusColor(selectedLeave.status)}
-                                >
-                                    {selectedLeave.status.replace('_', ' ')}
-                                </Badge>
-                            </div>
-                            <div>
-                                <Label>Start Date</Label>
-                                <p className="mt-1">
-                                    {formatDate(selectedLeave.start_date)}
-                                </p>
-                            </div>
-                            <div>
-                                <Label>End Date</Label>
-                                <p className="mt-1">
-                                    {formatDate(selectedLeave.end_date)}
-                                </p>
-                            </div>
-                            {selectedLeave.reason && (
-                                <div>
-                                    <Label>Reason</Label>
-                                    <p className="mt-1 whitespace-pre-line">
-                                        {selectedLeave.reason}
-                                    </p>
-                                </div>
-                            )}
+                    <form className="grid gap-4 py-4" onSubmit={handleSubmit}>
+                        <div className="space-y-2">
+                            <Label htmlFor="leave-type">Leave Type</Label>
+                            <Select value={leaveType} onValueChange={setLeaveType}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select leave type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="annual">Annual Leave</SelectItem>
+                                    <SelectItem value="sick">Sick Leave</SelectItem>
+                                    <SelectItem value="unpaid">Unpaid Leave</SelectItem>
+                                    <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
-                    )}
 
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setDetailsOpen(false)}>
-                            Close
-                        </Button>
-                    </DialogFooter>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="start-date">Start Date</Label>
+                                <Input
+                                    id="start-date"
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="end-date">End Date</Label>
+                                <Input
+                                    id="end-date"
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="reason">Reason (optional)</Label>
+                            <Textarea
+                                id="reason"
+                                rows={3}
+                                placeholder="Add any additional details about your leave"
+                                value={reason}
+                                onChange={(e) => setReason(e.target.value)}
+                            />
+                        </div>
+
+                        <DialogFooter>
+                            <Button
+                                type="submit"
+                                disabled={loadingSubmit}
+                            >
+                                {loadingSubmit ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Submitting...
+                                    </>
+                                ) : (
+                                    'Submit Request'
+                                )}
+                            </Button>
+                        </DialogFooter>
+                    </form>
                 </DialogContent>
             </Dialog>
         </div>
-    );
+
+        {/* Stats */}
+        <div className="grid gap-4 md:grid-cols-4">
+            <Card>
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{stats.total}</div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Pending</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold text-yellow-500">
+                        {stats.pending}
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Approved</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold text-green-500">
+                        {stats.approved}
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold text-red-500">
+                        {stats.rejected}
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+
+        {/* Leave list */}
+        <Card>
+            <CardHeader>
+                <CardTitle>Leave Request History</CardTitle>
+                <CardDescription>
+                    View the status and details of all your leave requests
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                {leaves.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                        You have not submitted any leave requests yet.
+                    </p>
+                ) : (
+                    <div className="space-y-4">
+                        {leaves.map((leave) => (
+                            <Card
+                                key={leave.id}
+                                className="hover:shadow-md transition-shadow"
+                            >
+                                <CardContent className="p-4">
+                                    <div className="flex flex-col sm:flex-row justify-between gap-4">
+                                        <div className="space-y-2 flex-1">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <h3 className="font-semibold">
+                                                    {leave.type.replace('_', ' ').toUpperCase()}
+                                                </h3>
+                                                <Badge
+                                                    variant="outline"
+                                                    className={getStatusColor(leave.status)}
+                                                >
+                                                    <span className="flex items-center gap-1">
+                                                        {getStatusIcon(leave.status)}
+                                                        {leave.status.replace('_', ' ')}
+                                                    </span>
+                                                </Badge>
+                                            </div>
+
+                                            <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                                                <span>
+                                                    ID: {leave.id}
+                                                </span>
+                                                <span>
+                                                    From:{' '}
+                                                    <span className="font-medium">
+                                                        {formatDate(leave.start_date)}
+                                                    </span>
+                                                </span>
+                                                <span>
+                                                    To:{' '}
+                                                    <span className="font-medium">
+                                                        {formatDate(leave.end_date)}
+                                                    </span>
+                                                </span>
+                                                {leave.created_at && (
+                                                    <span>
+                                                        Submitted:{' '}
+                                                        <span className="font-medium">
+                                                            {formatDate(leave.created_at)}
+                                                        </span>
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex sm:flex-col gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="flex-1"
+                                                onClick={() => handleViewDetails(leave)}
+                                            >
+                                                View Details
+                                            </Button>
+                                            {/* If later you add cancel endpoint, you can put a Cancel button here for pending status */}
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+
+        {/* Details Dialog */}
+        <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+            <DialogContent className="sm:max-w-[525px]">
+                <DialogHeader>
+                    <DialogTitle>Leave Request Details</DialogTitle>
+                    <DialogDescription>
+                        Complete information about your leave request
+                    </DialogDescription>
+                </DialogHeader>
+
+                {selectedLeave && (
+                    <div className="space-y-4 text-sm">
+                        <div>
+                            <Label>Leave Type</Label>
+                            <p className="text-sm font-medium mt-1">
+                                {selectedLeave.type.replace('_', ' ').toUpperCase()}
+                            </p>
+                        </div>
+                        <div>
+                            <Label>Status</Label>
+                            <Badge
+                                variant="outline"
+                                className={getStatusColor(selectedLeave.status)}
+                            >
+                                {selectedLeave.status.replace('_', ' ')}
+                            </Badge>
+                        </div>
+                        <div>
+                            <Label>Start Date</Label>
+                            <p className="mt-1">
+                                {formatDate(selectedLeave.start_date)}
+                            </p>
+                        </div>
+                        <div>
+                            <Label>End Date</Label>
+                            <p className="mt-1">
+                                {formatDate(selectedLeave.end_date)}
+                            </p>
+                        </div>
+                        {selectedLeave.reason && (
+                            <div>
+                                <Label>Reason</Label>
+                                <p className="mt-1 whitespace-pre-line">
+                                    {selectedLeave.reason}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setDetailsOpen(false)}>
+                        Close
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    </div>
+);
 }
