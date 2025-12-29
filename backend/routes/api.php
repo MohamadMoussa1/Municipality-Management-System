@@ -14,8 +14,12 @@ use App\Http\Controllers\API\AttendanceController;
 use App\Http\Controllers\API\EventController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\StripeWebhookController;
+<<<<<<< HEAD
 use App\Http\Controllers\Api\LeaveController;
 use App\Http\Controllers\API\PayrollController;
+=======
+use App\Http\Controllers\API\AdminDashboardController;
+>>>>>>> 1e9534acd70837e86bed42d7fa1010bd13403fe7
 
 // Public routes
 Route::prefix('auth')->group(function () {
@@ -85,6 +89,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Admin-only routes
     Route::middleware(['role:admin|hr_manager'])->group(function () {
         Route::post('/admin/register', [AuthController::class, 'adminRegister']);
+    });
+
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/admin/dashboard/permits-requests/monthly-counts', [AdminDashboardController::class, 'monthlyPermitsAndRequestsCounts']);
+        Route::get('/admin/dashboard/totals', [AdminDashboardController::class, 'totals']);
     });
 });
 

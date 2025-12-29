@@ -53,14 +53,6 @@ class PayrollController extends Controller
             $deductions = 0;
             $bonuses = 0;
 
-            // Example: deduct unpaid leaves
-            $unpaidLeaves = $employee->leaves()
-                ->where('status', 'approved')
-                ->where('type', 'unpaid')
-                ->whereMonth('start_date', substr($month, 5, 2))
-                ->count();
-
-            $deductions = $unpaidLeaves * 50; // example logic
 
             $netSalary = $baseSalary - $deductions + $bonuses;
 
