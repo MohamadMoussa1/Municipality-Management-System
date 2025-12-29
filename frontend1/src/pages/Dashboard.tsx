@@ -118,12 +118,6 @@ const AdminDashboard = () => {
   let citizenData = null;
   if (!loading && info) {
     citizenData = [
-      { month: 'Jan', requests: D.requests['2025-01'], permits: D.permits['2025-01'] },
-      { month: 'Feb', requests: D.requests['2025-02'], permits: D.permits['2025-02'] },
-      { month: 'Mar', requests: D.requests['2025-03'], permits: D.permits['2025-03'] },
-      { month: 'Apr', requests: D.requests['2025-04'], permits: D.permits['2025-04'] },
-      { month: 'May', requests: D.requests['2025-05'], permits: D.permits['2025-05'] },
-      { month: 'Jun', requests: D.requests['2025-06'], permits: D.permits['2025-06'] },
       { month: 'July', requests: D.requests['2025-07'], permits: D.permits['2025-07'] },
       { month: 'Aug', requests: D.requests['2025-08'], permits: D.permits['2025-08'] },
       { month: 'Sep', requests: D.requests['2025-09'], permits: D.permits['2025-09'] },
@@ -182,7 +176,7 @@ const AdminDashboard = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Citizen Requests & Permits</CardTitle>
