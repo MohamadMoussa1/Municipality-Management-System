@@ -4,12 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Users, UserCheck, Clock, AlertCircle,Loader2 } from 'lucide-react';
+import { Users, UserCheck, Clock, AlertCircle, Loader2, Eye, Filter, Calendar, FileText, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { Employee } from '@/types';
+import type { Employee, RequestLeaveStatus } from '@/types';
 import {
   Select,
   SelectContent,
@@ -18,8 +18,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useEffect } from "react";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 export default function HumanResources() {
   const { toast } = useToast();
+  const [statusFilter, setStatusFilter] = useState<RequestLeaveStatus | 'all'>('all');
   const [addEmployeeOpen, setAddEmployeeOpen] = useState(false);
   const [viewProfileOpen, setViewProfileOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -27,6 +29,13 @@ export default function HumanResources() {
   const [E, setE] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [R, setR] = useState([]);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [PayRollOpen, setPayRollOpen] = useState(false);
+  const [mnth, setMonth] = useState("");
+  const [pr, setpr] = useState([]);
+  const [year, setYear] = useState(0);
+  const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
   const [newEmployee, setNewEmployee] = useState({
     name: '',
     email: '',
@@ -40,27 +49,115 @@ export default function HumanResources() {
     password: '',
     password_confirmation: '',
   });
+  const handleViewRequest = (request: any) => {
+    setSelectedRequest(request);
+    setViewDialogOpen(true);
+  };
+
+  const handleStatusChange = (Id: string, newStatus: RequestLeaveStatus) => {
+    let res = null;
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://127.0.0.1:8000/api/leaves/" + Id + "/status", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          'status': newStatus
+        }),
+      });
+      res = await response.json();
+      setClicked(true);
+    }
+    fetchData();
+    toast({
+      title: "Status Updated",
+      description: `Request ${Id} status changed to ${newStatus.replace('_', ' ')}.`,
+    });
+  };
+  const getStatusColor = (status: RequestLeaveStatus) => {
+    switch (status) {
+      case 'pending': return 'bg-yellow-500';
+      case 'rejected': return 'bg-destructive';
+      case 'approved': return 'bg-success';
+      default: return 'bg-outline text-black';
+    }
+  };
+  const getStatusBadge = (status: RequestLeaveStatus) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline">Pending</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive">Rejected</Badge>;
+      case 'approved':
+        return <Badge className="bg-primary">Completed</Badge>;
+    }
+  };
 
   useEffect(() => {
-      setClicked(false);
-      const fetchData = async () => {
-          const token=localStorage.getItem("token");
-          const response = await fetch("http://127.0.0.1:8000/api/employees", {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Accept": "application/json",
-              "Authorization":`Bearer ${token}`
-            },
-          });
-          const res=await response.json();
-          setE(res.data);
-          setLoading(false);
-      };
-      fetchData();
-    }, [Clicked]);
+    setClicked(false);
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://127.0.0.1:8000/api/leaves", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+      });
+      const res = await response.json();
+      setR(res.data);
+      setLoading(false);
+    };
 
-    if (loading) {
+    fetchData();
+  }, [Clicked]);
+
+  useEffect(() => {
+    setClicked(false);
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://127.0.0.1:8000/api/payrolls", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+      });
+      const res = await response.json();
+      console.log(res.data)
+      setpr(res.data);
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [Clicked]);
+
+  useEffect(() => {
+    setClicked(false);
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://127.0.0.1:8000/api/employees", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+      });
+      const res = await response.json();
+      setE(res.data);
+      setLoading(false);
+    };
+    fetchData();
+  }, [Clicked]);
+
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -68,7 +165,7 @@ export default function HumanResources() {
       </div>
     );
   }
-  
+
   const handleAddEmployee = async () => {
     setLoadingSubmit(true);
     setClicked(true);
@@ -93,7 +190,7 @@ export default function HumanResources() {
         },
         body: JSON.stringify(newEmployee),
       });
-      
+
       const result = await response.json();
       console.log(result.message);
       if (response.ok) {
@@ -129,10 +226,53 @@ export default function HumanResources() {
         description: "An unexpected error occurred.",
         variant: "destructive",
       });
-    }finally{
+    } finally {
       setLoadingSubmit(false);
     }
-};
+  };
+  const handleAddPayRoll = async () => {
+    setLoadingSubmit(true);
+    setClicked(true);
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/payrolls/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          'month': year + "-" + mnth
+        }),
+      });
+
+      const result = await response.json();
+      console.log(result.message);
+      if (response.ok) {
+        toast({
+          title: "PayRoll Added",
+          description: `${newEmployee.name} has been successfully added as ${newEmployee.role.replace('_', ' ')}.`,
+        });
+
+        setPayRollOpen(false);
+      } else {
+        toast({
+          title: "Error",
+          description: result.message || "Failed to add PayRoll",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingSubmit(false);
+    }
+  };
 
   const handleViewProfile = (employee: Employee) => {
     setSelectedEmployee(employee);
@@ -245,7 +385,7 @@ export default function HumanResources() {
                           <h4 className="font-semibold text-sm sm:text-base truncate">Name: {employee.name}</h4>
                           <p className="text-xs sm:text-sm text-muted-foreground truncate">Position: {employee.position}</p>
                           <p className="text-xs text-muted-foreground mt-1 truncate">Department: {employee.department}</p>
-                          
+
                         </div>
                         <div className="hidden lg:block text-right">
                           <p className="text-xs sm:text-sm font-medium truncate">{employee.email}</p>
@@ -276,15 +416,215 @@ export default function HumanResources() {
 
         {/* Leaves */}
         <TabsContent value="leaves" className="mt-4 sm:mt-6">
-          {/* ... leave requests table (unchanged) */}
+          <Card>
+
+            <CardContent className="p-3 sm:p-6">
+              <div className="flex flex-col gap-2 mb-3 sm:mb-4">
+                <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+                  <SelectTrigger className="w-full sm:w-[180px] text-[11px] sm:text-sm h-8 sm:h-9">
+                    <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="rounded-md border overflow-x-auto -mx-3 sm:mx-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Employee Id</TableHead>
+                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Employee Name</TableHead>
+                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">Type</TableHead>
+                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Reason</TableHead>
+                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell">Status</TableHead>
+                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">view</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {loading ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8">
+                          <div className="flex items-center justify-center">
+                            <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                            <span>Loading requests...</span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : R?.filter((request) =>
+                      statusFilter === 'all' || request.status === statusFilter
+                    ).length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8">
+                          <div className="text-muted-foreground">
+                            {statusFilter === 'all' ? 'No requests found' : `No ${statusFilter} requests found`}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      R?.filter((request) =>
+                        statusFilter === 'all' || request.status === statusFilter
+                      ).map((request) => (
+                        <TableRow key={request.id}>
+                          <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4">{request.id}</TableCell>
+                          <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[80px] sm:max-w-none truncate">{request?.employee.user?.name || 'N/A'}</TableCell>
+                          <TableCell className="capitalize text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">{request.type || 'N/A'}</TableCell>
+                          <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell">{request.reason}</TableCell>
+                          <TableCell className="px-2 sm:px-4">
+                            <Select
+                              value={request.status}
+                              onValueChange={(value: RequestLeaveStatus) => handleStatusChange(request.id, value)}
+                            >
+                              <SelectTrigger className="w-[130px] h-8">
+                                <SelectValue>
+                                  <Badge className={getStatusColor(request.status)}>
+                                    {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                  </Badge>
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="approved">
+                                  <Badge className="bg-success">approved</Badge>
+                                </SelectItem>
+                                <SelectItem value="pending">
+                                  <Badge className="bg-accent">Pending</Badge>
+                                </SelectItem>
+                                <SelectItem value="rejected">
+                                  <Badge className="bg-destructive">rejected</Badge>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+
+                          <TableCell className="px-2 sm:px-4">
+                            <div className="flex gap-0.5 sm:gap-4">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 sm:h-8 sm:w-8"
+                                onClick={() => handleViewRequest(request)}
+                              >
+                                <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Payroll */}
         <TabsContent value="payroll" className="mt-4 sm:mt-6">
-          {/* ... payroll table (unchanged) */}
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+                <div>
+                  <CardTitle className="text-lg sm:text-xl">Employee Directory</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">Complete staff roster</CardDescription>
+                </div>
+                <Button onClick={() => setPayRollOpen(true)} className="w-full sm:w-auto text-sm">Generate payroll</Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* <div className="grid gap-3 sm:gap-4">
+                {pr?.map((employee) => (
+                  <Card key={employee.id}>
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                        <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
+                          <AvatarFallback className="text-xs sm:text-sm">
+                            {employee.name?.split(' ').map(n => n[0]).join('') || 'NA'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-sm sm:text-base truncate">Name: {employee.name}</h4>
+                          <p className="text-xs sm:text-sm text-muted-foreground truncate">Position: {employee.position}</p>
+                          <p className="text-xs text-muted-foreground mt-1 truncate">Department: {employee.department}</p>
+
+                        </div>
+                        <div className="hidden lg:block text-right">
+                          <p className="text-xs sm:text-sm font-medium truncate">{employee.email}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">Role:{employee.role}</p>
+                          <p className="text-xs text-muted-foreground mt-1 truncate">Salary:{employee.salary}</p>
+                        </div>
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                          <Badge variant={employee.status === 'active' ? 'default' : 'outline'} className="text-xs">
+                            {employee.status}
+                          </Badge>
+                          <Button variant="outline" size="sm" onClick={() => handleViewProfile(employee)} className="text-xs h-8 flex-1 sm:flex-none">
+                            View Profile
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div> */}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Attendance */}
+        <TabsContent value="attendance" className="mt-4 sm:mt-6">
+          {/* ... attendance table (unchanged) */}
         </TabsContent>
       </Tabs>
-
+      <Dialog open={PayRollOpen} onOpenChange={setPayRollOpen}>
+        <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Generate Payroll</DialogTitle>
+            <DialogDescription>Select month to generate payroll for</DialogDescription>
+          </DialogHeader>
+          <select value={mnth}
+            onChange={e => setMonth(e.target.value)}>
+            <option value="">Select month</option>
+            <option value="04">April</option>
+            <option value="08">August</option>
+            <option value="12">December</option>
+            <option value="02">February</option>
+            <option value="01">January</option>
+            <option value="07">July</option>
+            <option value="06">June</option>
+            <option value="03">March</option>
+            <option value="05">May</option>
+            <option value="11">November</option>
+            <option value="10">October</option>
+            <option value="09">September</option>
+          </select>
+          <div className="mt-4">
+            <Label htmlFor="year">Year</Label>
+            <Input
+              id="year"
+              type="number"
+              value={year}
+              onChange={(e) => setYear(parseInt(e.target.value))}
+              placeholder="Enter year"
+              min="2000"
+              max="2100"
+            />
+          </div>
+          <Button onClick={handleAddPayRoll} className="w-full" disabled={loadingSubmit}>
+            {loadingSubmit ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Adding...
+              </>
+            ) : (
+              'Add PayRoll'
+            )}
+          </Button>
+        </DialogContent>
+      </Dialog>
       {/* Add Employee Dialog */}
       <Dialog open={addEmployeeOpen} onOpenChange={setAddEmployeeOpen}>
         <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
@@ -295,29 +635,29 @@ export default function HumanResources() {
           <div className="space-y-4">
             <div>
               <Label htmlFor="emp-name">Full Name</Label>
-              <Input 
+              <Input
                 id="emp-name"
                 value={newEmployee.name}
-                onChange={(e) => setNewEmployee({...newEmployee, name: e.target.value})}
+                onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
                 placeholder="John Doe"
               />
             </div>
             <div>
               <Label htmlFor="emp-email">Email</Label>
-              <Input 
+              <Input
                 id="emp-email"
                 type="email"
                 value={newEmployee.email}
-                onChange={(e) => setNewEmployee({...newEmployee, email: e.target.value})}
+                onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
                 placeholder="john.doe@example.com"
               />
             </div>
             <div>
               <Label htmlFor="emp-position">Position</Label>
-              <Input 
+              <Input
                 id="emp-position"
                 value={newEmployee.position}
-                onChange={(e) => setNewEmployee({...newEmployee, position: e.target.value})}
+                onChange={(e) => setNewEmployee({ ...newEmployee, position: e.target.value })}
                 placeholder="Software Engineer"
               />
             </div>
@@ -325,7 +665,7 @@ export default function HumanResources() {
               <Label htmlFor="emp-department">Department</Label>
               <Select
                 value={newEmployee.department}
-                onValueChange={(value) => setNewEmployee({...newEmployee, department: value})}
+                onValueChange={(value) => setNewEmployee({ ...newEmployee, department: value })}
               >
                 <SelectTrigger id="depar">
                   <SelectValue placeholder="Select Department" />
@@ -343,7 +683,7 @@ export default function HumanResources() {
               <Label htmlFor="emp-role">Role</Label>
               <Select
                 value={newEmployee.role}
-                onValueChange={(value) => setNewEmployee({...newEmployee, role: value})}
+                onValueChange={(value) => setNewEmployee({ ...newEmployee, role: value })}
               >
                 <SelectTrigger id="emp-role">
                   <SelectValue placeholder="Select role" />
@@ -359,28 +699,28 @@ export default function HumanResources() {
             </div>
             <div>
               <Label htmlFor="emp-salary">Salary</Label>
-              <Input 
+              <Input
                 id="emp-salary"
                 type="number"
                 value={newEmployee.salary}
-                onChange={(e) => setNewEmployee({...newEmployee, salary: e.target.value})}
+                onChange={(e) => setNewEmployee({ ...newEmployee, salary: e.target.value })}
                 placeholder="50000"
               />
             </div>
             <div>
               <Label htmlFor="emp-hire_date">Hire Date</Label>
-              <Input 
+              <Input
                 id="emp-hire_date"
                 type="date"
                 value={newEmployee.hire_date}
-                onChange={(e) => setNewEmployee({...newEmployee, hire_date: e.target.value})}
+                onChange={(e) => setNewEmployee({ ...newEmployee, hire_date: e.target.value })}
               />
             </div>
             <div>
               <Label htmlFor="emp-status">Status</Label>
               <Select
                 value={newEmployee.status}
-                onValueChange={(value) => setNewEmployee({...newEmployee, status: value})}
+                onValueChange={(value) => setNewEmployee({ ...newEmployee, status: value })}
               >
                 <SelectTrigger id="emp-status">
                   <SelectValue placeholder="Select status" />
@@ -393,33 +733,33 @@ export default function HumanResources() {
             </div>
             <div>
               <Label htmlFor="emp-password">Password</Label>
-              <Input 
+              <Input
                 id="emp-password"
                 type="password"
                 value={newEmployee.password}
-                onChange={(e) => setNewEmployee({...newEmployee, password: e.target.value})}
+                onChange={(e) => setNewEmployee({ ...newEmployee, password: e.target.value })}
                 placeholder="password"
               />
             </div>
             <div>
               <Label htmlFor="emp-password_confirmation">Confirm Password</Label>
-              <Input 
+              <Input
                 id="emp-password_confirmation"
                 type="password"
                 value={newEmployee.password_confirmation}
-                onChange={(e) => setNewEmployee({...newEmployee, password_confirmation: e.target.value})}
+                onChange={(e) => setNewEmployee({ ...newEmployee, password_confirmation: e.target.value })}
                 placeholder="password"
               />
             </div>
             <Button onClick={handleAddEmployee} className="w-full" disabled={loadingSubmit}>
-             {loadingSubmit ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Adding...
-                  </>
-                ) : (
-                  'Add Employee'
-                )}
+              {loadingSubmit ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                'Add Employee'
+              )}
             </Button>
           </div>
         </DialogContent>
@@ -469,6 +809,167 @@ export default function HumanResources() {
           )}
         </DialogContent>
       </Dialog>
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="pb-4 border-b">
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Leave Request Details
+            </DialogTitle>
+            <DialogDescription>
+              Review the complete leave request information
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedRequest && (
+            <div className="space-y-6 py-4">
+              {/* Request Status Card */}
+              <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-lg text-blue-900">Request Status</h3>
+                      <div className="mt-2">{getStatusBadge(selectedRequest.status)}</div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-blue-600">Request ID</p>
+                      <p className="font-mono text-blue-900">#{selectedRequest.id}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Employee Information Card */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <User className="h-4 w-4" />
+                    Employee Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Name</Label>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                            <User className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <span className="font-medium">{selectedRequest?.employee.user?.name}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</Label>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                            <span className="text-green-600 text-xs font-bold">@</span>
+                          </div>
+                          <span className="text-sm">{selectedRequest.employee.user?.email}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Position</Label>
+                        <div className="mt-1 px-3 py-2 bg-gray-50 rounded text-sm font-medium">
+                          {selectedRequest.employee?.position}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Role</Label>
+                        <div className="mt-1 px-3 py-2 bg-purple-50 rounded text-sm font-medium text-purple-900">
+                          {selectedRequest?.employee.user?.role?.replace('_', ' ')}
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Salary</Label>
+                        <div className="mt-1 px-3 py-2 bg-green-50 rounded text-sm font-medium text-green-900">
+                          ${selectedRequest?.employee?.salary}
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</Label>
+                        <div className="mt-1">
+                          <Badge variant={selectedRequest.employee.user?.status === 'active' ? 'default' : 'secondary'}>
+                            {selectedRequest.employee.user?.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Leave Details Card */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Calendar className="h-4 w-4" />
+                    Leave Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Reason for Leave</Label>
+                    <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <p className="text-sm">{selectedRequest.reason}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Created Date</Label>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Calendar className="h-4 w-4 text-blue-500" />
+                        <span className="text-sm font-medium">
+                          {new Date(selectedRequest.created_at).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                    {selectedRequest.approved_at && (
+                      <div>
+                        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Approved Date</Label>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Calendar className="h-4 w-4 text-green-500" />
+                          <span className="text-sm font-medium">
+                            {new Date(selectedRequest.approved_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {selectedRequest.approved_by && (
+                    <div>
+                      <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Approved By</Label>
+                      <div className="mt-1 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-sm font-medium text-green-900">
+                        {selectedRequest?.approved_by}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          <DialogFooter className="pt-4 border-t">
+            <Button onClick={() => setViewDialogOpen(false)} className="w-full sm:w-auto">
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+

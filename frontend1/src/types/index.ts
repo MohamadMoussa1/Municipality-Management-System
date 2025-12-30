@@ -28,6 +28,7 @@ export interface Citizen {
 }
 export type RequestProjectStatus = 'cancelled' | 'in_progress'| 'on_hold' | 'completed' |'planned';
 export type RequestStatus = 'pending' | 'in_progress'| 'rejected' | 'completed';
+export type RequestLeaveStatus = 'pending' |  'rejected' | 'approved';
 export type RequestPermitStatus = 'pending' | 'expired'| 'rejected' | 'approved';
 export type RequestTaskStatus = 'in_review' | 'in_progress'| 'blocked' | 'completed'|'todo';
 export type PermitType = 'business' | 'construction' | 'vehicle' | 'event';
