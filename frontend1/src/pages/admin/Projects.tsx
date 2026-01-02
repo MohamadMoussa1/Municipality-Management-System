@@ -42,7 +42,7 @@ export default function Projects() {
     switch (status) {
       case 'planned': return 'bg-accent';
       case 'in_progress': return 'bg-warning';
-      case 'on_hold': return 'bg-muted text-black';
+      case 'on_hold': return 'bg-amber-500 text-white';
       case 'cancelled': return 'bg-destructive';
       case 'completed': return 'bg-success';
       default: return 'bg-accent';
@@ -255,6 +255,30 @@ export default function Projects() {
     setTasksDialogOpen(true);
   };
 
+  const projectsArray = Array.isArray(Projects) ? Projects : [];
+  const totalBudgetValue = projectsArray.reduce((sum: number, project: any) => {
+    const raw = project?.budget;
+    const num = typeof raw === 'number' ? raw : parseFloat(String(raw ?? '').replace(/[^0-9.\-]/g, ''));
+    return sum + (Number.isFinite(num) ? num : 0);
+  }, 0);
+  const completedProjectsCount = projectsArray.filter(
+    (project: any) => String(project?.status ?? '').toLowerCase() === 'completed'
+  ).length;
+  const onHoldProjectsCount = projectsArray.filter(
+    (project: any) => String(project?.status ?? '').toLowerCase() === 'on_hold'
+  ).length;
+  const activeProjectsCount = projectsArray.filter((project: any) => {
+    const status = String(project?.status ?? '').toLowerCase();
+    return status === 'in_progress';
+  }).length;
+  const formatCurrencyCompact = (value: number) => {
+    if (!Number.isFinite(value)) return '$0';
+    if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(1)}B`;
+    if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
+    if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}K`;
+    return `$${value.toLocaleString()}`;
+  };
+
 
   return (
     <div className="space-y-6">
@@ -268,7 +292,7 @@ export default function Projects() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">24</div>
+                <div className="text-2xl font-bold">{activeProjectsCount}</div>
                 <div className="text-sm text-muted-foreground">Active Projects</div>
               </div>
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -282,7 +306,7 @@ export default function Projects() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">$2.5M</div>
+                <div className="text-2xl font-bold">{formatCurrencyCompact(totalBudgetValue)}</div>
                 <div className="text-sm text-muted-foreground">Total Budget</div>
               </div>
               <div className="h-12 w-12 rounded-full bg-success/10 flex items-center justify-center">
@@ -296,7 +320,7 @@ export default function Projects() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">12</div>
+                <div className="text-2xl font-bold">{completedProjectsCount}</div>
                 <div className="text-sm text-muted-foreground">Completed</div>
               </div>
               <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center">
@@ -310,7 +334,7 @@ export default function Projects() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">3</div>
+                <div className="text-2xl font-bold">{onHoldProjectsCount}</div>
                 <div className="text-sm text-muted-foreground">On Hold</div>
               </div>
               <div className="h-12 w-12 rounded-full bg-warning/10 flex items-center justify-center">
@@ -355,11 +379,11 @@ export default function Projects() {
 
                       <div className="flex flex-wrap gap-4 text-sm">
                         <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span>Start:
-                              {project.start_date.split("T")[0]}
-                            </span>
-                          </div>
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span>Start:
+                            {project.start_date.split("T")[0]}
+                          </span>
+                        </div>
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-muted-foreground" />
                           <span>End:
@@ -389,7 +413,7 @@ export default function Projects() {
                             </SelectItem>
                             <SelectItem value="in_progress">
                               <Badge className="bg-warning">In progress</Badge>
-                            </SelectItem> 
+                            </SelectItem>
                             <SelectItem value="on_hold">
                               <Badge className="bg-muted text-black">on_hold</Badge>
                             </SelectItem>

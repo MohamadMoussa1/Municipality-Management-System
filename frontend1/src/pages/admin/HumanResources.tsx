@@ -84,7 +84,7 @@ export default function HumanResources() {
       }),
     });
     const res = await response.json();
-    setClicked(true);
+    setClicked((v) => !v);
   }
 
   const handlePayrollEditOpen = (payroll: any) => {
@@ -129,7 +129,7 @@ export default function HumanResources() {
         }),
       });
       res = await response.json();
-      setClicked(true);
+      setClicked((v) => !v);
     }
     fetchData();
     toast({
@@ -157,7 +157,6 @@ export default function HumanResources() {
   };
 
   useEffect(() => {
-    setClicked(false);
     const fetchData = async () => {
       const token = localStorage.getItem("token");
       const response = await fetch("http://127.0.0.1:8000/api/leaves", {
@@ -169,7 +168,13 @@ export default function HumanResources() {
         },
       });
       const res = await response.json();
-      setR(res.data);
+      const leavesData = res?.data;
+      const leaves = Array.isArray(leavesData)
+        ? leavesData
+        : Array.isArray(leavesData?.data)
+          ? leavesData.data
+          : [];
+      setR(leaves);
       setLoading(false);
     };
 
@@ -177,7 +182,6 @@ export default function HumanResources() {
   }, [Clicked]);
 
   useEffect(() => {
-    setClicked(false);
     const fetchData = async () => {
       await fetchPayrollPage(1);
       setLoading(false);
@@ -190,7 +194,6 @@ export default function HumanResources() {
     fetchD();
   }
   useEffect(() => {
-    setClicked(false);
     const fetchData = async () => {
       const token = localStorage.getItem("token");
       const response = await fetch("http://127.0.0.1:8000/api/employees", {
@@ -216,6 +219,14 @@ export default function HumanResources() {
       </div>
     );
   }
+
+  const pendingApprovalsCount = Array.isArray(R)
+    ? R.filter((request: any) => String(request?.status ?? '').toLowerCase() === 'pending').length
+    : 0;
+
+  const onLeaveCount = Array.isArray(R)
+    ? R.filter((request: any) => String(request?.status ?? '').toLowerCase() === 'approved').length
+    : 0;
 
   const handleAddEmployee = async () => {
     setLoadingSubmit(true);
@@ -361,8 +372,8 @@ export default function HumanResources() {
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xl sm:text-2xl font-bold">142</div>
-                <div className="text-xs sm:text-sm text-muted-foreground">Present Today</div>
+                <div className="text-xl sm:text-2xl font-bold">{Array.isArray(R) ? R.length : 0}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Total Leave Requests</div>
               </div>
               <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-success/10 flex items-center justify-center">
                 <UserCheck className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
@@ -375,7 +386,7 @@ export default function HumanResources() {
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xl sm:text-2xl font-bold">12</div>
+                <div className="text-xl sm:text-2xl font-bold">{onLeaveCount}</div>
                 <div className="text-xs sm:text-sm text-muted-foreground">On Leave</div>
               </div>
               <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-warning/10 flex items-center justify-center">
@@ -389,7 +400,7 @@ export default function HumanResources() {
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xl sm:text-2xl font-bold">5</div>
+                <div className="text-xl sm:text-2xl font-bold">{pendingApprovalsCount}</div>
                 <div className="text-xs sm:text-sm text-muted-foreground">Pending Approvals</div>
               </div>
               <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-accent/10 flex items-center justify-center">
@@ -402,11 +413,25 @@ export default function HumanResources() {
 
       {/* Tabs */}
       <Tabs defaultValue="employees">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
-          <TabsTrigger value="employees" className="text-xs sm:text-sm">Employees</TabsTrigger>
-          <TabsTrigger value="attendance" className="text-xs sm:text-sm">Attendance</TabsTrigger>
-          <TabsTrigger value="leaves" className="text-xs sm:text-sm">Leave Requests</TabsTrigger>
-          <TabsTrigger value="payroll" className="text-xs sm:text-sm">Payroll</TabsTrigger>
+        <TabsList className="w-full h-auto grid grid-cols-2 sm:grid-cols-3 gap-3 bg-muted/60 p-2 rounded-xl -mx-4 sm:mx-0">
+          <TabsTrigger
+            value="employees"
+            className="text-xs sm:text-sm rounded-lg px-3 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground hover:bg-background/70"
+          >
+            Employees
+          </TabsTrigger>
+          <TabsTrigger
+            value="leaves"
+            className="text-xs sm:text-sm rounded-lg px-3 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground hover:bg-background/70"
+          >
+            Leave Requests
+          </TabsTrigger>
+          <TabsTrigger
+            value="payroll"
+            className="text-xs sm:text-sm rounded-lg px-3 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground hover:bg-background/70"
+          >
+            Payroll
+          </TabsTrigger>
         </TabsList>
 
         {/* Employee Directory */}
@@ -460,11 +485,6 @@ export default function HumanResources() {
           </Card>
         </TabsContent>
 
-        {/* Attendance */}
-        <TabsContent value="attendance" className="mt-4 sm:mt-6">
-          {/* ... attendance table (unchanged) */}
-        </TabsContent>
-
         {/* Leaves */}
         <TabsContent value="leaves" className="mt-4 sm:mt-6">
           <Card>
@@ -507,7 +527,7 @@ export default function HumanResources() {
                         </TableCell>
                       </TableRow>
                     ) : R?.filter((request) =>
-                      statusFilter === 'all' || request.status === statusFilter
+                      statusFilter === 'all' || String(request.status ?? '').toLowerCase() === statusFilter
                     ).length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={6} className="text-center py-8">
@@ -518,7 +538,7 @@ export default function HumanResources() {
                       </TableRow>
                     ) : (
                       R?.filter((request) =>
-                        statusFilter === 'all' || request.status === statusFilter
+                        statusFilter === 'all' || String(request.status ?? '').toLowerCase() === statusFilter
                       ).map((request) => (
                         <TableRow key={request.id}>
                           <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4">{request.id}</TableCell>

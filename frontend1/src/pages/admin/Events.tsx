@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
@@ -50,7 +50,7 @@ type EventAudience = 'public' | 'staff' | 'citizens';
 const API_URL = 'http://127.0.0.1:8000/api';
 
 export default function Events() {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   // 4. State management
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,7 +99,7 @@ export default function Events() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!formData.title || !formData.date) {
       toast.error('Title and date are required');
       return false;
@@ -125,7 +125,7 @@ export default function Events() {
             }
           }
         );
-        setEvents(events.map(event => 
+        setEvents(events.map(event =>
           event.id === selectedEvent.id ? response.data : event
         ));
         await fetchEvents();
@@ -146,7 +146,7 @@ export default function Events() {
         // Ensure we're using the correct response structure
         const newEvent = response.data?.data || response.data;
         setEvents(prevEvents => [newEvent, ...prevEvents]);
-        await fetchEvents(); 
+        await fetchEvents();
         toast.success('Event created successfully');
       }
 
@@ -210,7 +210,7 @@ export default function Events() {
           'Content-Type': 'application/json',
         },
       });
-      
+
       // Remove the deleted event from the state
       setEvents(prevEvents => prevEvents.filter(event => event.id !== eventId));
       toast.success('Event deleted successfully');
@@ -235,26 +235,26 @@ export default function Events() {
   };
 
   // 11. Filter events
- const filteredEvents = events.filter((event) => {
-  // Safely get all properties with fallbacks
-  const title = event?.title || '';
-  const description = event?.description || '';
-  const eventType = event?.type || '';
-  const eventStatus = event?.status || '';
-  const eventAudience = event?.target_audience || '';
+  const filteredEvents = events.filter((event) => {
+    // Safely get all properties with fallbacks
+    const title = event?.title || '';
+    const description = event?.description || '';
+    const eventType = event?.type || '';
+    const eventStatus = event?.status || '';
+    const eventAudience = event?.target_audience || '';
 
-  // Convert search query to lowercase once
-  const searchLower = searchQuery.toLowerCase();
-  
-  // Safe string operations
-  const matchesSearch = title?.toLowerCase().includes(searchLower) || 
-                       description?.toLowerCase().includes(searchLower);
-  const matchesType = filterType === 'all' || eventType === filterType;
-  const matchesStatus = filterStatus === 'all' || eventStatus === filterStatus;
-  const matchesAudience = filterAudience === 'all' || eventAudience === filterAudience;
-  
-  return matchesSearch && matchesType && matchesStatus && matchesAudience;
-});
+    // Convert search query to lowercase once
+    const searchLower = searchQuery.toLowerCase();
+
+    // Safe string operations
+    const matchesSearch = title?.toLowerCase().includes(searchLower) ||
+      description?.toLowerCase().includes(searchLower);
+    const matchesType = filterType === 'all' || eventType === filterType;
+    const matchesStatus = filterStatus === 'all' || eventStatus === filterStatus;
+    const matchesAudience = filterAudience === 'all' || eventAudience === filterAudience;
+
+    return matchesSearch && matchesType && matchesStatus && matchesAudience;
+  });
 
   // 12. UI helper functions
   const getStatusColor = (status: string = 'upcoming') => {
@@ -294,8 +294,8 @@ export default function Events() {
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button 
-              className="gap-2" 
+            <Button
+              className="gap-2"
               onClick={() => {
                 resetForm();
                 setDialogOpen(true);
@@ -319,8 +319,8 @@ export default function Events() {
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="title">Event Title *</Label>
-                  <Input 
-                    id="title" 
+                  <Input
+                    id="title"
                     placeholder="Town Hall Meeting"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -329,20 +329,20 @@ export default function Events() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="description">Description</Label>
-                  <Textarea 
-                    id="description" 
+                  <Textarea
+                    id="description"
                     placeholder="Event details..."
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="audience">Target Audience *</Label>
-                    <Select 
-                      value={formData.target_audience} 
-                      onValueChange={(value: EventAudience) => 
+                    <Select
+                      value={formData.target_audience}
+                      onValueChange={(value: EventAudience) =>
                         setFormData({ ...formData, target_audience: value })
                       }
                     >
@@ -360,21 +360,21 @@ export default function Events() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="date">Date *</Label>
-                    <Input 
-                      id="date" 
+                    <Input
+                      id="date"
                       type="date"
                       value={formData.date}
                       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                       required
                     />
                   </div>
-                  
+
                 </div>
               </div>
               <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => {
                     setDialogOpen(false);
                     resetForm();
@@ -412,7 +412,7 @@ export default function Events() {
               />
             </div>
             <div className="flex flex-wrap gap-2">
-              
+
               <Select value={filterAudience} onValueChange={setFilterAudience}>
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="Audience" />
@@ -456,7 +456,7 @@ export default function Events() {
                           <Badge variant="outline" className={getStatusColor(event.status)}>
                             {event.status || 'upcoming'}
                           </Badge>
-                          
+
                           <Badge variant="outline">
                             {getAudienceLabel(event.target_audience as EventAudience)}
                           </Badge>

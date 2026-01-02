@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Clock, CheckCircle, XCircle, AlertCircle, Loader2, Eye } from 'lucide-react';
+import { Loader2, Eye } from 'lucide-react';
 import { CitizenRequest } from '@/types';
-import { toast } from 'sonner';
 
 import { useNavigate } from 'react-router-dom'
 import {
@@ -14,30 +12,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 
 export default function MyPayroll() {
-  const navigate = useNavigate();
   const [selectedRequest, setSelectedRequest] = useState<CitizenRequest | any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [details, setDetails] = useState(false);
-  const [Value, setValue] = useState("");
   const [Clicked, setClicked] = useState(false);
-  const [R, setR] = useState([]);
   const [pr, setpr] = useState<any[]>([]);
-
   const [loading, setLoading] = useState(true);
-  const [loadingSubmit, setLoadingSubmit] = useState(false);
   useEffect(() => {
     setClicked(false);
     const fetchData = async () => {
@@ -72,92 +56,14 @@ export default function MyPayroll() {
       </div>
     );
   }
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoadingSubmit(true);
-    setDetails(false);
-    if (!Value) { return; }
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://127.0.0.1:8000/api/citizen/requests", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          'type': Value,
-        }),
-      });
-
-      const result = await response.json();
-      navigate('/citizen/requests');
-      setClicked(true);
-      toast.message(result.message);
-    } catch (e) {
-      console.log("error");
-    } finally {
-      setLoadingSubmit(false);
-    }
-
-  }
-
+ 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">My Requests</h1>
-          <p className="text-muted-foreground">Track and manage your service requests</p>
+          <h1 className="text-3xl font-bold text-foreground">My PayRoll</h1>
+          <p className="text-muted-foreground">Track and manage your  payrolls</p>
         </div>
-        <Dialog open={details} onOpenChange={setDetails}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              New Request
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[525px]">
-            <DialogHeader>
-              <DialogTitle>Submit New Request</DialogTitle>
-              <DialogDescription>
-                Submit a request for municipal services or documents
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="type">Request Type</Label>
-                <Select value={Value} onValueChange={setValue}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select request type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="residency_certificate">Residency Certificate</SelectItem>
-                    <SelectItem value="birth_certificate">Birth Certificate</SelectItem>
-                    <SelectItem value="death_certificate">Death Certificate</SelectItem>
-                    <SelectItem value="marriage_certificate">Marriage Certificate</SelectItem>
-                    <SelectItem value="garbage_collection">Garbage Collection</SelectItem>
-                    <SelectItem value="street_repair">Street Repair</SelectItem>
-                    <SelectItem value="public_complaint">Public Complaint</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-            </div>
-            <DialogFooter>
-              <Button type="submit" onClick={handleSubmit} disabled={loadingSubmit}>
-                {loadingSubmit ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  'Submit Request'
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
