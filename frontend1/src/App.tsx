@@ -30,7 +30,7 @@ import Attendences from "./pages/admin/Attendances";
 import MyAttendances from "./pages/employee/MyAttendances";
 import EmployeeTasks from "./pages/employee/employeeTask";
 import MyLeaves from './pages/employee/MyLeaves';
-//import {MyPayroll} from './pages/employee/MyPayroll';
+import MyPayroll from './pages/employee/MyPayroll';
 
 const queryClient = new QueryClient();
 
@@ -79,7 +79,7 @@ const App = () => (
             <Route path="/employee/attendences" element={<ProtectedRoute allowedRoles={['finance_officer', 'urban_planner', 'clerk']}><DashboardLayout><MyAttendances /></DashboardLayout></ProtectedRoute>}/>
             <Route path="/employee/tasks" element={<ProtectedRoute allowedRoles={['finance_officer', 'urban_planner', 'hr_manager', 'clerk']}><DashboardLayout><EmployeeTasks/></DashboardLayout></ProtectedRoute>} />
             <Route path="/employee/MyLeaves" element={<ProtectedRoute allowedRoles={['finance_officer', 'urban_planner', 'hr_manager', 'clerk']}><DashboardLayout><MyLeaves/></DashboardLayout></ProtectedRoute>} />
-            {/* <Route path="/employee/MyPayroll" element={<ProtectedRoute allowedRoles={['finance_officer', 'urban_planner', 'hr_manager', 'clerk']}><DashboardLayout><MyPayroll/></DashboardLayout></ProtectedRoute>} /> */}
+            <Route path="/employee/MyPayroll" element={<ProtectedRoute allowedRoles={['finance_officer', 'urban_planner', 'hr_manager', 'clerk']}><DashboardLayout><MyPayroll/></DashboardLayout></ProtectedRoute>} />
 
             {/* Shared Routes */}
             <Route path="/notifications" element={<ProtectedRoute><DashboardLayout><Notifications /></DashboardLayout></ProtectedRoute>} />

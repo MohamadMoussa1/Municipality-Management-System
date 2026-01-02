@@ -113,22 +113,11 @@ class PayrollController extends Controller
 
 
 // list payroll records with optional filters
-    public function index(Request $request): JsonResponse
+   public function index(Request $request): JsonResponse
 {
     $user = $request->user();
-
-    // Authorization
-    $allowed = $user->role === 'admin'
-        || ($user->role === 'hr_manager'
-            && optional($user->employee)->department === 'hr');
-
-    if (!$allowed) {
-        return response()->json([
-            'message' => 'Unauthorized.'
-        ], 403);
-    }
-
-    // Optional filters
+    $employeeId = optional($user->employee)->id;
+// Optional filters
     $request->validate([
         'month' => 'nullable|date_format:Y-m',
         'employee_id' => 'nullable|exists:employees,id',
@@ -138,12 +127,35 @@ class PayrollController extends Controller
         'employee.user'
     ])->orderBy('generated_at', 'desc');
 
+    $isAdmin = $user->role === 'admin';
+    $isHrManager = $user->role === 'hr_manager'
+        && optional($user->employee)->department === 'hr';
+    $isOwnerEmployee = !is_null($employeeId);
+
+    if (!($isAdmin || $isHrManager || $isOwnerEmployee)) {
+        return response()->json([
+            'message' => 'Unauthorized.'
+        ], 403);
+    }
+
+    if (!($isAdmin || $isHrManager)) {
+        if ($request->filled('employee_id') && intval($request->employee_id) !== intval($employeeId)) {
+            return response()->json([
+                'message' => 'Unauthorized.'
+            ], 403);
+        }
+
+        $query->where('employee_id', $employeeId);
+    }
+
     if ($request->filled('month')) {
         $query->where('month', $request->month);
     }
 
     if ($request->filled('employee_id')) {
-        $query->where('employee_id', $request->employee_id);
+        if ($isAdmin || $isHrManager) {
+            $query->where('employee_id', $request->employee_id);
+        }
     }
 
     $payrolls = $query->paginate(10);

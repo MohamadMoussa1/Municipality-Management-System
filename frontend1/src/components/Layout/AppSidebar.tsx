@@ -28,8 +28,6 @@ import {
   ListTodo 
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { title } from 'process';
-
 export const AppSidebar = () => {
   const { role,loading} = useAuth();
   const { open } = useSidebar();
@@ -56,30 +54,31 @@ export const AppSidebar = () => {
       { title: 'Projects', url: '/admin/projects', icon: Building2 },
       { title: 'Human Resources', url: '/admin/hr', icon: UserCog },
       { title: 'Events', url: '/admin/events', icon: Calendar },
+      { title: 'Attendances', url: '/admin/attendences', icon: ClipboardList },
       { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
       { title: 'Notifications', url: '/notifications', icon: Bell },
-      { title: 'Attendances', url: '/admin/attendences', icon: ClipboardList },
     ];
 
     const financeItems = [
       { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
       { title: 'Finance', url: '/admin/finance', icon: DollarSign },
       { title: 'Tasks', url: '/employee/tasks', icon: DollarSign },
-      { title: 'Notifications', url: '/notifications', icon: Bell },
       {title: 'My Attendances', url: '/employee/attendences', icon: ClipboardList},
       {title: 'My Leaves', url: '/employee/MyLeaves', icon: ClipboardList},
       {title: 'My Payroll', url: '/employee/MyPayroll', icon: ClipboardList},
+      { title: 'Notifications', url: '/notifications', icon: Bell }
     ];
 
     const projectItems = [
       { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
       { title: 'Projects', url: '/admin/projects', icon: Building2 },
       { title: 'Events', url: '/employee/events', icon: Calendar },
-      { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
-      { title: 'Notifications', url: '/notifications', icon: Bell },
       {title: 'My Attendances', url: '/employee/attendences', icon: ClipboardList},
       {title: 'My Leaves', url: '/employee/MyLeaves', icon: ClipboardList},
-       {title: 'My Payroll', url: '/employee/MyPayroll', icon: ClipboardList}
+      {title: 'My Payroll', url: '/employee/MyPayroll', icon: ClipboardList},
+      { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
+      { title: 'Notifications', url: '/notifications', icon: Bell }
+
     ];
 
     const hrItems = [
@@ -87,11 +86,12 @@ export const AppSidebar = () => {
       { title: 'Human Resources', url: '/admin/hr', icon: UserCog },
       { title: 'Events', url: '/employee/events', icon: Calendar },
       { title: 'Tasks', url: '/employee/tasks', icon: Calendar },
-      { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
-      { title: 'Notifications', url: '/notifications', icon: Bell },
       { title: 'Attendances', url: '/admin/attendences', icon: ClipboardList },
       {title: 'My Leaves', url: '/employee/MyLeaves', icon: ClipboardList},
-       {title: 'My Payroll', url: '/employee/MyPayroll', icon: ClipboardList}
+      {title: 'My Payroll', url: '/employee/MyPayroll', icon: ClipboardList},
+      { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
+      { title: 'Notifications', url: '/notifications', icon: Bell }
+     
     ];
 
     const clerkItems = [
@@ -99,11 +99,12 @@ export const AppSidebar = () => {
       { title: 'Citizen Services', url: '/admin/citizen-services', icon: Users },
       { title: 'Permits', url: '/admin/permits', icon: FileText },
       { title: 'Tasks', url: '/employee/tasks', icon: ListTodo },
-      { title: 'Events', url: '/employee/events', icon: Calendar },
-      { title: 'Notifications', url: '/notifications', icon: Bell },
       {title: 'My Attendances', url: '/employee/attendences', icon: ClipboardList},
       {title: 'My Leaves', url: '/employee/MyLeaves', icon: ClipboardList},
-       {title: 'My Payroll', url: '/employee/MyPayroll', icon: ClipboardList}
+      {title: 'My Payroll', url: '/employee/MyPayroll', icon: ClipboardList},
+      { title: 'Events', url: '/employee/events', icon: Calendar },
+      { title: 'Notifications', url: '/notifications', icon: Bell }
+      
     ];
     
     switch (role) {

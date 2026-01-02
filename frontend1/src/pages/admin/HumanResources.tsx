@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Users, UserCheck, Clock, AlertCircle, Loader2, Eye, Filter, Calendar, FileText, User } from 'lucide-react';
+import { Users, UserCheck, Clock, AlertCircle, Loader2, Eye, Filter, Calendar, FileText, User, Pencil } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Employee, RequestLeaveStatus } from '@/types';
 import {
@@ -33,8 +33,17 @@ export default function HumanResources() {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [PayRollOpen, setPayRollOpen] = useState(false);
   const [mnth, setMonth] = useState("");
-  const [pr, setpr] = useState([]);
+  const [pr, setpr] = useState<any[]>([]);
+  const [payrollLoading, setPayrollLoading] = useState(false);
   const [year, setYear] = useState(0);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [payrollCurrentPage, setPayrollCurrentPage] = useState<number | null>(null);
+  const [payrollLastPage, setPayrollLastPage] = useState<number | null>(null);
+  const [payrollEditOpen, setPayrollEditOpen] = useState(false);
+  const [payrollEditId, setPayrollEditId] = useState<number | null>(null);
+  const [payrollEditType, setPayrollEditType] = useState<'bonus' | 'deduction'>('bonus');
+  const [payrollEditAmount, setPayrollEditAmount] = useState('');
+  const [payrollEditNote, setPayrollEditNote] = useState('');
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
   const [newEmployee, setNewEmployee] = useState({
     name: '',
@@ -52,6 +61,56 @@ export default function HumanResources() {
   const handleViewRequest = (request: any) => {
     setSelectedRequest(request);
     setViewDialogOpen(true);
+  };
+
+  const handlePayrollView = (payroll: any) => {
+    setSelectedRequest(payroll);
+    setDetailsOpen(true);
+
+  };
+  const fetchD = async () => {
+    const token = localStorage.getItem("token");
+    const response = await fetch("http://127.0.0.1:8000/api/payrolls/" + payrollEditId + "/adjustments", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        'type': payrollEditType,
+        'amount': payrollEditAmount,
+        'note': payrollEditNote,
+      }),
+    });
+    const res = await response.json();
+    setClicked(true);
+  }
+
+  const handlePayrollEditOpen = (payroll: any) => {
+    setPayrollEditId(payroll?.id ?? null);
+    setPayrollEditType('bonus');
+    setPayrollEditAmount('');
+    setPayrollEditNote('');
+    setPayrollEditOpen(true);
+
+  };
+
+  const fetchPayrollPage = async (pageNumber: number) => {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`http://127.0.0.1:8000/api/payrolls?page=${pageNumber}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+    });
+    const res = await response.json();
+    const pageData = res?.data;
+    setpr(Array.isArray(pageData?.data) ? pageData.data : []);
+    setPayrollCurrentPage(typeof pageData?.current_page === 'number' ? pageData.current_page : null);
+    setPayrollLastPage(typeof pageData?.last_page === 'number' ? pageData.last_page : null);
   };
 
   const handleStatusChange = (Id: string, newStatus: RequestLeaveStatus) => {
@@ -120,24 +179,16 @@ export default function HumanResources() {
   useEffect(() => {
     setClicked(false);
     const fetchData = async () => {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://127.0.0.1:8000/api/payrolls", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-      });
-      const res = await response.json();
-      console.log(res.data)
-      setpr(res.data);
+      await fetchPayrollPage(1);
       setLoading(false);
     };
 
     fetchData();
   }, [Clicked]);
-
+  const handleSave = () => {
+    setPayrollEditOpen(false);
+    fetchD();
+  }
   useEffect(() => {
     setClicked(false);
     const fetchData = async () => {
@@ -441,7 +492,6 @@ export default function HumanResources() {
                       <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Employee Id</TableHead>
                       <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Employee Name</TableHead>
                       <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">Type</TableHead>
-                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Reason</TableHead>
                       <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell">Status</TableHead>
                       <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">view</TableHead>
                     </TableRow>
@@ -474,7 +524,6 @@ export default function HumanResources() {
                           <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4">{request.id}</TableCell>
                           <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[80px] sm:max-w-none truncate">{request?.employee.user?.name || 'N/A'}</TableCell>
                           <TableCell className="capitalize text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">{request.type || 'N/A'}</TableCell>
-                          <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell">{request.reason}</TableCell>
                           <TableCell className="px-2 sm:px-4">
                             <Select
                               value={request.status}
@@ -529,47 +578,120 @@ export default function HumanResources() {
             <CardHeader>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
                 <div>
-                  <CardTitle className="text-lg sm:text-xl">Employee Directory</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">Complete staff roster</CardDescription>
+                  <CardTitle className="text-lg sm:text-xl">Payroll Records</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">Employee payroll information</CardDescription>
                 </div>
                 <Button onClick={() => setPayRollOpen(true)} className="w-full sm:w-auto text-sm">Generate payroll</Button>
               </div>
             </CardHeader>
             <CardContent>
-              {/* <div className="grid gap-3 sm:gap-4">
-                {pr?.map((employee) => (
-                  <Card key={employee.id}>
-                    <CardContent className="p-3 sm:p-4">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                        <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
-                          <AvatarFallback className="text-xs sm:text-sm">
-                            {employee.name?.split(' ').map(n => n[0]).join('') || 'NA'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-sm sm:text-base truncate">Name: {employee.name}</h4>
-                          <p className="text-xs sm:text-sm text-muted-foreground truncate">Position: {employee.position}</p>
-                          <p className="text-xs text-muted-foreground mt-1 truncate">Department: {employee.department}</p>
+              <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+                <div>
+                  {payrollCurrentPage && payrollLastPage ? `Page ${payrollCurrentPage} of ${payrollLastPage}` : null}
+                </div>
+                <div>
+                  Showing {pr?.length || 0}
+                </div>
+              </div>
+              <div className="rounded-md border overflow-x-auto -mx-3 sm:mx-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Employee ID</TableHead>
+                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Employee Name</TableHead>
+                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Month</TableHead>
+                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Base Salary</TableHead>
+                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Bonuses</TableHead>
+                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Generated Date</TableHead>
+                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {payrollLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8">
+                          <div className="flex items-center justify-center">
+                            <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                            <span>Loading payroll records...</span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : pr?.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8">
+                          <div className="text-muted-foreground">
+                            No payroll records found
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      pr?.map((payroll) => (
+                        <TableRow key={payroll.id} className="hover:bg-gray-50 transition-colors">
+                          <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4 text-blue-600">{payroll.employee_id}</TableCell>
+                          <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[80px] sm:max-w-none truncate font-medium">{payroll?.employee?.user?.name || 'N/A'}</TableCell>
+                          <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 bg-purple-50 text-purple-700 rounded px-2 py-1">{payroll.month || 'N/A'}</TableCell>
+                          <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-green-600">${payroll.base_salary || '0.00'}</TableCell>
+                          <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 text-blue-600">${payroll.bonuses || '0.00'}</TableCell>
+                          <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 text-gray-600">{new Date(payroll.generated_at).toLocaleDateString()}</TableCell>
+                          <TableCell className="px-2 sm:px-4">
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                type="button"
+                                className="h-7 w-7 sm:h-8 sm:w-8 hover:bg-blue-50"
+                                onClick={() => handlePayrollView(payroll)}
+                              >
+                                <Eye className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                type="button"
+                                className="h-7 w-7 sm:h-8 sm:w-8 hover:bg-blue-50"
+                                onClick={() => handlePayrollEditOpen(payroll)}
+                              >
+                                <Pencil className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
 
-                        </div>
-                        <div className="hidden lg:block text-right">
-                          <p className="text-xs sm:text-sm font-medium truncate">{employee.email}</p>
-                          <p className="text-xs sm:text-sm text-muted-foreground">Role:{employee.role}</p>
-                          <p className="text-xs text-muted-foreground mt-1 truncate">Salary:{employee.salary}</p>
-                        </div>
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                          <Badge variant={employee.status === 'active' ? 'default' : 'outline'} className="text-xs">
-                            {employee.status}
-                          </Badge>
-                          <Button variant="outline" size="sm" onClick={() => handleViewProfile(employee)} className="text-xs h-8 flex-1 sm:flex-none">
-                            View Profile
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div> */}
+              {(payrollCurrentPage && payrollLastPage && payrollLastPage > 1) && (
+                <div className="flex items-center justify-end gap-2 pt-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    disabled={payrollCurrentPage <= 1}
+                    onClick={async () => {
+                      setPayrollLoading(true);
+                      await fetchPayrollPage(payrollCurrentPage - 1);
+                      setPayrollLoading(false);
+                    }}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    disabled={payrollCurrentPage >= payrollLastPage}
+                    onClick={async () => {
+                      setPayrollLoading(true);
+                      await fetchPayrollPage(payrollCurrentPage + 1);
+                      setPayrollLoading(false);
+                    }}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -965,6 +1087,153 @@ export default function HumanResources() {
           <DialogFooter className="pt-4 border-t">
             <Button onClick={() => setViewDialogOpen(false)} className="w-full sm:w-auto">
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <DialogContent className="sm:max-w-[525px]">
+          <DialogHeader>
+            <DialogTitle>Payroll Details</DialogTitle>
+            <DialogDescription>
+              Complete payroll information
+            </DialogDescription>
+          </DialogHeader>
+          {selectedRequest && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Employee ID</Label>
+                  <p className="text-sm font-medium mt-1">{selectedRequest.employee_id}</p>
+                </div>
+                <div>
+                  <Label>Employee Name</Label>
+                  <p className="text-sm font-medium mt-1">{selectedRequest.employee?.user?.name || 'N/A'}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Month</Label>
+                  <p className="text-sm font-medium mt-1">{selectedRequest.month}</p>
+                </div>
+                <div>
+                  <Label>Position</Label>
+                  <p className="text-sm font-medium mt-1">{selectedRequest.employee?.position || 'N/A'}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Department</Label>
+                  <p className="text-sm font-medium mt-1">{selectedRequest.employee?.department || 'N/A'}</p>
+                </div>
+                <div>
+                  <Label>Hire Date</Label>
+                  <p className="text-sm font-medium mt-1">{new Date(selectedRequest.employee?.hire_date).toLocaleDateString()}</p>
+                </div>
+              </div>
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3">Financial Details</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Base Salary</Label>
+                    <p className="text-sm font-medium mt-1 text-green-600">${selectedRequest.base_salary}</p>
+                  </div>
+                  <div>
+                    <Label>Bonuses</Label>
+                    <p className="text-sm font-medium mt-1 text-blue-600">${selectedRequest.bonuses}</p>
+                  </div>
+                  <div>
+                    <Label>Deductions</Label>
+                    <p className="text-sm font-medium mt-1 text-red-600">${selectedRequest.deductions}</p>
+                  </div>
+                  <div>
+                    <Label>Net Salary</Label>
+                    <p className="text-sm font-medium mt-1 text-purple-600 font-semibold">${selectedRequest.net_salary}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Generated Date</Label>
+                  <p className="text-sm font-medium mt-1">{new Date(selectedRequest.generated_at).toLocaleString()}</p>
+                </div>
+                <div>
+                  <Label>Generated By</Label>
+                  <p className="text-sm font-medium mt-1">{selectedRequest.generated_by}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Created At</Label>
+                  <p className="text-sm font-medium mt-1">{new Date(selectedRequest.created_at).toLocaleString()}</p>
+                </div>
+                <div>
+                  <Label>Updated At</Label>
+                  <p className="text-sm font-medium mt-1">{new Date(selectedRequest.updated_at).toLocaleString()}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDetailsOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={payrollEditOpen} onOpenChange={setPayrollEditOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Payroll</DialogTitle>
+            <DialogDescription>
+              Add a bonus or deduction
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label>Type</Label>
+              <Select value={payrollEditType} onValueChange={(v: 'bonus' | 'deduction') => setPayrollEditType(v)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bonus">Bonus</SelectItem>
+                  <SelectItem value="deduction">Deduction</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="payroll-edit-amount">Amount</Label>
+              <Input
+                id="payroll-edit-amount"
+                type="number"
+                value={payrollEditAmount}
+                onChange={(e) => setPayrollEditAmount(e.target.value)}
+                placeholder="Enter amount"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="payroll-edit-note">Note (optional)</Label>
+              <Input
+                id="payroll-edit-note"
+                value={payrollEditNote}
+                onChange={(e) => setPayrollEditNote(e.target.value)}
+                placeholder="Optional note"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPayrollEditOpen(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                handleSave()
+              }}
+              disabled={!payrollEditId || !payrollEditAmount}
+            >
+              Save
             </Button>
           </DialogFooter>
         </DialogContent>
