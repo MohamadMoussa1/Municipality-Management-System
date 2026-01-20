@@ -14,6 +14,8 @@ use App\Http\Controllers\API\AttendanceController;
 use App\Http\Controllers\API\EventController;
 use App\Http\Controllers\API\NotificationController;
 use App\Http\Controllers\API\StripeWebhookController;
+use App\Http\Controllers\Api\LeaveController;
+use App\Http\Controllers\API\PayrollController;
 use App\Http\Controllers\API\AdminDashboardController;
 
 // Public routes
@@ -266,4 +268,34 @@ Route::get('/test-email', function () {
     });
 
     return 'Email sent!';
+});
+
+// Leave routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/leaves', [LeaveController::class, 'store']);
+     // Employee views own leave requests
+    Route::get('/leaves/my', [LeaveController::class, 'myLeaves']);
+
+    // HR/Admin views all leave requests [filter]
+    Route::get('/leaves', [LeaveController::class, 'index']);
+
+    // Approve or reject leave
+    Route::put('/leaves/{leave}/status', [LeaveController::class, 'updateStatus']);
+});
+
+
+// Payroll
+Route::middleware(['auth:sanctum'])->group(function () {
+
+    // Generate payroll for month
+    Route::post('/payrolls/generate', [PayrollController::class, 'generate']);
+
+    // List payroll records
+    Route::get('/payrolls', [PayrollController::class, 'index']);
+
+    // View payroll for employee
+    Route::get('/payrolls/{payroll}', [PayrollController::class, 'show']);
+
+    // Add bonus or deduction
+    Route::post('/payrolls/{payroll}/adjustments', [PayrollController::class, 'addAdjustment']);
 });
