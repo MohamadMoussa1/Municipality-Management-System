@@ -58,12 +58,11 @@ export default function Finance() {
 
   // Fetch all payments and citizens (for bulk)
   const fetchData = async () => {
-    const token = localStorage.getItem("token");
-
     // Payments
     try {
       const paymentsRes = await fetch("http://127.0.0.1:8000/api/payments", {
-        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
+        headers: {"Accept": "application/json" },
+        credentials:"include",
       });
 
       if (paymentsRes.status === 401) {
@@ -89,7 +88,8 @@ export default function Finance() {
     // Citizens (for bulk selection)
     try {
       const citizensRes = await fetch("http://127.0.0.1:8000/api/citizens", {
-        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
+        headers: { "Accept": "application/json" },
+        credentials:"include",
       });
       if (citizensRes.status === 401) {
         toast.error("Session expired. Please login again.");
@@ -131,10 +131,10 @@ if (loading) {
     if (!citizenSearch) return;
     setCitizenLoading(true);
     setCitizenResult(null);
-    const token = localStorage.getItem("token");
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/citizens/${encodeURIComponent(citizenSearch)}`, {
-        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
+        headers: { "Accept": "application/json" },
+        credentials:"include",
       });
       const body = await res.json().catch(() => null);
       setCitizenLoading(false);
@@ -165,10 +165,11 @@ if (loading) {
     if (!bulkSearch) return;
     setBulkCitizenLoading(true);
     setBulkSearchResult(null);
-    const token = localStorage.getItem("token");
+  
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/citizens/${encodeURIComponent(bulkSearch)}`, {
-        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
+        headers: { "Accept": "application/json" },
+        credentials:"include",
       });
       const body = await res.json().catch(() => null);
       setBulkCitizenLoading(false);
@@ -226,11 +227,12 @@ if (loading) {
       toast.error("Please select a citizen first.");
       return;
     }
-    const token = localStorage.getItem("token");
+  
     try {
       const res = await fetch("http://127.0.0.1:8000/api/payments", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json", "Authorization": `Bearer ${token}` },
+        credentials:"include",
+        headers: { "Content-Type": "application/json", "Accept": "application/json",},
         body: JSON.stringify({
           citizen_id: Number(form.citizen_id),
           amount: Number(form.amount),
@@ -266,11 +268,11 @@ if (loading) {
       toast.error("Please select at least one citizen.");
       return;
     }
-    const token = localStorage.getItem("token");
     try {
       const res = await fetch("http://127.0.0.1:8000/api/payments/bulk", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json", "Authorization": `Bearer ${token}` },
+        credentials:"include",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify({
           citizen_ids: bulkForm.citizen_ids.map(Number),
           amount: Number(bulkForm.amount),
@@ -299,10 +301,11 @@ if (loading) {
 
   // Update payment
   const handleUpdatePayment = async () => {
-    const token = localStorage.getItem("token");
+   
     const res = await fetch(`http://127.0.0.1:8000/api/payments/${selectedPayment.id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json", "Accept": "application/json", "Authorization": `Bearer ${token}` },
+      credentials:"include",
+      headers: { "Content-Type": "application/json", "Accept": "application/json"},
       body: JSON.stringify({
         status: editForm.status,
         amount: editForm.amount ? Number(editForm.amount) : undefined,
@@ -321,10 +324,10 @@ if (loading) {
 
   // Delete payment
   const handleDeletePayment = async (id) => {
-    const token = localStorage.getItem("token");
     const res = await fetch(`http://127.0.0.1:8000/api/payments/${id}`, {
       method: "DELETE",
-      headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
+      credentials:"include",
+      headers: {"Accept": "application/json" }
     });
     if (res.status === 401) {
       toast.error("Session expired. Please login again.");

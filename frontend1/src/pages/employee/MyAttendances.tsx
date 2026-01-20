@@ -27,19 +27,17 @@ export default function MyAttendances() {
 
   const fetchData = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
     try {
       const res = await fetch('http://127.0.0.1:8000/api/attendance', {
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        headers: {  Accept: 'application/json' },
+        credentials:"include",
       });
-
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');
-        localStorage.removeItem('token');
+       
         navigate('/login');
         return;
       }
-
       if (res.ok) {
         const body = await res.json().catch(() => null);
         const items = body?.data || body || [];
@@ -70,16 +68,15 @@ export default function MyAttendances() {
   const handleCheckIn = async () => {
     if (actionLoading) return;
     setActionLoading(true);
-    const token = localStorage.getItem('token');
     try {
       const res = await fetch('http://127.0.0.1:8000/api/attendance/check-in', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        credentials:"include",
+        headers: { Accept: 'application/json' },
       });
 
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');
-        localStorage.removeItem('token');
         navigate('/login');
         return;
       }
@@ -126,16 +123,15 @@ export default function MyAttendances() {
   const handleCheckOut = async () => {
     if (actionLoading) return;
     setActionLoading(true);
-    const token = localStorage.getItem('token');
     try {
       const res = await fetch('http://127.0.0.1:8000/api/attendance/check-out', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        credentials:"include",
+        headers: { Accept: 'application/json' },
       });
 
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');
-        localStorage.removeItem('token');
         navigate('/login');
         return;
       }
@@ -184,14 +180,15 @@ export default function MyAttendances() {
       toast.error('Attendance id not found.');
       return;
     }
-    const token = localStorage.getItem('token');
+   
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/attendance/${id}`, {
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        headers: { Accept: 'application/json' },
+        credentials:"include",
       });
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');
-        localStorage.removeItem('token');
+        
         navigate('/login');
         return;
       }
@@ -212,17 +209,17 @@ export default function MyAttendances() {
   const handleCheckoutFromDetails = async () => {
     if (detailsCheckoutLoading) return;
     setDetailsCheckoutLoading(true);
-    const token = localStorage.getItem('token');
+    
 
     try {
       const res = await fetch('http://127.0.0.1:8000/api/attendance/check-out', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        credentials:"include",
+        headers: {  Accept: 'application/json' },
       });
 
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');
-        localStorage.removeItem('token');
         navigate('/login');
         setDetailsCheckoutLoading(false);
         return;

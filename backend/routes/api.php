@@ -17,6 +17,7 @@ use App\Http\Controllers\API\StripeWebhookController;
 use App\Http\Controllers\Api\LeaveController;
 use App\Http\Controllers\API\PayrollController;
 use App\Http\Controllers\API\AdminDashboardController;
+use App\Http\Middleware\EnsureTokenIsValid;
 
 // Public routes
 Route::prefix('auth')->group(function () {
@@ -25,7 +26,7 @@ Route::prefix('auth')->group(function () {
 });
 
 // Protected routes
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware([EnsureTokenIsValid::class])->group(function () {
     
     // Auth routes
     Route::post('/auth/logout', [AuthController::class, 'logout']);
@@ -95,7 +96,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 // Citizen request routes
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware([EnsureTokenIsValid::class])->group(function () {
     Route::post('/citizen/requests', [citizenRequestController::class, 'store']);
     // Get requests for the authenticated citizen
     Route::get('/requests/my-requests', [citizenRequestController::class, 'myRequests']);
@@ -157,7 +158,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 // Stripe webhook endpoint
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleStripeWebhook']);
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware([EnsureTokenIsValid::class])->group(function () {
 
     // citizen payments
     Route::get('/payments/my-payments', [PaymentController::class, 'myPayments']);
@@ -193,7 +194,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 // Project routes
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware([EnsureTokenIsValid::class])->group(function () {
     // Project listing and creation (admin and urban_planner only)
     Route::middleware(['role:admin|urban_planner'])->group(function () {
         // Get all projects (admin and urban_planner)
@@ -213,7 +214,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 // Attendace routes
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware([EnsureTokenIsValid::class])->group(function () {
     // check-in
     Route::post('/attendance/check-in', [AttendanceController::class, 'checkIn']);
     // check-out
@@ -227,7 +228,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 });
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware([EnsureTokenIsValid::class])->group(function () {
    // Event routes
     Route::prefix('events')->group(function () {
         // Admin-only routes
@@ -243,7 +244,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/{event}', [EventController::class, 'show']);
     });
 });
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(EnsureTokenIsValid::class)->group(function () {
     Route::prefix('notifications')->group(function () {
     // Get all notifications
     Route::get('/', [NotificationController::class, 'index']);
@@ -271,7 +272,7 @@ Route::get('/test-email', function () {
 });
 
 // Leave routes
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(EnsureTokenIsValid::class)->group(function () {
     Route::post('/leaves', [LeaveController::class, 'store']);
      // Employee views own leave requests
     Route::get('/leaves/my', [LeaveController::class, 'myLeaves']);
@@ -285,7 +286,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 // Payroll
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware([EnsureTokenIsValid::class])->group(function () {
 
     // Generate payroll for month
     Route::post('/payrolls/generate', [PayrollController::class, 'generate']);

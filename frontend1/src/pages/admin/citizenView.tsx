@@ -31,13 +31,14 @@ export function CitizenList() {
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const fetchCitizens = useCallback(async () => {
     try {
-      const token = localStorage.getItem("token");
+     
       const response = await fetch("http://127.0.0.1:8000/api/citizens", {
         method: "GET",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
+         
         },
       });
       const res = await response.json();
@@ -93,6 +94,8 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
   const handleUpdateCitizen = async (e: React.FormEvent) => {
     e.preventDefault();
+    setRefreshTrigger(1);
+    setRefreshTrigger(0);
     setLoadingSubmit(true);
     if (!formData.name.trim() || !formData.email.trim() || !formData.national_id.trim()) {
       toast({
@@ -103,13 +106,14 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       return;
     }
     try {
-      const token = localStorage.getItem("token");
+     
       const response = await fetch("http://127.0.0.1:8000/api/citizens/" + formData.id, {
         method: "PUT",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
+         
         },
         body: JSON.stringify({
           'name': formData.name,

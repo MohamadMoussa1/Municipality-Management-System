@@ -23,21 +23,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
 
   const unreadCount = notifications.filter(n => !n.read_at).length;
-
-  // Get auth token from localStorage
-  const getAuthToken = () => {
-    return localStorage.getItem('token');
-  };
-
   // Fetch all notifications
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const token = getAuthToken();
       const response = await axios.get(`${API_BASE_URL}/notifications`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+           'Accept': 'application/json',
         },
+        withCredentials: true,
       });
       setNotifications(response.data.notifications);
     } catch (error) {
@@ -51,11 +45,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const fetchUnreadNotifications = async () => {
     setLoading(true);
     try {
-      const token = getAuthToken();
+    
       const response = await axios.get(`${API_BASE_URL}/notifications/unread`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+         headers: {
+           'Accept': 'application/json',
         },
+        withCredentials: true,
       });
       setNotifications(response.data.notifications);
     } catch (error) {
@@ -68,14 +63,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   // Mark a specific notification as read
   const markAsRead = async (id: string) => {
     try {
-      const token = getAuthToken();
+      
       await axios.post(
         `${API_BASE_URL}/notifications/${id}/read`,
         {},
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+           headers: {
+           'Accept': 'application/json',
+        },
+        withCredentials: true,
         }
       );
       // Refetch notifications to get the correct server timestamp
@@ -88,14 +84,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   // Mark all notifications as read
   const markAllAsRead = async () => {
     try {
-      const token = getAuthToken();
+      
       await axios.post(
         `${API_BASE_URL}/notifications/read-all`,
         {},
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+           headers: {
+           'Accept': 'application/json',
+        },
+        withCredentials: true,
         }
       );
       // Refetch notifications to get the correct server timestamp
@@ -108,13 +105,14 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   // Delete notification
   const deleteNotification = async (id: string) => {
     try {
-      const token = getAuthToken();
+      
       await axios.delete(
         `${API_BASE_URL}/notifications/${id}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
-          },
+           'Accept': 'application/json',
+        },
+        withCredentials: true,
         }
       );
       // Update local state
@@ -130,15 +128,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   };
 
   // Fetch notifications on mount and when token changes
-  useEffect(() => {
-    const token = getAuthToken();
-    if (token) {
-      fetchNotifications();
-    } else {
-      // Clear notifications if no token (user logged out)
-      clearNotifications();
-    }
-  }, []);
+  // useEffect(() => {
+  //   const token = getAuthToken();
+  //   if (token) {
+  //     fetchNotifications();
+  //   } else {
+  //     // Clear notifications if no token (user logged out)
+  //     clearNotifications();
+  //   }
+  // }, []);
 
   // Monitor token changes to clear notifications on logout
   useEffect(() => {

@@ -51,13 +51,13 @@ export default function Projects() {
   const handleStatusChange = (Id: string, newStatus: RequestProjectStatus) => {
     let res = null;
     const fetchData = async () => {
-      const token = localStorage.getItem("token");
       const response = await fetch("http://127.0.0.1:8000/api/projects/" + Id + "/status", {
         method: "PUT",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
+        
         },
         body: JSON.stringify({
           'status': newStatus
@@ -77,13 +77,13 @@ export default function Projects() {
   useEffect(() => {
     setClicked(false);
     const fetchData = async () => {
-      const token = localStorage.getItem("token");
       const response = await fetch("http://127.0.0.1:8000/api/projects", {
         method: "GET",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
+         
         },
       });
       const res = await response.json();
@@ -97,14 +97,14 @@ export default function Projects() {
     setLoadingSubmit(true);
     setCreateDialogOpen(false)
     setClicked(true);
-    const token = localStorage.getItem("token");
     try {
       const response = await fetch("http://127.0.0.1:8000/api/projects", {
         method: "POST",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
+         
         },
         body: JSON.stringify({
 
@@ -140,13 +140,13 @@ export default function Projects() {
 
       setLoading(true);
       try {
-        const token = localStorage.getItem("token");
         const response = await fetch(`http://127.0.0.1:8000/api/projects/${selectedProject.id}`, {
           method: "GET",
+          credentials:"include",
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "Authorization": `Bearer ${token}`
+           
           },
         });
         const res = await response.json();
@@ -168,13 +168,13 @@ export default function Projects() {
     setLoadingSubmit(true);
     setClicked(true);
     try {
-      const token = localStorage.getItem("token");
       const response = await fetch("http://127.0.0.1:8000/api/projects/" + id + "/tasks", {
         method: "POST",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
+        
         },
         body: JSON.stringify({
           'title': form.task,
@@ -203,10 +203,10 @@ export default function Projects() {
     if (!EmployeeSearch) return;
     setEmployeeLoading(true);
     setEmployeeResult(null);
-    const token = localStorage.getItem("token");
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/employees/${encodeURIComponent(EmployeeSearch)}`, {
-        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
+        headers: {"Accept": "application/json" },
+        credentials:"include",
       });
       const body = await res.json().catch(() => null);
       setEmployeeLoading(false);

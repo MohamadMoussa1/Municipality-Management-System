@@ -83,8 +83,8 @@ export default function Events() {
       const response = await axios.get(`${API_URL}/events`, {
         headers: {
           'Accept': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        },
+         withCredentials: true,
       });
       setEvents(response.data);
     } catch (error) {
@@ -121,8 +121,8 @@ export default function Events() {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
+            },
+             withCredentials: true,
           }
         );
         setEvents(events.map(event =>
@@ -139,8 +139,9 @@ export default function Events() {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
+             
+            },
+             withCredentials: true,
           }
         );
         // Ensure we're using the correct response structure
@@ -167,8 +168,8 @@ export default function Events() {
       const response = await axios.get(`${API_URL}/events/${eventId}`, {
         headers: {
           'Accept': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        },
+         withCredentials: true,
       });
       setSelectedEvent(response.data);
       // You can open a view dialog here if needed
@@ -197,18 +198,12 @@ export default function Events() {
   // 9.1 Handle delete event
   const handleDeleteEvent = async (eventId: number) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        toast.error('Authentication required. Please log in again.');
-        return;
-      }
-
       await axios.delete(`${API_URL}/events/${eventId}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
+         withCredentials: true,
       });
 
       // Remove the deleted event from the state

@@ -69,13 +69,14 @@ export default function HumanResources() {
 
   };
   const fetchD = async () => {
-    const token = localStorage.getItem("token");
+   
     const response = await fetch("http://127.0.0.1:8000/api/payrolls/" + payrollEditId + "/adjustments", {
       method: "POST",
+      credentials:"include",
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "Authorization": `Bearer ${token}`
+       
       },
       body: JSON.stringify({
         'type': payrollEditType,
@@ -97,13 +98,14 @@ export default function HumanResources() {
   };
 
   const fetchPayrollPage = async (pageNumber: number) => {
-    const token = localStorage.getItem("token");
+    
     const response = await fetch(`http://127.0.0.1:8000/api/payrolls?page=${pageNumber}`, {
       method: "GET",
+      credentials:"include",
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "Authorization": `Bearer ${token}`
+       
       },
     });
     const res = await response.json();
@@ -116,13 +118,14 @@ export default function HumanResources() {
   const handleStatusChange = (Id: string, newStatus: RequestLeaveStatus) => {
     let res = null;
     const fetchData = async () => {
-      const token = localStorage.getItem("token");
+     
       const response = await fetch("http://127.0.0.1:8000/api/leaves/" + Id + "/status", {
         method: "PUT",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
+         
         },
         body: JSON.stringify({
           'status': newStatus
@@ -158,13 +161,14 @@ export default function HumanResources() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const token = localStorage.getItem("token");
+     
       const response = await fetch("http://127.0.0.1:8000/api/leaves", {
         method: "GET",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
+         
         },
       });
       const res = await response.json();
@@ -195,13 +199,14 @@ export default function HumanResources() {
   }
   useEffect(() => {
     const fetchData = async () => {
-      const token = localStorage.getItem("token");
+     
       const response = await fetch("http://127.0.0.1:8000/api/employees", {
         method: "GET",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
+         
         },
       });
       const res = await response.json();
@@ -241,14 +246,14 @@ export default function HumanResources() {
       return;
     }
 
-    const token = localStorage.getItem("token");
+  
     try {
       const response = await fetch("http://127.0.0.1:8000/api/admin/register", {
         method: "POST",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify(newEmployee),
       });
@@ -295,14 +300,15 @@ export default function HumanResources() {
   const handleAddPayRoll = async () => {
     setLoadingSubmit(true);
     setClicked(true);
-    const token = localStorage.getItem("token");
+    
     try {
       const response = await fetch("http://127.0.0.1:8000/api/payrolls/generate", {
         method: "POST",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
+         
         },
         body: JSON.stringify({
           'month': year + "-" + mnth

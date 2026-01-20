@@ -39,14 +39,13 @@ export default function MyRequests() {
   useEffect(() => {
     setClicked(false);
     const fetchData = async () => {
-        const token=localStorage.getItem("token");
         const response = await fetch("http://127.0.0.1:8000/api/requests/my-requests", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "Authorization":`Bearer ${token}`
           },
+          credentials:"include",
         });
         const res=await response.json();
        
@@ -70,13 +69,12 @@ export default function MyRequests() {
        setDetails(false);
   if (!Value) { return;}
   try{
-    const token=localStorage.getItem("token");
     const response = await fetch("http://127.0.0.1:8000/api/citizen/requests", {
           method: "POST",
+          credentials:"include",
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "Authorization":`Bearer ${token}`,
           },
          body: JSON.stringify({
             'type':Value ,      
@@ -103,13 +101,12 @@ export default function MyRequests() {
   const handleCancelRequest = (requestId: string) => {
     let res=null;
      const fetchData = async () => {
-        const token=localStorage.getItem("token");
         const response = await fetch("http://127.0.0.1:8000/api/requests/"+requestId, {
           method: "DELETE",
+          credentials:"include",
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "Authorization":`Bearer ${token}`
           },
         });
          res=await response.json();
@@ -141,10 +138,10 @@ export default function MyRequests() {
   };
 
   const stats = {
-    total: R.length,
-    pending: R.filter(r => r.status === 'pending').length,
-    inReview: R.filter(r => r.status === 'in_progress').length,
-    completed: R.filter(r => r.status === 'completed' || r.status === 'approved').length,
+    total: R?.length,
+    pending: R?.filter(r => r.status === 'pending').length,
+    inReview: R?.filter(r => r.status === 'in_progress').length,
+    completed: R?.filter(r => r.status === 'completed' || r.status === 'approved')?.length,
   };
 
   return (
@@ -210,7 +207,7 @@ export default function MyRequests() {
               <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.total}</div>
+              <div className="text-2xl font-bold">{stats?.total}</div>
             </CardContent>
           </Card>
           <Card>
@@ -218,7 +215,7 @@ export default function MyRequests() {
               <CardTitle className="text-sm font-medium">Pending</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-500">{stats.pending}</div>
+              <div className="text-2xl font-bold text-yellow-500">{stats?.pending}</div>
             </CardContent>
           </Card>
           <Card>
@@ -226,7 +223,7 @@ export default function MyRequests() {
               <CardTitle className="text-sm font-medium">In Review</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-500">{stats.inReview}</div>
+              <div className="text-2xl font-bold text-blue-500">{stats?.inReview}</div>
             </CardContent>
           </Card>
           <Card>
@@ -234,7 +231,7 @@ export default function MyRequests() {
               <CardTitle className="text-sm font-medium">Completed</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-500">{stats.completed}</div>
+              <div className="text-2xl font-bold text-green-500">{stats?.completed}</div>
             </CardContent>
           </Card>
         </div>
@@ -246,25 +243,25 @@ export default function MyRequests() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {R.map((request) => (
+              {R?.map((request) => (
                 <Card key={request.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex flex-col sm:flex-row justify-between gap-4">
                       <div className="space-y-2 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold">{request.type.replace('_', ' ').toUpperCase()}</h3>
+                          <h3 className="font-semibold">{request?.type.replace('_', ' ').toUpperCase()}</h3>
                           <Badge variant="outline" className={getStatusColor(request.status)}>
                             <span className="flex items-center gap-1">
                               {getStatusIcon(request.status)}
-                              {request.status.replace('_', ' ')}
+                              {request?.status?.replace('_', ' ')}
                             </span>
                           </Badge>
                         </div>
                        
                         <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                          <span>ID: {request.id}</span>
-                          <span>Submitted:{request.submission_date}</span>
-                           <span>Completed: {request.completion_date}</span>
+                          <span>ID: {request?.id}</span>
+                          <span>Submitted:{request?.submission_date}</span>
+                           <span>Completed: {request?.completion_date}</span>
                          
                         </div>
                       </div>

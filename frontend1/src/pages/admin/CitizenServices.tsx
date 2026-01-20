@@ -57,13 +57,12 @@ export default function CitizenServices() {
   const handleDeleteRequest = (Rid: string) => {
     let res = null;
     const fetchData = async () => {
-      const token = localStorage.getItem("token");
       const response = await fetch("http://127.0.0.1:8000/api/requests/" + Rid, {
         method: "DELETE",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
         },
       });
       res = await response.json();
@@ -79,13 +78,14 @@ export default function CitizenServices() {
   const handleStatusChange = (Id: string, newStatus: RequestStatus) => {
     let res = null;
     const fetchData = async () => {
-      const token = localStorage.getItem("token");
+      
       const response = await fetch("http://127.0.0.1:8000/api/requests/" + Id + "/status", {
         method: "PUT",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
+        
         },
         body: JSON.stringify({
           'status': newStatus
@@ -104,13 +104,14 @@ export default function CitizenServices() {
   useEffect(() => {
     setClicked(false);
     const fetchData = async () => {
-      const token = localStorage.getItem("token");
+  
       const response = await fetch("http://127.0.0.1:8000/api/requests/department", {
         method: "GET",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
+         
         },
       });
       const res = await response.json();

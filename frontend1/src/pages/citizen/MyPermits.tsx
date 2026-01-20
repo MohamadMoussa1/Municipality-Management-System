@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, FileText, Calendar, DollarSign, Loader2 } from 'lucide-react';
+import { Plus, FileText, Calendar, Loader2 } from 'lucide-react';
 import {
-  CheckCircle,
   User,
   Phone,
   Clock,
@@ -48,25 +47,20 @@ export default function MyPermits() {
     setLoadingSubmit(true);
 
     try {
-      const token = localStorage.getItem("token");
       const formData = new FormData();
       formData.append("type", value);
-
       files.forEach((file: File) => {
         formData.append("documents[]", file);
       });
-
       const response = await fetch("http://127.0.0.1:8000/api/permits", {
         method: "POST",
+        credentials:"include",
         headers: {
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
         },
         body: formData,
       });
-
       const res = await response.json();
-
       if (response.ok) {
         // Reset form state
         setvalue("");
@@ -88,13 +82,12 @@ export default function MyPermits() {
   useEffect(() => {
     const fetchData = async () => {
       setClicked(false);
-      const token = localStorage.getItem("token");
       const response = await fetch("http://127.0.0.1:8000/api/permits/my-permits", {
         method: "GET",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
         },
       });
       let res = null;
@@ -121,11 +114,10 @@ export default function MyPermits() {
   const handleViewDetails = async (id: string) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`http://127.0.0.1:8000/api/permits/${id}`, {
         method: 'GET',
+        credentials:"include",
         headers: {
-          Authorization: `Bearer ${token}`,
           Accept: 'application/json',
         },
       });
