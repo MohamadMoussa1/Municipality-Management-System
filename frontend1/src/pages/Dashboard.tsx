@@ -115,7 +115,7 @@ const AdminDashboard = () => {
     financeData = [
       { name: 'property tax', value: i.by_type.property_tax.total_amount },
       { name: 'water bill', value: i.by_type?.water_bill?.total_amount },
-      { name: 'eletricity bill', value: i.by_type?.eletricity_bill?.total_amount },
+      { name: 'eletricity bill', value: i.by_type?.electricity_bill?.total_amount },
       { name: 'waste management', value: i.by_type?.waste_management?.total_amount },
       { name: 'other', value: i.by_type?.other?.total_amount },
     ];
@@ -189,18 +189,20 @@ const AdminDashboard = () => {
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                <Pie
-                  data={financeData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {financeData?.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
+                 <Pie
+                data={financeData || []}
+                cx="50%"
+                cy="50%"
+                labelLine={true}
+                label={({ name, percent }) => {if (percent > 0) {return `${name} ${(percent * 100).toFixed(0)}%`}}}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {(financeData || []).map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
                 <Tooltip />
                 <Legend />
               </PieChart>
@@ -432,7 +434,7 @@ const FinanceDashboard = () => {
     financeData = [
       { name: 'property tax', value: info.by_type.property_tax.total_amount },
       { name: 'water bill', value: info.by_type?.water_bill?.total_amount },
-      { name: 'eletricity bill', value: info.by_type?.eletricity_bill?.total_amount },
+      { name: 'eletricity bill', value: info.by_type?.electricity_bill?.total_amount },
       { name: 'waste management', value: info.by_type?.waste_management?.total_amount },
       { name: 'other', value: info.by_type?.other?.total_amount },
     ];
@@ -479,8 +481,8 @@ const FinanceDashboard = () => {
                 data={financeData || []}
                 cx="50%"
                 cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                labelLine={true}
+                label={({ name, percent }) => {if (percent > 0) {return `${name} ${(percent * 100).toFixed(0)}%`}}}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
@@ -523,9 +525,9 @@ const ProjectDashboard = () => {
     };
     fetchData();
   }, []);
-  let financeData = null;
+  let DepartmentsData = null;
   if (!loading && projectsL) {
-    financeData = [
+    DepartmentsData = [
       { name: 'finance', value: projectsL?.projects_by_department?.finance },
       { name: 'it', value: projectsL?.projects_by_department?.it },
       { name: 'hr', value: projectsL?.projects_by_department?.hr },
@@ -569,18 +571,19 @@ const ProjectDashboard = () => {
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                <Pie
-                  data={financeData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {financeData?.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
+               <Pie
+                data={DepartmentsData || []}
+                cx="50%"
+                cy="50%"
+                label={({ name, percent }) => percent > 0 ? `${name} ${(percent * 100).toFixed(0)}%` : ''}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {(DepartmentsData || []).map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
                 <Tooltip />
                 <Legend />
               </PieChart>
@@ -743,18 +746,20 @@ const HRDashboard = () => {
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                <Pie
-                  data={departmentData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {departmentData?.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
+               <Pie
+                data={departmentData || []}
+                cx="50%"
+                cy="50%"
+                labelLine={true}
+                label={({ name, percent }) => {if (percent > 0) {return `${name} ${(percent * 100).toFixed(0)}%`}}}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {(departmentData || []).map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
                 <Tooltip />
                 <Legend />
               </PieChart>

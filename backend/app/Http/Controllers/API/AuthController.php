@@ -161,17 +161,17 @@ class AuthController extends Controller
 
 public function logout(Request $request)
 {
-    // 1️⃣ Get the token from the cookie
+    // Get the token from the cookie
     $token = $request->cookie('auth_token');
     $user = $request->user();
     if ($token) {
-        // 2️⃣ Delete the token from personal_access_tokens table
+        // Delete the token from personal_access_tokens table
         DB::table('personal_access_tokens')
             ->where('tokenable_id', $user->id)
             ->delete();
     }
 
-    // 3️⃣ Forget the cookie on the client
+    // Forget the cookie on the client
     return response()->json([
         'message' => 'Logged out successfully'
     ])->withCookie(Cookie::forget('auth_token'));
