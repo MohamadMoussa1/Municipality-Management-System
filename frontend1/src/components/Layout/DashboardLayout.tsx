@@ -42,13 +42,12 @@ if(role == "admin"){
 }
   const  handleLogout =async () => {
     
-    const token=localStorage.getItem("token");
       const response = await fetch("http://127.0.0.1:8000/api/auth/logout", {
         method: "POST",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization":`Bearer ${token}`
         },
       });
       let res=null;
@@ -61,7 +60,6 @@ if(role == "admin"){
 
       toast.success(res.message,{ duration: 4000 });
       clearNotifications();
-      localStorage.removeItem("token");
       logout();
       navigate('/login');
   };

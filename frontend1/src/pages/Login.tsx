@@ -44,6 +44,7 @@ export default function Login() {
     try{
       const response = await fetch("http://127.0.0.1:8000/api/auth/login", {
         method: "POST",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
@@ -57,7 +58,6 @@ export default function Login() {
        if(result.message == "Login successful") {      
            localStorage.setItem("role",result.user.role);
            localStorage.setItem("user",result.user.name);
-           localStorage.setItem("token",result.access_token);
            setRole(result.user.role);
            setUser(result.user.name);
            // Dispatch custom event to trigger notification fetch

@@ -37,12 +37,10 @@ export default function Profile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem('token');
-
         const response = await fetch('http://127.0.0.1:8000/api/citizens/me', {
           method: 'GET',
+          credentials:"include",
           headers: {
-            Authorization: `Bearer ${token}`,
             Accept: 'application/json',
           },
         });
@@ -84,14 +82,13 @@ export default function Profile() {
     e.preventDefault();
     setLoadingSubmit(true);
     try {
-      const token = localStorage.getItem('token');
 
       const response = await fetch(
         'http://127.0.0.1:8000/api/citizens/me/update',
         {
           method: 'PUT',
+          credentials:"include",
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             Accept: 'application/json',
           },

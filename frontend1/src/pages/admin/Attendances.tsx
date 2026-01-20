@@ -37,10 +37,11 @@ export default function Attendances() {
   const navigate = useNavigate();
 
   const fetchEmployees = async () => {
-    const token = localStorage.getItem('token');
+    
     try {
       const res = await fetch('http://127.0.0.1:8000/api/employees', {
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        headers: {  Accept: 'application/json' },
+        credentials:"include",
       });
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');
@@ -63,7 +64,7 @@ export default function Attendances() {
 
   const fetchData = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
+   
     try {
       const params = new URLSearchParams();
       if (filters.employee_id) params.set('employee_id', filters.employee_id);
@@ -73,7 +74,8 @@ export default function Attendances() {
       if (filters.missing_checkout) params.set('missing_checkout', '1');
 
       const res = await fetch(`http://127.0.0.1:8000/api/attendance?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        headers: { Accept: 'application/json' },
+        credentials:"include",
       });
 
       if (res.status === 401) {
@@ -103,10 +105,11 @@ export default function Attendances() {
   }, []);
 
   const openDetails = async (id) => {
-    const token = localStorage.getItem('token');
+   
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/attendance/${id}`, {
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        headers: { Accept: 'application/json' },
+        credentials:"include",
       });
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');
@@ -140,12 +143,12 @@ export default function Attendances() {
       return;
     }
     setEditLoading(true);
-    const token = localStorage.getItem('token');
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/attendance/${selected.id}`, {
         method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json', 'Content-Type': 'application/json' },
+        headers: {  Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify({ check_in: editForm.check_in || null, check_out: editForm.check_out || null }),
+        credentials:"include",
       });
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');

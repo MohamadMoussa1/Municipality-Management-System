@@ -51,13 +51,13 @@ export default function EmployeeTasks() {
   const handleStatusChange = (Id: string, newStatus: RequestStatus) => {
     let res = null;
     const fetchData = async () => {
-      const token = localStorage.getItem("token");
+      
       const response = await fetch("http://127.0.0.1:8000/api/employees/tasks/" + Id + "/status", {
         method: "PUT",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
           'status': newStatus
@@ -76,13 +76,12 @@ export default function EmployeeTasks() {
   useEffect(() => {
     setClicked(false);
     const fetchData = async () => {
-      const token = localStorage.getItem("token");
       const response = await fetch("http://127.0.0.1:8000/api/employees/me/tasks", {
         method: "GET",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
         },
       });
       const res = await response.json();

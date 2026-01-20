@@ -50,13 +50,13 @@ export default function Permits() {
     const f = async () => {
       setClicked(false);    
       try {
-        const token = localStorage.getItem("token");
+       
         const response = await fetch("http://127.0.0.1:8000/api/permits", {
           method: "GET",
+          credentials:"include",
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "Authorization": `Bearer ${token}`
           },
         });
 
@@ -93,13 +93,12 @@ export default function Permits() {
     if (formData.date == '') {
       const fetchData = async () => {
         try {
-          const token = localStorage.getItem("token");
           const response = await fetch(`http://127.0.0.1:8000/api/permits/${Id}/status`, {
             method: "PUT",
+            credentials:"include",
             headers: {
               "Content-Type": "application/json",
               "Accept": "application/json",
-              "Authorization": `Bearer ${token}`,
             },
             body: JSON.stringify({
               status: selectedStatus,
@@ -130,13 +129,12 @@ export default function Permits() {
     else {
       const fetchData = async () => {
         try {
-          const token = localStorage.getItem("token");
           const response = await fetch(`http://127.0.0.1:8000/api/permits/${Id}/status`, {
             method: "PUT",
+            credentials:"include",
             headers: {
               "Content-Type": "application/json",
               "Accept": "application/json",
-              "Authorization": `Bearer ${token}`,
             },
             body: JSON.stringify({
               status: selectedStatus,
@@ -181,13 +179,12 @@ export default function Permits() {
   const handleDeletePermit = (Pid: string) => {
     let res = null;
     const fetchData = async () => {
-      const token = localStorage.getItem("token");
       const response = await fetch("http://127.0.0.1:8000/api/permits/" + Pid, {
         method: "DELETE",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
         },
       });
       res = await response.json();
@@ -202,11 +199,10 @@ export default function Permits() {
   const handleViewPermit = async (p: string) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`http://127.0.0.1:8000/api/permits/${p}`, {
         method: 'GET',
+        credentials:"include",
         headers: {
-          Authorization: `Bearer ${token}`,
           Accept: 'application/json',
         },
       });

@@ -42,12 +42,10 @@ export default function ProfileEmployee() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const token = localStorage.getItem('token');
-
       const response = await fetch('http://127.0.0.1:8000/api/employees/me', {
          method: "GET",
+         credentials:"include",
         headers: {
-          Authorization: `Bearer ${token}`,
           Accept: 'application/json',
         },
       });
@@ -90,14 +88,13 @@ export default function ProfileEmployee() {
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoadingSubmit(true);
-    const token = localStorage.getItem('token');
   try{
     const response = await fetch(
       'http://127.0.0.1:8000/api/employees/me/update',
       {
         method: 'PUT',
+        credentials:"include",
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },

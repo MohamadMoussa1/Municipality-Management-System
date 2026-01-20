@@ -12,7 +12,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 
@@ -20,7 +19,6 @@ export default function MyPayments() {
   const [payments, setPayments] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [payDialogOpen, setPayDialogOpen] = useState(false);
 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -29,14 +27,13 @@ export default function MyPayments() {
 
   const fetchData = async () => {
     setLoading(true);
-    const token = localStorage.getItem("token");
     try {
       const response = await fetch("http://127.0.0.1:8000/api/payments/my-payments", {
         method: "GET",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
         },
       });
       if (response.status === 401) {
@@ -76,11 +73,9 @@ export default function MyPayments() {
         const poll = async () => {
           attempts++;
           try {
-            const token = localStorage.getItem('token');
-            const r = await fetch(`http://127.0.0.1:8000/api/payments/${id}`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+            const r = await fetch(`http://127.0.0.1:8000/api/payments/${id}`, { headers: { Accept: 'application/json' },credentials:"include" });
             if (r.status === 401) {
               toast.error('Session expired. Please login again.');
-              localStorage.removeItem('token');
               navigate('/login');
               return;
             }
@@ -118,14 +113,15 @@ export default function MyPayments() {
   const handlePayNow = async (payment) => {
     if (payLoading) return;
     setPayLoading(true);
-    const token = localStorage.getItem("token");
+   
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/payments/${payment.id}/pay`, {
         method: "POST",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
+          
         },
       });
       if (response.status === 401) {
@@ -172,19 +168,17 @@ Thank you for your payment!
 
   const fetchPaymentDetails = async (id) => {
     setDetailsLoading(true);
-    const token = localStorage.getItem("token");
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/payments/${id}`, {
         method: "GET",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
         },
       });
       if (response.status === 401) {
         toast.error("Session expired. Please login again.");
-        localStorage.removeItem('token');
         navigate('/login');
         return;
       }

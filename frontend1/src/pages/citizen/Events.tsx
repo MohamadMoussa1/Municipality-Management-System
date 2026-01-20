@@ -37,9 +37,10 @@ export default function CitizenEvents() {
         const response = await axios.get('http://127.0.0.1:8000/api/events', {
           headers: {
             'Accept': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+          },
+          withCredentials: true,
         });
+        console.log(response);
         setEvents(response.data);
       } catch (err) {
         console.error('Error fetching events:', err);

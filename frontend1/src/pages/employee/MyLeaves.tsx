@@ -116,21 +116,21 @@ export default function MyLeaves() {
     useEffect(() => {
         const fetchLeaves = async () => {
             setLoading(true);
-            const token = localStorage.getItem('token');
+           
 
             try {
                 const res = await fetch(`${API_BASE}/leaves/my`, {
                     method: 'GET',
+                    credentials:"include",
                     headers: {
                         'Content-Type': 'application/json',
                         Accept: 'application/json',
-                        Authorization: `Bearer ${token}`,
+                       
                     },
                 });
 
                 if (res.status === 401) {
-                    toast.error('Session expired. Please login again.');
-                    localStorage.removeItem('token');
+                    toast.error('Session expired. Please login again.');                
                     navigate('/login');
                     return;
                 }
@@ -172,18 +172,15 @@ export default function MyLeaves() {
             toast.error('Please fill in leave type, start date and end date.');
             return;
         }
-
         setLoadingSubmit(true);
-
-        const token = localStorage.getItem('token');
-
         try {
             const res = await fetch(`${API_BASE}/leaves`, {
                 method: 'POST',
+                credentials:"include",
                 headers: {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
-                    Authorization: `Bearer ${token}`,
+                   
                 },
                 body: JSON.stringify({
                     type: leaveType,
@@ -195,7 +192,6 @@ export default function MyLeaves() {
 
             if (res.status === 401) {
                 toast.error('Session expired. Please login again.');
-                localStorage.removeItem('token');
                 navigate('/login');
                 return;
             }

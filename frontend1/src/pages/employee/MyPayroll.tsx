@@ -3,8 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Loader2, Eye } from 'lucide-react';
 import { CitizenRequest } from '@/types';
-
-import { useNavigate } from 'react-router-dom'
 import {
   Dialog,
   DialogContent,
@@ -25,13 +23,13 @@ export default function MyPayroll() {
   useEffect(() => {
     setClicked(false);
     const fetchData = async () => {
-      const token = localStorage.getItem("token");
+     
       const response = await fetch("http://127.0.0.1:8000/api/payrolls", {
         method: "GET",
+        credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
         },
       });
       const res = await response.json();

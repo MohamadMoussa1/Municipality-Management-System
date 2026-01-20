@@ -37,8 +37,8 @@ export default function EmployeeEvents() {
         const response = await axios.get('http://127.0.0.1:8000/api/events', {
           headers: {
             'Accept': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+          },
+          withCredentials:true
         });
         setEvents(response.data);
       } catch (err) {

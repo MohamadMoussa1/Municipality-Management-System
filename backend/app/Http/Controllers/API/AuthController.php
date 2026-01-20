@@ -22,7 +22,7 @@ class AuthController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
+   public function login(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'email' => 'required|email',
@@ -49,12 +49,23 @@ class AuthController extends Controller
         // Create new token with static name
         $token = $user->createToken('auth-token')->plainTextToken;
 
+        // Set the token as a cookie
+        $cookie = cookie(
+            'auth_token',
+            $token,
+            60 * 24, // 24 hours
+            null,
+            null,
+            true, // secure
+            true, // httpOnly
+            false, // raw
+            'None' // sameSite
+        );
+
         return response()->json([
             'message' => 'Login successful',
             'user' => new UserResource($user->load(['citizen', 'employee'])),
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-        ]);
+        ])->withCookie($cookie);
     }
     /**
      * Register a new citizen user.
@@ -90,13 +101,12 @@ class AuthController extends Controller
             // Generate API token
             $token = $user->createToken('auth-token')->plainTextToken;
 
+            $cookie = cookie('auth_token',$token,60 * 24,null, null, true, true, false, 'None');
             return response()->json([
-                'message' => 'Registration successful',
-                'user' => new UserResource($user->load('citizen')),
-                'access_token' => $token,
-                'token_type' => 'Bearer',
-            ], 201);
-        });
+                'status' => true,
+                'message'=>'registration succesuffly'
+                ])->withCookie($cookie);
+            });
     }
 
     /**
