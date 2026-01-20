@@ -17,6 +17,7 @@ use App\Http\Controllers\API\StripeWebhookController;
 use App\Http\Controllers\Api\LeaveController;
 use App\Http\Controllers\API\PayrollController;
 use App\Http\Controllers\API\AdminDashboardController;
+use App\Http\Controllers\API\HRDashboardController;
 use App\Http\Middleware\EnsureTokenIsValid;
 
 // Public routes
@@ -88,6 +89,13 @@ Route::middleware([EnsureTokenIsValid::class])->group(function () {
     Route::middleware(['role:admin|hr_manager'])->group(function () {
         Route::post('/admin/register', [AuthController::class, 'adminRegister']);
     });
+
+    Route::middleware(['role:admin|hr_manager'])->group(function () {
+        Route::get('/hr/dashboard/stats', [HRDashboardController::class, 'dashboardStats']);
+        Route::get('/hr/dashboard/pending-leave-requests', [HRDashboardController::class, 'pendingLeaveRequests']);
+    Route::get('/upcoming-count', [EventController::class, 'getUpcomingEventsCount']);
+    Route::get('/hr/dashboard/total-tasks', [HRDashboardController::class, 'countTodoTasks']);
+});
 
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/admin/dashboard/permits-requests/monthly-counts', [AdminDashboardController::class, 'monthlyPermitsAndRequestsCounts']);
