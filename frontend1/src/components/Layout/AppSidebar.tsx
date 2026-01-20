@@ -55,7 +55,7 @@ export const AppSidebar = () => {
       { title: 'Human Resources', url: '/admin/hr', icon: UserCog },
       { title: 'Events', url: '/admin/events', icon: Calendar },
       { title: 'Attendances', url: '/admin/attendences', icon: ClipboardList },
-      { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
+      // { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
       { title: 'Notifications', url: '/notifications', icon: Bell },
     ];
 
@@ -76,7 +76,7 @@ export const AppSidebar = () => {
       {title: 'My Attendances', url: '/employee/attendences', icon: ClipboardList},
       {title: 'My Leaves', url: '/employee/MyLeaves', icon: ClipboardList},
       {title: 'My Payroll', url: '/employee/MyPayroll', icon: ClipboardList},
-      { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
+      // { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
       { title: 'Notifications', url: '/notifications', icon: Bell }
 
     ];
@@ -89,7 +89,7 @@ export const AppSidebar = () => {
       { title: 'Attendances', url: '/admin/attendences', icon: ClipboardList },
       {title: 'My Leaves', url: '/employee/MyLeaves', icon: ClipboardList},
       {title: 'My Payroll', url: '/employee/MyPayroll', icon: ClipboardList},
-      { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
+      // { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
       { title: 'Notifications', url: '/notifications', icon: Bell }
      
     ];
