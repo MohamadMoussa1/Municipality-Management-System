@@ -13,6 +13,10 @@ use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cookie;
+
+
+
 
 class AuthController extends Controller
 {
@@ -152,20 +156,27 @@ class AuthController extends Controller
         });
     }
 
-    public function logout(Request $request)
-{
-    try {
-        $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Successfully logged out'
-        ], Response::HTTP_OK);  // Changed from Response::HTTP_OK to 200
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Error during logout',
-            'error' => $e->getMessage()
-        ], 500);
+
+
+public function logout(Request $request)
+{
+    // 1️⃣ Get the token from the cookie
+    $token = $request->cookie('auth_token');
+    $user = $request->user();
+    if ($token) {
+        // 2️⃣ Delete the token from personal_access_tokens table
+        DB::table('personal_access_tokens')
+            ->where('tokenable_id', $user->id)
+            ->delete();
     }
+
+    // 3️⃣ Forget the cookie on the client
+    return response()->json([
+        'message' => 'Logged out successfully'
+    ])->withCookie(Cookie::forget('auth_token'));
 }
+
+
 
 }
