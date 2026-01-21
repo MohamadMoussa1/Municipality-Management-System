@@ -4,9 +4,10 @@
 # 1-Navigate to the backend folder:
 # 2-cd backend
 # 3-composer install
-# 4-Copy .env.example to .env and configure:
-# 5-Generate app key: php artisan key:generate
-# 6-Run migrations and seeders: php artisan migrate --seed
+# 4-Generate app key: php artisan key:generate
+# 5-php artisan install:api
+# 6-php artisan migrate
+# 7-php artisan db:seed
 
 ### REACT:
 # cd frontend1
