@@ -92,6 +92,9 @@ export default function Permits() {
   const handleStatusChange = (Id: string, newStatus: any) => {
     if (formData.date == '') {
       const fetchData = async () => {
+         
+         setClicked(false);
+         setClicked(true);
         try {
           const response = await fetch(`http://127.0.0.1:8000/api/permits/${Id}/status`, {
             method: "PUT",
@@ -106,7 +109,7 @@ export default function Permits() {
           });
 
           const res = await response.json();
-          setClicked(true)
+         
           toast({
             title: "Status Updated",
             description: `Permit ${Id} status changed to ${newStatus.replace("_", " ")}${formData.date ? ` (Expiry: ${formData.date})` : ""
@@ -349,7 +352,7 @@ export default function Permits() {
                         >
                           <SelectValue> 
                             <Badge className={getStatusColor(p.status)}>
-                              {p.status === 'in_review' ? 'In Review' : p.status.charAt(0).toUpperCase() + p.status.slice(1)}
+                              {p.status === 'pending' ? 'Pending' : p.status.charAt(0).toUpperCase() + p.status.slice(1)}
                             </Badge>
                           </SelectValue>
                         </Select>

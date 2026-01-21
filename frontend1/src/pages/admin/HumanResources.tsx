@@ -235,7 +235,8 @@ export default function HumanResources() {
 
   const handleAddEmployee = async () => {
     setLoadingSubmit(true);
-    setClicked(true);
+    setClicked(true);  
+    setClicked(false);  
     // Validate required fields
     if (!newEmployee.name || !newEmployee.email || !newEmployee.position || !newEmployee.role || !newEmployee.password || !newEmployee.password_confirmation) {
       toast({

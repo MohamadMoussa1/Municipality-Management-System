@@ -11,6 +11,14 @@ import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom'
 import { Textarea } from '@/components/ui/textarea';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -84,7 +92,7 @@ export default function Events() {
         headers: {
           'Accept': 'application/json',
         },
-         withCredentials: true,
+        withCredentials: true,
       });
       setEvents(response.data);
     } catch (error) {
@@ -122,7 +130,7 @@ export default function Events() {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
             },
-             withCredentials: true,
+            withCredentials: true,
           }
         );
         setEvents(events.map(event =>
@@ -139,9 +147,9 @@ export default function Events() {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
-             
+
             },
-             withCredentials: true,
+            withCredentials: true,
           }
         );
         // Ensure we're using the correct response structure
@@ -169,7 +177,7 @@ export default function Events() {
         headers: {
           'Accept': 'application/json',
         },
-         withCredentials: true,
+        withCredentials: true,
       });
       setSelectedEvent(response.data);
       // You can open a view dialog here if needed
@@ -203,7 +211,7 @@ export default function Events() {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
-         withCredentials: true,
+        withCredentials: true,
       });
 
       // Remove the deleted event from the state
@@ -363,7 +371,26 @@ export default function Events() {
                       required
                     />
                   </div>
-
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input
+                      id="location"
+                      placeholder="Event venue or address"
+                      value={formData.location}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="capacity">Capacity</Label>
+                  <Input
+                    id="capacity"
+                    type="number"
+                    placeholder="Maximum number of attendees"
+                    value={formData.capacity}
+                    onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+                    min="1"
+                  />
                 </div>
               </div>
               <DialogFooter>
@@ -435,77 +462,83 @@ export default function Events() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4">
-            {filteredEvents.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No events found. Create a new event to get started.
-              </div>
-            ) : (
-              filteredEvents.map((event) => (
-                <Card key={event.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-lg font-semibold">{event.title}</h3>
-                          <Badge variant="outline" className={getStatusColor(event.status)}>
-                            {event.status || 'upcoming'}
-                          </Badge>
-
-                          <Badge variant="outline">
-                            {getAudienceLabel(event.target_audience as EventAudience)}
-                          </Badge>
+          {filteredEvents.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No events found. Create a new event to get started.
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Event</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Audience</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredEvents.map((event) => (
+                    <TableRow key={event.id} className="hover:bg-muted/50">
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          {event.title}
                         </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {event.description}
-                        </p>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            {new Date(event.date).toLocaleDateString()}
-                          </div>
-                          {event.location && (
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-4 w-4" />
-                              {event.location}
-                            </div>
-                          )}
-                          {event.capacity && (
-                            <div className="flex items-center gap-1">
-                              <Users className="h-4 w-4" />
-                              {event.registered || 0} / {event.capacity} registered
-                            </div>
-                          )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="max-w-xs truncate" title={event.description}>
+                          {event.description || 'No description'}
                         </div>
-                      </div>
-                      <div className="flex gap-2 flex-shrink-0">
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            if (window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
-                              handleDeleteEvent(event.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Delete
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditEvent(event)}
-                        >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Edit
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          {new Date(event.date).toLocaleDateString()}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusColor(event.status)}>
+                          {event.status || 'upcoming'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {getAudienceLabel(event.target_audience as EventAudience)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditEvent(event)}
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => {
+                              if (window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+                                handleDeleteEvent(event.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
