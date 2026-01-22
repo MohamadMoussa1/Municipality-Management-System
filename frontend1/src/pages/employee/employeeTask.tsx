@@ -124,15 +124,15 @@ export default function EmployeeTasks() {
   return (
     <div className="space-y-3 sm:space-y-6 p-2 sm:p-0">
       <div className="px-2 sm:px-0">
-        <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground">Citizen Services</h1>
-        <p className="text-[11px] sm:text-sm md:text-base text-muted-foreground mt-0.5 sm:mt-1">Manage citizen requests and applications</p>
+        <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground">TO DO TASKS</h1>
+        <p className="text-[11px] sm:text-sm md:text-base text-muted-foreground mt-0.5 sm:mt-1">Manage tasks and what to do </p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
         <Card>
           <CardContent className="p-2.5 sm:p-4 md:p-6">
             <div className="text-base sm:text-xl md:text-2xl font-bold">{Tasks?.length}</div>
-            <div className="text-[9px] sm:text-xs md:text-sm text-muted-foreground leading-tight">Total Requests</div>
+            <div className="text-[9px] sm:text-xs md:text-sm text-muted-foreground leading-tight">Total tasks</div>
           </CardContent>
         </Card>
         <Card>
@@ -159,8 +159,8 @@ export default function EmployeeTasks() {
         <CardHeader className="p-3 sm:p-6">
           <div className="flex flex-col gap-2 sm:gap-3">
             <div>
-              <CardTitle className="text-sm sm:text-lg md:text-xl">All Requests</CardTitle>
-              <CardDescription className="text-[11px] sm:text-sm">View and manage citizen service requests</CardDescription>
+              <CardTitle className="text-sm sm:text-lg md:text-xl">All tasks</CardTitle>
+              <CardDescription className="text-[11px] sm:text-sm">View and complete tasks</CardDescription>
             </div>
           </div>
         </CardHeader>

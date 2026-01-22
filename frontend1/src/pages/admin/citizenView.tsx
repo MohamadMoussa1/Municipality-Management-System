@@ -5,14 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {Dialog,DialogContent,DialogDescription,DialogFooter,DialogHeader,DialogTitle,} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 export function CitizenList() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
-    id:""
+    id: ""
     , name: ""
     , email: ""
     , password: ""
@@ -21,24 +21,25 @@ export function CitizenList() {
     , address: ""
     , contact: ""
     , date_of_birth: "",
-    status:"",
+    status: "",
   });
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [editStatus, setEditStatus] = useState("");
   const { toast } = useToast();
   const [C, setC] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [clicked, setClicked] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const fetchCitizens = useCallback(async () => {
     try {
-     
+
       const response = await fetch("http://127.0.0.1:8000/api/citizens", {
         method: "GET",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-         
+
         },
       });
       const res = await response.json();
@@ -51,8 +52,8 @@ export function CitizenList() {
 
   useEffect(() => {
     fetchCitizens();
-  }, [fetchCitizens, refreshTrigger]);
-  
+  }, [fetchCitizens, refreshTrigger, clicked]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -61,7 +62,7 @@ export function CitizenList() {
       </div>
     );
   }
-const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
@@ -78,7 +79,7 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
   const handleEditClick = (citizen: any) => {
     setFormData({
-      id:citizen.id,
+      id: citizen.id,
       name: citizen.name,
       email: citizen.email,
       password: "",
@@ -87,15 +88,16 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       address: citizen.address,
       contact: citizen.contact,
       date_of_birth: citizen.date_of_birth,
-      status:citizen.status,
+      status: citizen.status,
     });
+    setEditStatus(citizen.status);
     setIsEditDialogOpen(true);
   };
 
   const handleUpdateCitizen = async (e: React.FormEvent) => {
     e.preventDefault();
-    setRefreshTrigger(1);
-    setRefreshTrigger(0);
+    setClicked(true);
+    setClicked(false);
     setLoadingSubmit(true);
     if (!formData.name.trim() || !formData.email.trim() || !formData.national_id.trim()) {
       toast({
@@ -106,14 +108,14 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       return;
     }
     try {
-     
+
       const response = await fetch("http://127.0.0.1:8000/api/citizens/" + formData.id, {
         method: "PUT",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-         
+
         },
         body: JSON.stringify({
           'name': formData.name,
@@ -127,7 +129,7 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       });
       const result = await response.json();
       setRefreshTrigger(100);
-      
+
       setIsEditDialogOpen(false);
       toast({
         title: "Success",
@@ -139,96 +141,96 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setLoadingSubmit(false);
     }
   };
-const citizenFormFields = (
-  <>
-    <div className="grid gap-4 py-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  const citizenFormFields = (
+    <>
+      <div className="grid gap-4 py-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="edit-name">Name *</Label>
+            <Input
+              id="edit-name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              placeholder="Full Name"
+              required
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="edit-email">Email *</Label>
+            <Input
+              id="edit-email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="email@example.com"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="edit-national_id">National ID *</Label>
+            <Input
+              id="edit-national_id"
+              name="national_id"
+              value={formData.national_id}
+              onChange={handleInputChange}
+              placeholder="National ID Number"
+              required
+            />
+          </div>
+        </div>
         <div className="space-y-2">
-          <Label htmlFor="edit-name">Name *</Label>
+          <Label htmlFor="edit-address">Address</Label>
           <Input
-            id="edit-name"
-            name="name"
-            value={formData.name}
+            id="edit-address"
+            name="address"
+            value={formData.address}
             onChange={handleInputChange}
-            placeholder="Full Name"
-            required
+            placeholder="Full Address"
           />
         </div>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="edit-email">Email *</Label>
-          <Input
-            id="edit-email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            placeholder="email@example.com"
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="edit-national_id">National ID *</Label>
-          <Input
-            id="edit-national_id"
-            name="national_id"
-            value={formData.national_id}
-            onChange={handleInputChange}
-            placeholder="National ID Number"
-            required
-          />
-        </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="edit-address">Address</Label>
-        <Input
-          id="edit-address"
-          name="address"
-          value={formData.address}
-          onChange={handleInputChange}
-          placeholder="Full Address"
-        />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="edit-contact">Contact</Label>
-          <Input
-            id="edit-contact"
-            name="contact"
-            value={formData.contact}
-            onChange={handleInputChange}
-            placeholder="+1-234-567-8900"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="edit-contact">Contact</Label>
+            <Input
+              id="edit-contact"
+              name="contact"
+              value={formData.contact}
+              onChange={handleInputChange}
+              placeholder="+1-234-567-8900"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="edit-date_of_birth">Date of Birth</Label>
+            <Input
+              id="edit-date_of_birth"
+              name="date_of_birth"
+              type="date"
+              value={formData.date_of_birth}
+              onChange={handleInputChange}
+            />
+          </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="edit-date_of_birth">Date of Birth</Label>
-          <Input
-            id="edit-date_of_birth"
-            name="date_of_birth"
-            type="date"
-            value={formData.date_of_birth}
-            onChange={handleInputChange}
-          />
+          <Label htmlFor="edit-status">Status</Label>
+          <Select value={editStatus} onValueChange={handleStatusChange}>
+            <SelectTrigger id="edit-status">
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">In active</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="edit-status">Status</Label>
-        <Select value={editStatus} onValueChange={handleStatusChange}>
-          <SelectTrigger id="edit-status">
-            <SelectValue placeholder="Select status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">In active</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-  </>
-);
+    </>
+  );
   return (
     <div className="space-y-6">
       {/* Header Stats */}
@@ -371,7 +373,7 @@ const citizenFormFields = (
               Update the citizen's information. Leave password fields empty to keep current password.
             </DialogDescription>
           </DialogHeader>
-           {citizenFormFields}
+          {citizenFormFields}
           <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="w-full sm:w-auto">
               Cancel

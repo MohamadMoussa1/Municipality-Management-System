@@ -93,6 +93,8 @@ export default function Permits() {
     if (formData.date == '') {
       const fetchData = async () => {
         try {
+          setClicked(false);
+          setClicked(true);
           const response = await fetch(`http://127.0.0.1:8000/api/permits/${Id}/status`, {
             method: "PUT",
             credentials:"include",
@@ -145,7 +147,7 @@ export default function Permits() {
           const res = await response.json();
           setClicked(true)
           toast({
-            title: "Status Updated",
+            title: res.message,
             description: `Permit ${Id} status changed to ${newStatus.replace("_", " ")}${formData.date ? ` (Expiry: ${formData.date})` : ""
               }.`,
           });

@@ -69,14 +69,14 @@ export default function HumanResources() {
 
   };
   const fetchD = async () => {
-   
+
     const response = await fetch("http://127.0.0.1:8000/api/payrolls/" + payrollEditId + "/adjustments", {
       method: "POST",
-      credentials:"include",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
-       
+
       },
       body: JSON.stringify({
         'type': payrollEditType,
@@ -98,14 +98,14 @@ export default function HumanResources() {
   };
 
   const fetchPayrollPage = async (pageNumber: number) => {
-    
+
     const response = await fetch(`http://127.0.0.1:8000/api/payrolls?page=${pageNumber}`, {
       method: "GET",
-      credentials:"include",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
-       
+
       },
     });
     const res = await response.json();
@@ -118,14 +118,14 @@ export default function HumanResources() {
   const handleStatusChange = (Id: string, newStatus: RequestLeaveStatus) => {
     let res = null;
     const fetchData = async () => {
-     
+
       const response = await fetch("http://127.0.0.1:8000/api/leaves/" + Id + "/status", {
         method: "PUT",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-         
+
         },
         body: JSON.stringify({
           'status': newStatus
@@ -161,14 +161,14 @@ export default function HumanResources() {
 
   useEffect(() => {
     const fetchData = async () => {
-     
+
       const response = await fetch("http://127.0.0.1:8000/api/leaves", {
         method: "GET",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-         
+
         },
       });
       const res = await response.json();
@@ -199,14 +199,14 @@ export default function HumanResources() {
   }
   useEffect(() => {
     const fetchData = async () => {
-     
+
       const response = await fetch("http://127.0.0.1:8000/api/employees", {
         method: "GET",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-         
+
         },
       });
       const res = await response.json();
@@ -235,7 +235,7 @@ export default function HumanResources() {
 
   const handleAddEmployee = async () => {
     setLoadingSubmit(true);
-    setClicked(true);
+
     // Validate required fields
     if (!newEmployee.name || !newEmployee.email || !newEmployee.position || !newEmployee.role || !newEmployee.password || !newEmployee.password_confirmation) {
       toast({
@@ -246,11 +246,11 @@ export default function HumanResources() {
       return;
     }
 
-  
+
     try {
       const response = await fetch("http://127.0.0.1:8000/api/admin/register", {
         method: "POST",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
@@ -278,7 +278,7 @@ export default function HumanResources() {
           password: '',
           password_confirmation: '',
         });
-
+        setClicked(prev => !prev);
         setAddEmployeeOpen(false);
       } else {
         toast({
@@ -300,15 +300,15 @@ export default function HumanResources() {
   const handleAddPayRoll = async () => {
     setLoadingSubmit(true);
     setClicked(true);
-    
+
     try {
       const response = await fetch("http://127.0.0.1:8000/api/payrolls/generate", {
         method: "POST",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-         
+
         },
         body: JSON.stringify({
           'month': year + "-" + mnth

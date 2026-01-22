@@ -12,6 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface Event {
   id: number;
@@ -57,20 +65,20 @@ export default function CitizenEvents() {
   // Filter events based on search and filters
   const filteredEvents = events.filter((event) => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchQuery.toLowerCase());
+      event.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = filterType === 'all' || event.target_audience === filterType;
     const isPast = new Date(event.date) < new Date();
-    const matchesStatus = filterStatus === 'all' || 
-                         (filterStatus === 'past' && isPast) || 
-                         (filterStatus === 'upcoming' && !isPast);
-    
+    const matchesStatus = filterStatus === 'all' ||
+      (filterStatus === 'past' && isPast) ||
+      (filterStatus === 'upcoming' && !isPast);
+
     return matchesSearch && matchesType && matchesStatus;
   });
 
   const getStatusColor = (eventDate: string) => {
     const today = new Date();
     const eventDateObj = new Date(eventDate);
-    
+
     if (eventDateObj < today) {
       return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
     }
@@ -145,54 +153,70 @@ export default function CitizenEvents() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4">
-                {filteredEvents.length === 0 ? (
-                  <div className="col-span-full text-center py-12">
-                    <div className="mx-auto h-24 w-24 text-muted-foreground/40 mb-4">
-                      <Calendar className="w-full h-full" />
-                    </div>
-                    <h3 className="text-lg font-medium">No events found</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {events.length === 0 
-                        ? 'There are no events at the moment.' 
-                        : 'Try adjusting your search or filter to find what you\'re looking for.'}
-                    </p>
+              {filteredEvents.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="mx-auto h-24 w-24 text-muted-foreground/40 mb-4">
+                    <Calendar className="w-full h-full" />
                   </div>
-                ) : (
-                  filteredEvents.map((event) => (
-                    <Card key={event.id} className="hover:shadow-md transition-shadow">
-                      <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-lg font-semibold">{event.title}</h3>
-                            <div className="flex items-center mt-1 space-x-2">
-                              <Badge className={`${getTypeColor(event.target_audience)} capitalize`}>
-                                {event.target_audience}
-                              </Badge>
-                              <Badge className={`${getStatusColor(event.date)} capitalize`}>
-                                {new Date(event.date) < new Date() ? 'Past' : 'Upcoming'}
-                              </Badge>
+                  <h3 className="text-lg font-medium">No events found</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {events.length === 0
+                      ? 'There are no events at the moment.'
+                      : 'Try adjusting your search or filter to find what you\'re looking for.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Event</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Audience</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredEvents.map((event) => (
+                        <TableRow key={event.id} className="hover:bg-muted/50">
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                              {event.title}
                             </div>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <p className="text-muted-foreground mb-4">{event.description}</p>
-                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            {new Date(event.date).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                            })}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="max-w-xs truncate" title={event.description}>
+                              {event.description}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                              {new Date(event.date).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={`${getTypeColor(event.target_audience)} capitalize`}>
+                              {event.target_audience}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={`${getStatusColor(event.date)} capitalize`}>
+                              {new Date(event.date) < new Date() ? 'Past' : 'Upcoming'}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </>
