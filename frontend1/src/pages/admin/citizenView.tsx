@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import  getCsrfToken  from '../../lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 export function CitizenList() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -109,13 +110,13 @@ export function CitizenList() {
     }
     try {
 
-      const response = await fetch("http://127.0.0.1:8000/api/citizens/" + formData.id, {
+      const response = await fetch("http://127.0.0.1:8000/cs/citizens/" + formData.id, {
         method: "PUT",
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-
+          'X-XSRF-TOKEN':getCsrfToken(),
         },
         body: JSON.stringify({
           'name': formData.name,

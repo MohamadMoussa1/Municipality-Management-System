@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Search, Clock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Edit, Search, Clock, CheckCircle,Loader2 } from 'lucide-react';
+import  getCsrfToken  from '../../lib/utils';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -45,7 +46,6 @@ export default function Attendances() {
       });
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');
-        localStorage.removeItem('token');
         navigate('/login');
         return;
       }
@@ -80,7 +80,6 @@ export default function Attendances() {
 
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');
-        localStorage.removeItem('token');
         navigate('/login');
         return;
       }
@@ -113,7 +112,6 @@ export default function Attendances() {
       });
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');
-        localStorage.removeItem('token');
         navigate('/login');
         return;
       }
@@ -144,15 +142,14 @@ export default function Attendances() {
     }
     setEditLoading(true);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/attendance/${selected.id}`, {
+      const res = await fetch(`http://127.0.0.1:8000/cs/attendance/${selected.id}`, {
         method: 'PUT',
-        headers: {  Accept: 'application/json', 'Content-Type': 'application/json' },
+        headers: {  Accept: 'application/json', 'Content-Type': 'application/json', 'X-XSRF-TOKEN':getCsrfToken(), },
         body: JSON.stringify({ check_in: editForm.check_in || null, check_out: editForm.check_out || null }),
         credentials:"include",
       });
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');
-        localStorage.removeItem('token');
         navigate('/login');
         return;
       }
@@ -340,10 +337,6 @@ export default function Attendances() {
       </Dialog>
     </div>
   );
-}
-
-function fmt(s) {
-  return s ? new Date(s).toLocaleString() : '-';
 }
 
 function toLocalDatetimeVal(s) {

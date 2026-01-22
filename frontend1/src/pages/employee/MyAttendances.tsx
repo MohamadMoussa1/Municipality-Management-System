@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, CheckCircle, XCircle, LogIn, LogOut ,Loader2} from 'lucide-react';
+import { Clock, CheckCircle, LogIn, LogOut ,Loader2} from 'lucide-react';
+import  getCsrfToken  from '../../lib/utils';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -69,10 +70,10 @@ export default function MyAttendances() {
     if (actionLoading) return;
     setActionLoading(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/attendance/check-in', {
+      const res = await fetch('http://127.0.0.1:8000/cs/attendance/check-in', {
         method: 'POST',
         credentials:"include",
-        headers: { Accept: 'application/json' },
+        headers: { Accept: 'application/json', 'X-XSRF-TOKEN':getCsrfToken(), },
       });
 
       if (res.status === 401) {
@@ -124,10 +125,10 @@ export default function MyAttendances() {
     if (actionLoading) return;
     setActionLoading(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/attendance/check-out', {
+      const res = await fetch('http://127.0.0.1:8000/cs/attendance/check-out', {
         method: 'POST',
         credentials:"include",
-        headers: { Accept: 'application/json' },
+        headers: { Accept: 'application/json', 'X-XSRF-TOKEN':getCsrfToken(), },
       });
 
       if (res.status === 401) {
@@ -212,10 +213,10 @@ export default function MyAttendances() {
     
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/attendance/check-out', {
+      const res = await fetch('http://127.0.0.1:8000/cs/attendance/check-out', {
         method: 'POST',
         credentials:"include",
-        headers: {  Accept: 'application/json' },
+        headers: {  Accept: 'application/json' , 'X-XSRF-TOKEN':getCsrfToken(),},
       });
 
       if (res.status === 401) {

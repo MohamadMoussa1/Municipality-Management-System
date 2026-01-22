@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, FileText, Calendar, Loader2 } from 'lucide-react';
+import  getCsrfToken  from '../../lib/utils';
 import {
   User,
   Phone,
@@ -52,11 +53,12 @@ export default function MyPermits() {
       files.forEach((file: File) => {
         formData.append("documents[]", file);
       });
-      const response = await fetch("http://127.0.0.1:8000/api/permits", {
+      const response = await fetch("http://127.0.0.1:8000/cs/permits", {
         method: "POST",
         credentials:"include",
         headers: {
           "Accept": "application/json",
+          'X-XSRF-TOKEN':getCsrfToken(),
         },
         body: formData,
       });

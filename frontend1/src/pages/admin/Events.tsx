@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import  getCsrfToken  from '../../lib/utils';
 import { useNavigate } from 'react-router-dom'
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -55,7 +56,7 @@ interface Event {
 type EventAudience = 'public' | 'staff' | 'citizens';
 
 // 3. API base URL
-const API_URL = 'http://127.0.0.1:8000/api';
+
 
 export default function Events() {
   const navigate = useNavigate();
@@ -88,7 +89,7 @@ export default function Events() {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/events`, {
+      const response = await axios.get('http://127.0.0.1:8000/api/events', {
         headers: {
           'Accept': 'application/json',
         },
@@ -123,12 +124,13 @@ export default function Events() {
       if (selectedEvent) {
         // Update existing event
         const response = await axios.put(
-          `${API_URL}/events/${selectedEvent.id}`,
+         `http://127.0.0.1:8000/cs/events/${selectedEvent.id}`,
           eventData,
           {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
+              'X-XSRF-TOKEN':getCsrfToken(),
             },
             withCredentials: true,
           }
@@ -141,13 +143,13 @@ export default function Events() {
       } else {
         // Create new event
         const response = await axios.post(
-          `${API_URL}/events`,
+          `http://127.0.0.1:8000/cs/events`,
           eventData,
           {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
-
+              'X-XSRF-TOKEN':getCsrfToken(),
             },
             withCredentials: true,
           }
@@ -173,7 +175,7 @@ export default function Events() {
   // 8. API: View event details
   const handleViewEvent = async (eventId: number) => {
     try {
-      const response = await axios.get(`${API_URL}/events/${eventId}`, {
+      const response = await axios.get(`http://127.0.0.1:8000/api/events/${eventId}`, {
         headers: {
           'Accept': 'application/json',
         },
@@ -206,10 +208,11 @@ export default function Events() {
   // 9.1 Handle delete event
   const handleDeleteEvent = async (eventId: number) => {
     try {
-      await axios.delete(`${API_URL}/events/${eventId}`, {
+      await axios.delete(`http://127.0.0.1:8000/cs/events/${eventId}`, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
+          'X-XSRF-TOKEN':getCsrfToken(),
         },
         withCredentials: true,
       });

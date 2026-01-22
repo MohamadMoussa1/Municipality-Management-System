@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import  getCsrfToken  from '../../lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -49,8 +49,6 @@ type Leave = {
     created_at?: string;
     updated_at?: string;
 };
-
-const API_BASE = 'http://127.0.0.1:8000/api';
 
 // ---- Helpers ----
 
@@ -119,7 +117,7 @@ export default function MyLeaves() {
            
 
             try {
-                const res = await fetch(`${API_BASE}/leaves/my`, {
+                const res = await fetch(`http://127.0.0.1:8000/api/leaves/my`, {
                     method: 'GET',
                     credentials:"include",
                     headers: {
@@ -174,13 +172,13 @@ export default function MyLeaves() {
         }
         setLoadingSubmit(true);
         try {
-            const res = await fetch(`${API_BASE}/leaves`, {
+            const res = await fetch(`http://127.0.0.1:8000/cs/leaves`, {
                 method: 'POST',
                 credentials:"include",
                 headers: {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
-                   
+                    'X-XSRF-TOKEN':getCsrfToken(),
                 },
                 body: JSON.stringify({
                     type: leaveType,

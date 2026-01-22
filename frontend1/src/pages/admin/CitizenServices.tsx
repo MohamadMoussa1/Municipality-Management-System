@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import  getCsrfToken  from '../../lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -57,12 +58,13 @@ export default function CitizenServices() {
   const handleDeleteRequest = (Rid: string) => {
     let res = null;
     const fetchData = async () => {
-      const response = await fetch("http://127.0.0.1:8000/api/requests/" + Rid, {
+      const response = await fetch("http://127.0.0.1:8000/cs/requests/" + Rid, {
         method: "DELETE",
         credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
+           'X-XSRF-TOKEN':getCsrfToken(),
         },
       });
       res = await response.json();
@@ -79,12 +81,13 @@ export default function CitizenServices() {
     let res = null;
     const fetchData = async () => {
       
-      const response = await fetch("http://127.0.0.1:8000/api/requests/" + Id + "/status", {
+      const response = await fetch("http://127.0.0.1:8000/cs/requests/" + Id + "/status", {
         method: "PUT",
         credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
+          'X-XSRF-TOKEN':getCsrfToken(),
         
         },
         body: JSON.stringify({

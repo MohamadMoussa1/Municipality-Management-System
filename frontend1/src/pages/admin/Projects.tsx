@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-
+import  getCsrfToken  from '../../lib/utils';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -51,13 +51,13 @@ export default function Projects() {
   const handleStatusChange = (Id: string, newStatus: RequestProjectStatus) => {
     let res = null;
     const fetchData = async () => {
-      const response = await fetch("http://127.0.0.1:8000/api/projects/" + Id + "/status", {
+      const response = await fetch("http://127.0.0.1:8000/cs/projects/" + Id + "/status", {
         method: "PUT",
         credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-        
+          'X-XSRF-TOKEN':getCsrfToken(),
         },
         body: JSON.stringify({
           'status': newStatus
@@ -98,13 +98,13 @@ export default function Projects() {
     setCreateDialogOpen(false)
     setClicked(true);
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/projects", {
+      const response = await fetch("http://127.0.0.1:8000/cs/projects", {
         method: "POST",
         credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-         
+          'X-XSRF-TOKEN':getCsrfToken(),
         },
         body: JSON.stringify({
 
@@ -168,13 +168,13 @@ export default function Projects() {
     setLoadingSubmit(true);
     setClicked(true);
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/projects/" + id + "/tasks", {
+      const response = await fetch("http://127.0.0.1:8000/cs/projects/" + id + "/tasks", {
         method: "POST",
         credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-        
+          'X-XSRF-TOKEN':getCsrfToken(),
         },
         body: JSON.stringify({
           'title': form.task,
@@ -186,6 +186,7 @@ export default function Projects() {
       });
 
       const result = await response.json();
+      console.log(result.message)
       toast({
         title: "Success",
         description: result.message

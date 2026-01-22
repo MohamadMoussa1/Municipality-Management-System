@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
+import  getCsrfToken  from '../../lib/utils';
 import {
   Table,
   TableBody,
@@ -95,12 +96,13 @@ export default function Permits() {
         try {
           setClicked(false);
           setClicked(true);
-          const response = await fetch(`http://127.0.0.1:8000/api/permits/${Id}/status`, {
+          const response = await fetch(`http://127.0.0.1:8000/cs/permits/${Id}/status`, {
             method: "PUT",
             credentials:"include",
             headers: {
               "Content-Type": "application/json",
               "Accept": "application/json",
+              'X-XSRF-TOKEN':getCsrfToken(),
             },
             body: JSON.stringify({
               status: selectedStatus,
@@ -131,12 +133,13 @@ export default function Permits() {
     else {
       const fetchData = async () => {
         try {
-          const response = await fetch(`http://127.0.0.1:8000/api/permits/${Id}/status`, {
+          const response = await fetch(`http://127.0.0.1:8000/cs/permits/${Id}/status`, {
             method: "PUT",
             credentials:"include",
             headers: {
               "Content-Type": "application/json",
               "Accept": "application/json",
+              'X-XSRF-TOKEN':getCsrfToken(),
             },
             body: JSON.stringify({
               status: selectedStatus,
@@ -181,12 +184,13 @@ export default function Permits() {
   const handleDeletePermit = (Pid: string) => {
     let res = null;
     const fetchData = async () => {
-      const response = await fetch("http://127.0.0.1:8000/api/permits/" + Pid, {
+      const response = await fetch("http://127.0.0.1:8000/cs/permits/" + Pid, {
         method: "DELETE",
         credentials:"include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
+          'X-XSRF-TOKEN':getCsrfToken(),
         },
       });
       res = await response.json();

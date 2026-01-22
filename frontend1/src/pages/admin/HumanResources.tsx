@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import  getCsrfToken  from '../../lib/utils';
 import { useEffect } from "react";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 export default function HumanResources() {
@@ -70,13 +71,13 @@ export default function HumanResources() {
   };
   const fetchD = async () => {
 
-    const response = await fetch("http://127.0.0.1:8000/api/payrolls/" + payrollEditId + "/adjustments", {
+    const response = await fetch("http://127.0.0.1:8000/cs/payrolls/" + payrollEditId + "/adjustments", {
       method: "POST",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
-
+        'X-XSRF-TOKEN':getCsrfToken(),
       },
       body: JSON.stringify({
         'type': payrollEditType,
@@ -119,13 +120,13 @@ export default function HumanResources() {
     let res = null;
     const fetchData = async () => {
 
-      const response = await fetch("http://127.0.0.1:8000/api/leaves/" + Id + "/status", {
+      const response = await fetch("http://127.0.0.1:8000/cs/leaves/" + Id + "/status", {
         method: "PUT",
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-
+          'X-XSRF-TOKEN':getCsrfToken(),
         },
         body: JSON.stringify({
           'status': newStatus
@@ -248,12 +249,13 @@ export default function HumanResources() {
 
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/admin/register", {
+      const response = await fetch("http://127.0.0.1:8000/cs/admin/register", {
         method: "POST",
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
+           'X-XSRF-TOKEN':getCsrfToken(),
         },
         body: JSON.stringify(newEmployee),
       });
@@ -302,13 +304,13 @@ export default function HumanResources() {
     setClicked(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/payrolls/generate", {
+      const response = await fetch("http://127.0.0.1:8000/cs/payrolls/generate", {
         method: "POST",
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-
+          'X-XSRF-TOKEN':getCsrfToken(),
         },
         body: JSON.stringify({
           'month': year + "-" + mnth

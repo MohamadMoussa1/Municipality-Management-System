@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import  getCsrfToken  from '../lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -38,6 +39,22 @@ export default function Login() {
       [e.target.name]: e.target.value
     }));
   };
+  useEffect(() => {
+    const fetchCsrf = async () => {
+        try {
+            const res = await fetch('http://127.0.0.1:8000/sanctum/csrf-cookie', {
+                method: 'GET',
+                credentials: 'include',
+            });
+            if (!res.ok) throw new Error('Failed to fetch CSRF cookie');
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    fetchCsrf();
+}, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoadingSubmit(true);
@@ -46,6 +63,7 @@ export default function Login() {
         method: "POST",
         credentials:"include",
         headers: {
+          'X-XSRF-TOKEN':getCsrfToken(),
           "Content-Type": "application/json",
           "Accept": "application/json",
         },

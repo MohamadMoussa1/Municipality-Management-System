@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Notification } from '@/types';
 import axios from 'axios';
-
+import  getCsrfToken  from '../lib/utils';
 interface NotificationContextType {
   notifications: Notification[];
   unreadCount: number;
@@ -16,7 +16,6 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -27,7 +26,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_BASE_URL}/notifications`, {
+      const response = await axios.get('http://127.0.0.1:8000/api/notifications', {
         headers: {
            'Accept': 'application/json',
         },
@@ -46,7 +45,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
     
-      const response = await axios.get(`${API_BASE_URL}/notifications/unread`, {
+      const response = await axios.get(`http://127.0.0.1:8000/api/notifications/unread`, {
          headers: {
            'Accept': 'application/json',
         },
@@ -65,11 +64,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     try {
       
       await axios.post(
-        `${API_BASE_URL}/notifications/${id}/read`,
+        `http://127.0.0.1:8000/cs/notifications/${id}/read`,
         {},
         {
            headers: {
            'Accept': 'application/json',
+           'X-XSRF-TOKEN':getCsrfToken(),
         },
         withCredentials: true,
         }
@@ -86,13 +86,13 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     try {
       
       await axios.post(
-        `${API_BASE_URL}/notifications/read-all`,
-        {},
+        `http://127.0.0.1:8000/cs/notifications/read-all`,
         {
            headers: {
            'Accept': 'application/json',
-        },
-        withCredentials: true,
+           'X-XSRF-TOKEN':getCsrfToken(),
+                    },
+           withCredentials: true,
         }
       );
       // Refetch notifications to get the correct server timestamp
@@ -107,10 +107,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     try {
       
       await axios.delete(
-        `${API_BASE_URL}/notifications/${id}`,
+        `http://127.0.0.1:8000/cs/notifications/${id}`,
         {
           headers: {
            'Accept': 'application/json',
+           'X-XSRF-TOKEN':getCsrfToken(),
         },
         withCredentials: true,
         }

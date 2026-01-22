@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Clock, CheckCircle, XCircle, AlertCircle,Loader2} from 'lucide-react';
 import { CitizenRequest } from '@/types';
 import { toast } from 'sonner';
-
+import  getCsrfToken  from '../../lib/utils';
 import {useNavigate} from 'react-router-dom'
 import {
   Dialog,
@@ -69,12 +69,13 @@ export default function MyRequests() {
        setDetails(false);
   if (!Value) { return;}
   try{
-    const response = await fetch("http://127.0.0.1:8000/api/citizen/requests", {
+    const response = await fetch("http://127.0.0.1:8000/cs/citizen/requests", {
           method: "POST",
           credentials:"include",
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json",
+            'X-XSRF-TOKEN':getCsrfToken(),
           },
          body: JSON.stringify({
             'type':Value ,      
@@ -101,12 +102,13 @@ export default function MyRequests() {
   const handleCancelRequest = (requestId: string) => {
     let res=null;
      const fetchData = async () => {
-        const response = await fetch("http://127.0.0.1:8000/api/requests/"+requestId, {
+        const response = await fetch("http://127.0.0.1:8000/cs/requests/"+requestId, {
           method: "DELETE",
           credentials:"include",
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json",
+            'X-XSRF-TOKEN':getCsrfToken(),
           },
         });
          res=await response.json();
