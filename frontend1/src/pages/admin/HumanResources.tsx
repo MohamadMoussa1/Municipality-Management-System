@@ -626,7 +626,7 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Loading emplyees list...</span>
+        <span className="ml-2">Loading leaving request list...</span>
       </div>
     );
   }
@@ -1072,7 +1072,7 @@ const PayRollTab = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Loading emplyees list...</span>
+        <span className="ml-2">Loading payroll list...</span>
       </div>
     );
   }

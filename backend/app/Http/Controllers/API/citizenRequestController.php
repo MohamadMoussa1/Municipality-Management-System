@@ -136,7 +136,7 @@ class citizenRequestController extends Controller
     {
         $user = $request->user();
         if ($user->role === 'admin') {
-            $requests = CitizenRequest::orderBy('submission_date', 'desc')->get();
+            $requests = CitizenRequest::with('citizen.user')->orderBy('submission_date', 'desc')->get();
 
             return response()->json([
                 'role' => 'admin',
