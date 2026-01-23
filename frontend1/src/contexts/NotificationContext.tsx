@@ -65,7 +65,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       
       await axios.post(
         `http://127.0.0.1:8000/cs/notifications/${id}/read`,
-        {},
         {
            headers: {
            'Accept': 'application/json',

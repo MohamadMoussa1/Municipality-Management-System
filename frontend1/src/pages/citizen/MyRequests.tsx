@@ -29,7 +29,7 @@ export default function MyRequests() {
   const navigate=useNavigate();
   const [selectedRequest, setSelectedRequest] = useState<CitizenRequest | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
-   const [details, setDetails] = useState(false);
+  const [details, setDetails] = useState(false);
   const [Value, setValue] = useState("");
   const [Clicked, setClicked] = useState(false);
   const [R, setR] = useState([]);
@@ -272,8 +272,8 @@ export default function MyRequests() {
                        
                         <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                           <span>ID: {request?.id}</span>
-                          <span>Submitted:{request?.submission_date}</span>
-                           <span>Completed: {request?.completion_date}</span>
+                          <span>Submitted: {request?.submission_date.split("T")[0]}</span>
+                           <span>Completed: {request?.completion_date?.split("T")[0]}</span>
                          
                         </div>
                       </div>
@@ -318,12 +318,12 @@ export default function MyRequests() {
                 
                 <div>
                   <Label>Submission Date</Label>
-                  <p className="text-sm mt-1">{selectedRequest.submission_date}</p>
+                  <p className="text-sm mt-1">{selectedRequest.submission_date.split("T")[0]}</p>
                 </div>
                 {selectedRequest.completion_date && (
                   <div>
                     <Label>Completion Date</Label>
-                    <p className="text-sm mt-1">{selectedRequest.completion_date}</p>
+                    <p className="text-sm mt-1">{selectedRequest.completion_date.split("T")[0]}</p>
                   </div>
                 )}
               </div>

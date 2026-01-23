@@ -301,7 +301,7 @@ const EmployeesTab = () => {
                         </div>
                         <div className="hidden lg:block text-right">
                           <p className="text-xs sm:text-sm font-medium truncate">{employee.email}</p>
-                          <p className="text-xs sm:text-sm text-muted-foreground">Role:{employee.role}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">Role:{employee.user.role}</p>
                           <p className="text-xs text-muted-foreground mt-1 truncate">Salary:{employee.salary}</p>
                         </div>
                         <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -522,7 +522,9 @@ const EmployeesTab = () => {
               </div>
               <div>
                 <p className="text-sm font-medium">Hire Date</p>
-                <p className="text-sm text-muted-foreground">{selectedEmployee.hire_date}</p>
+                  
+                  
+                <p className="text-sm text-muted-foreground">{selectedEmployee.hire_date?.split('T')[0]}</p>
               </div>
               <div>
                 <p className="text-sm font-medium">Salary</p>
@@ -1336,7 +1338,7 @@ const PayRollTab = () => {
                   <p className="text-sm font-medium mt-1">{selectedRequest.employee?.department || 'N/A'}</p>
                 </div>
                 <div>
-                  <Label>Hire Date</Label>
+                  <Label>Hire Dae</Label>
                   <p className="text-sm font-medium mt-1">{new Date(selectedRequest.employee?.hire_date).toLocaleDateString()}</p>
                 </div>
               </div>

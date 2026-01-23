@@ -436,7 +436,7 @@ export default function Permits() {
                 <div>
                   <Label>Created At</Label>
                   <p className="text-sm font-medium mt-1">
-                    {selectedPermit.permit.created_at}
+                    {selectedPermit.permit.created_at?.split("T")[0]}
                   </p>
                 </div>
               </div>
@@ -481,7 +481,7 @@ export default function Permits() {
                     <Calendar className="h-5 w-5 text-muted-foreground mt-1" />
                     <div>
                       <Label>Issue Date</Label>
-                      <p className="text-sm mt-1">{selectedPermit.permit.issue_date}</p>
+                      <p className="text-sm mt-1">{selectedPermit.permit.issue_date.split("T")[0]}</p>
                     </div>
                   </div>
 
@@ -490,7 +490,7 @@ export default function Permits() {
                       <Calendar className="h-5 w-5 text-muted-foreground mt-1" />
                       <div>
                         <Label>Expiry Date</Label>
-                        <p className="text-sm mt-1">{selectedPermit.permit.expiry_date}</p>
+                        <p className="text-sm mt-1">{selectedPermit.permit.expiry_date?.split("T")[0]}</p>
                       </div>
                     </div>
                   )}

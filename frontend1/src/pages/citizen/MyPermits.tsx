@@ -328,7 +328,7 @@ This is an official permit issued by the municipality.
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <div>
                           <p className="text-xs text-muted-foreground">Issue Date</p>
-                          <p className="font-medium">{permit.issue_date}</p>
+                          <p className="font-medium">{permit.issue_date?.split("T")[0]}</p>
                         </div>
                       </div>)}
                       {permit.expiry_date && (
@@ -336,7 +336,7 @@ This is an official permit issued by the municipality.
                           <Calendar className="h-4 w-4 text-muted-foreground" />
                           <div>
                             <p className="text-xs text-muted-foreground">Expires</p>
-                            <p className="font-medium">{permit.expiry_date}</p>
+                            <p className="font-medium">{permit.expiry_date?.split("T")[0]}</p>
                           </div>
                         </div>
                       )}
@@ -410,7 +410,7 @@ This is an official permit issued by the municipality.
                 <div>
                   <Label>Created At</Label>
                   <p className="text-sm font-medium mt-1">
-                    {selectedPermit.permit.created_at}
+                    {selectedPermit.permit.created_at?.split("T")[0]}
                   </p>
                 </div>
               </div>
