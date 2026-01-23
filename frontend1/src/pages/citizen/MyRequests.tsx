@@ -178,7 +178,17 @@ export default function MyRequests() {
                       <SelectItem value="residency_certificate">Residency Certificate</SelectItem>
                       <SelectItem value="birth_certificate">Birth Certificate</SelectItem>
                       <SelectItem value="death_certificate">Death Certificate</SelectItem>
-                      <SelectItem value="marriage_certificate">Marriage Certificate</SelectItem>
+                      <SelectItem value="marriage_certificate">Marriage Certificate</SelectItem>                 
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="type">Service request </Label>
+                  <Select  value={Value} onValueChange={setValue}>
+                    <SelectTrigger>
+                      <SelectValue  placeholder="Select request type" />
+                    </SelectTrigger>
+                    <SelectContent>                      
                       <SelectItem value="garbage_collection">Garbage Collection</SelectItem>
                       <SelectItem value="street_repair">Street Repair</SelectItem>
                       <SelectItem value="public_complaint">Public Complaint</SelectItem>
