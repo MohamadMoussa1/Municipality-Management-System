@@ -17,35 +17,129 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import  getCsrfToken  from '../../lib/utils';
+import getCsrfToken from '../../lib/utils';
 import { useEffect } from "react";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 export default function HumanResources() {
+  const [dataStat, setDataStat] = useState<any>('');
+  const [statsRefreshTrigger, setStatsRefreshTrigger] = useState(0);
+  useEffect(() => {
+    const fetchData = async () => {
+
+      const response = await fetch("http://127.0.0.1:8000/api/humanResource/stat", {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+      });
+      const res = await response.json();
+      setDataStat(res);
+    };
+    fetchData();
+  }, [statsRefreshTrigger]);
+  return (
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Human Resources</h1>
+        <p className="text-sm sm:text-base text-muted-foreground mt-1">Employee management and HR operations</p>
+      </div>
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <Card>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xl sm:text-2xl font-bold">{dataStat.total_employees}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Total Employees</div>
+              </div>
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xl sm:text-2xl font-bold">{dataStat.total_leave_request}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Total Leave Requests</div>
+              </div>
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-success/10 flex items-center justify-center">
+                <UserCheck className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xl sm:text-2xl font-bold">{dataStat.total_approved_leave_requests}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">On Leave</div>
+              </div>
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-warning/10 flex items-center justify-center">
+                <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-warning" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xl sm:text-2xl font-bold">{dataStat.pending_leave_requests}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Pending Approvals</div>
+              </div>
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-accent/10 flex items-center justify-center">
+                <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Tabs */}
+      <Tabs defaultValue="employees">
+        <TabsList className="w-full h-auto grid grid-cols-2 sm:grid-cols-3 gap-3 bg-muted/60 p-2 rounded-xl -mx-4 sm:mx-0">
+          <TabsTrigger
+            value="employees"
+            className="text-xs sm:text-sm rounded-lg px-3 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground hover:bg-background/70" >Employees</TabsTrigger>
+          <TabsTrigger
+            value="leaves"
+            className="text-xs sm:text-sm rounded-lg px-3 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground hover:bg-background/70">Leave Requests</TabsTrigger>
+          <TabsTrigger
+            value="payroll"
+            className="text-xs sm:text-sm rounded-lg px-3 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground hover:bg-background/70">Payroll</TabsTrigger>
+        </TabsList>
+
+        {/* Employee Directory */}
+        <TabsContent value="employees" className="mt-4 sm:mt-6"><EmployeesTab /></TabsContent>
+
+        {/* Leaves */}
+        <TabsContent value="leaves" className="mt-4 sm:mt-6"><LeaveTab onStatsUpdate={() => setStatsRefreshTrigger(prev => prev + 1)} /></TabsContent>
+
+        {/* Payroll */}
+        <TabsContent value="payroll" className="mt-4 sm:mt-6"><PayRollTab /></TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+const EmployeesTab = () => {
   const { toast } = useToast();
-  const [statusFilter, setStatusFilter] = useState<RequestLeaveStatus | 'all'>('all');
   const [addEmployeeOpen, setAddEmployeeOpen] = useState(false);
+  const [E, setE] = useState([]);
   const [viewProfileOpen, setViewProfileOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [Clicked, setClicked] = useState(false);
-  const [E, setE] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  const [R, setR] = useState([]);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [PayRollOpen, setPayRollOpen] = useState(false);
-  const [mnth, setMonth] = useState("");
-  const [pr, setpr] = useState<any[]>([]);
-  const [payrollLoading, setPayrollLoading] = useState(false);
-  const [year, setYear] = useState(0);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [payrollCurrentPage, setPayrollCurrentPage] = useState<number | null>(null);
-  const [payrollLastPage, setPayrollLastPage] = useState<number | null>(null);
-  const [payrollEditOpen, setPayrollEditOpen] = useState(false);
-  const [payrollEditId, setPayrollEditId] = useState<number | null>(null);
-  const [payrollEditType, setPayrollEditType] = useState<'bonus' | 'deduction'>('bonus');
-  const [payrollEditAmount, setPayrollEditAmount] = useState('');
-  const [payrollEditNote, setPayrollEditNote] = useState('');
-  const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
   const [newEmployee, setNewEmployee] = useState({
     name: '',
     email: '',
@@ -59,180 +153,10 @@ export default function HumanResources() {
     password: '',
     password_confirmation: '',
   });
-  const handleViewRequest = (request: any) => {
-    setSelectedRequest(request);
-    setViewDialogOpen(true);
+  const handleViewProfile = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setViewProfileOpen(true);
   };
-
-  const handlePayrollView = (payroll: any) => {
-    setSelectedRequest(payroll);
-    setDetailsOpen(true);
-
-  };
-  const fetchD = async () => {
-
-    const response = await fetch("http://127.0.0.1:8000/cs/payrolls/" + payrollEditId + "/adjustments", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        'X-XSRF-TOKEN':getCsrfToken(),
-      },
-      body: JSON.stringify({
-        'type': payrollEditType,
-        'amount': payrollEditAmount,
-        'note': payrollEditNote,
-      }),
-    });
-    const res = await response.json();
-    setClicked((v) => !v);
-  }
-
-  const handlePayrollEditOpen = (payroll: any) => {
-    setPayrollEditId(payroll?.id ?? null);
-    setPayrollEditType('bonus');
-    setPayrollEditAmount('');
-    setPayrollEditNote('');
-    setPayrollEditOpen(true);
-
-  };
-
-  const fetchPayrollPage = async (pageNumber: number) => {
-
-    const response = await fetch(`http://127.0.0.1:8000/api/payrolls?page=${pageNumber}`, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-
-      },
-    });
-    const res = await response.json();
-    const pageData = res?.data;
-    setpr(Array.isArray(pageData?.data) ? pageData.data : []);
-    setPayrollCurrentPage(typeof pageData?.current_page === 'number' ? pageData.current_page : null);
-    setPayrollLastPage(typeof pageData?.last_page === 'number' ? pageData.last_page : null);
-  };
-
-  const handleStatusChange = (Id: string, newStatus: RequestLeaveStatus) => {
-    let res = null;
-    const fetchData = async () => {
-
-      const response = await fetch("http://127.0.0.1:8000/cs/leaves/" + Id + "/status", {
-        method: "PUT",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          'X-XSRF-TOKEN':getCsrfToken(),
-        },
-        body: JSON.stringify({
-          'status': newStatus
-        }),
-      });
-      res = await response.json();
-      setClicked((v) => !v);
-    }
-    fetchData();
-    toast({
-      title: "Status Updated",
-      description: `Request ${Id} status changed to ${newStatus.replace('_', ' ')}.`,
-    });
-  };
-  const getStatusColor = (status: RequestLeaveStatus) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-500';
-      case 'rejected': return 'bg-destructive';
-      case 'approved': return 'bg-success';
-      default: return 'bg-outline text-black';
-    }
-  };
-  const getStatusBadge = (status: RequestLeaveStatus) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="outline">Pending</Badge>;
-      case 'rejected':
-        return <Badge variant="destructive">Rejected</Badge>;
-      case 'approved':
-        return <Badge className="bg-primary">Completed</Badge>;
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-
-      const response = await fetch("http://127.0.0.1:8000/api/leaves", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-
-        },
-      });
-      const res = await response.json();
-      const leavesData = res?.data;
-      const leaves = Array.isArray(leavesData)
-        ? leavesData
-        : Array.isArray(leavesData?.data)
-          ? leavesData.data
-          : [];
-      setR(leaves);
-      setLoading(false);
-    };
-
-    fetchData();
-  }, [Clicked]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetchPayrollPage(1);
-      setLoading(false);
-    };
-
-    fetchData();
-  }, [Clicked]);
-  const handleSave = () => {
-    setPayrollEditOpen(false);
-    fetchD();
-  }
-  useEffect(() => {
-    const fetchData = async () => {
-
-      const response = await fetch("http://127.0.0.1:8000/api/employees", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-
-        },
-      });
-      const res = await response.json();
-      setE(res.data);
-      setLoading(false);
-    };
-    fetchData();
-  }, [Clicked]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Loading emplyees list...</span>
-      </div>
-    );
-  }
-
-  const pendingApprovalsCount = Array.isArray(R)
-    ? R.filter((request: any) => String(request?.status ?? '').toLowerCase() === 'pending').length
-    : 0;
-
-  const onLeaveCount = Array.isArray(R)
-    ? R.filter((request: any) => String(request?.status ?? '').toLowerCase() === 'approved').length
-    : 0;
 
   const handleAddEmployee = async () => {
     setLoadingSubmit(true);
@@ -246,8 +170,6 @@ export default function HumanResources() {
       });
       return;
     }
-
-
     try {
       const response = await fetch("http://127.0.0.1:8000/cs/admin/register", {
         method: "POST",
@@ -255,7 +177,7 @@ export default function HumanResources() {
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-           'X-XSRF-TOKEN':getCsrfToken(),
+          'X-XSRF-TOKEN': getCsrfToken(),
         },
         body: JSON.stringify(newEmployee),
       });
@@ -299,482 +221,83 @@ export default function HumanResources() {
       setLoadingSubmit(false);
     }
   };
-  const handleAddPayRoll = async () => {
-    setLoadingSubmit(true);
-    setClicked(true);
+  useEffect(() => {
+    const fetchData = async () => {
 
-    try {
-      const response = await fetch("http://127.0.0.1:8000/cs/payrolls/generate", {
-        method: "POST",
+      const response = await fetch("http://127.0.0.1:8000/api/employees", {
+        method: "GET",
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          'X-XSRF-TOKEN':getCsrfToken(),
+
         },
-        body: JSON.stringify({
-          'month': year + "-" + mnth
-        }),
       });
+      const res = await response.json();
+      setE(res.data);
+      setLoading(false);
+    };
+    fetchData();
+  }, [Clicked]);
 
-      const result = await response.json();
-      console.log(result.message);
-      if (response.ok) {
-        toast({
-          title: "PayRoll Added",
-          description: `${newEmployee.name} has been successfully added as ${newEmployee.role.replace('_', ' ')}.`,
-        });
-
-        setPayRollOpen(false);
-      } else {
-        toast({
-          title: "Error",
-          description: result.message || "Failed to add PayRoll",
-          variant: "destructive",
-        });
-      }
-    } catch (err) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingSubmit(false);
-    }
-  };
-
-  const handleViewProfile = (employee: Employee) => {
-    setSelectedEmployee(employee);
-    setViewProfileOpen(true);
-  };
-
-
-  ;
-
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading emplyees list...</span>
+      </div>
+    );
+  }
   return (
-    <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Human Resources</h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-1">Employee management and HR operations</p>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-        <Card>
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xl sm:text-2xl font-bold">{E.length}</div>
-                <div className="text-xs sm:text-sm text-muted-foreground">Total Employees</div>
-              </div>
-              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-              </div>
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+            <div>
+              <CardTitle className="text-lg sm:text-xl">Employee Directory</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Complete staff roster</CardDescription>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xl sm:text-2xl font-bold">{Array.isArray(R) ? R.length : 0}</div>
-                <div className="text-xs sm:text-sm text-muted-foreground">Total Leave Requests</div>
-              </div>
-              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-success/10 flex items-center justify-center">
-                <UserCheck className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xl sm:text-2xl font-bold">{onLeaveCount}</div>
-                <div className="text-xs sm:text-sm text-muted-foreground">On Leave</div>
-              </div>
-              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-warning/10 flex items-center justify-center">
-                <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-warning" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xl sm:text-2xl font-bold">{pendingApprovalsCount}</div>
-                <div className="text-xs sm:text-sm text-muted-foreground">Pending Approvals</div>
-              </div>
-              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-accent/10 flex items-center justify-center">
-                <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Tabs */}
-      <Tabs defaultValue="employees">
-        <TabsList className="w-full h-auto grid grid-cols-2 sm:grid-cols-3 gap-3 bg-muted/60 p-2 rounded-xl -mx-4 sm:mx-0">
-          <TabsTrigger
-            value="employees"
-            className="text-xs sm:text-sm rounded-lg px-3 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground hover:bg-background/70"
-          >
-            Employees
-          </TabsTrigger>
-          <TabsTrigger
-            value="leaves"
-            className="text-xs sm:text-sm rounded-lg px-3 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground hover:bg-background/70"
-          >
-            Leave Requests
-          </TabsTrigger>
-          <TabsTrigger
-            value="payroll"
-            className="text-xs sm:text-sm rounded-lg px-3 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground hover:bg-background/70"
-          >
-            Payroll
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Employee Directory */}
-        <TabsContent value="employees" className="mt-4 sm:mt-6">
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
-                <div>
-                  <CardTitle className="text-lg sm:text-xl">Employee Directory</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">Complete staff roster</CardDescription>
-                </div>
-                <Button onClick={() => setAddEmployeeOpen(true)} className="w-full sm:w-auto text-sm">Add Employee</Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-3 sm:gap-4">
-                {E.map((employee) => (
-                  <Card key={employee.id}>
-                    <CardContent className="p-3 sm:p-4">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                        <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
-                          <AvatarFallback className="text-xs sm:text-sm">
-                            {employee.name?.split(' ').map(n => n[0]).join('') || 'NA'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-sm sm:text-base truncate">Name: {employee.name}</h4>
-                          <p className="text-xs sm:text-sm text-muted-foreground truncate">Position: {employee.position}</p>
-                          <p className="text-xs text-muted-foreground mt-1 truncate">Department: {employee.department}</p>
-
-                        </div>
-                        <div className="hidden lg:block text-right">
-                          <p className="text-xs sm:text-sm font-medium truncate">{employee.email}</p>
-                          <p className="text-xs sm:text-sm text-muted-foreground">Role:{employee.role}</p>
-                          <p className="text-xs text-muted-foreground mt-1 truncate">Salary:{employee.salary}</p>
-                        </div>
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                          <Badge variant={employee.status === 'active' ? 'default' : 'outline'} className="text-xs">
-                            {employee.status}
-                          </Badge>
-                          <Button variant="outline" size="sm" onClick={() => handleViewProfile(employee)} className="text-xs h-8 flex-1 sm:flex-none">
-                            View Profile
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Leaves */}
-        <TabsContent value="leaves" className="mt-4 sm:mt-6">
-          <Card>
-
-            <CardContent className="p-3 sm:p-6">
-              <div className="flex flex-col gap-2 mb-3 sm:mb-4">
-                <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
-                  <SelectTrigger className="w-full sm:w-[180px] text-[11px] sm:text-sm h-8 sm:h-9">
-                    <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="rounded-md border overflow-x-auto -mx-3 sm:mx-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Employee Id</TableHead>
-                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Employee Name</TableHead>
-                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">Type</TableHead>
-                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell">Status</TableHead>
-                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">view</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {loading ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8">
-                          <div className="flex items-center justify-center">
-                            <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                            <span>Loading requests...</span>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ) : R?.filter((request) =>
-                      statusFilter === 'all' || String(request.status ?? '').toLowerCase() === statusFilter
-                    ).length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8">
-                          <div className="text-muted-foreground">
-                            {statusFilter === 'all' ? 'No requests found' : `No ${statusFilter} requests found`}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      R?.filter((request) =>
-                        statusFilter === 'all' || String(request.status ?? '').toLowerCase() === statusFilter
-                      ).map((request) => (
-                        <TableRow key={request.id}>
-                          <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4">{request.id}</TableCell>
-                          <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[80px] sm:max-w-none truncate">{request?.employee.user?.name || 'N/A'}</TableCell>
-                          <TableCell className="capitalize text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">{request.type || 'N/A'}</TableCell>
-                          <TableCell className="px-2 sm:px-4">
-                            <Select
-                              value={request.status}
-                              onValueChange={(value: RequestLeaveStatus) => handleStatusChange(request.id, value)}
-                            >
-                              <SelectTrigger className="w-[130px] h-8">
-                                <SelectValue>
-                                  <Badge className={getStatusColor(request.status)}>
-                                    {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                                  </Badge>
-                                </SelectValue>
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="approved">
-                                  <Badge className="bg-success">approved</Badge>
-                                </SelectItem>
-                                <SelectItem value="pending">
-                                  <Badge className="bg-accent">Pending</Badge>
-                                </SelectItem>
-                                <SelectItem value="rejected">
-                                  <Badge className="bg-destructive">rejected</Badge>
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </TableCell>
-
-                          <TableCell className="px-2 sm:px-4">
-                            <div className="flex gap-0.5 sm:gap-4">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 sm:h-8 sm:w-8"
-                                onClick={() => handleViewRequest(request)}
-                              >
-                                <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Payroll */}
-        <TabsContent value="payroll" className="mt-4 sm:mt-6">
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
-                <div>
-                  <CardTitle className="text-lg sm:text-xl">Payroll Records</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">Employee payroll information</CardDescription>
-                </div>
-                <Button onClick={() => setPayRollOpen(true)} className="w-full sm:w-auto text-sm">Generate payroll</Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-                <div>
-                  {payrollCurrentPage && payrollLastPage ? `Page ${payrollCurrentPage} of ${payrollLastPage}` : null}
-                </div>
-                <div>
-                  Showing {pr?.length || 0}
-                </div>
-              </div>
-              <div className="rounded-md border overflow-x-auto -mx-3 sm:mx-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Employee ID</TableHead>
-                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Employee Name</TableHead>
-                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Month</TableHead>
-                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Base Salary</TableHead>
-                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Bonuses</TableHead>
-                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Generated Date</TableHead>
-                      <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {payrollLoading ? (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8">
-                          <div className="flex items-center justify-center">
-                            <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                            <span>Loading payroll records...</span>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ) : pr?.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8">
-                          <div className="text-muted-foreground">
-                            No payroll records found
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      pr?.map((payroll) => (
-                        <TableRow key={payroll.id} className="hover:bg-gray-50 transition-colors">
-                          <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4 text-blue-600">{payroll.employee_id}</TableCell>
-                          <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[80px] sm:max-w-none truncate font-medium">{payroll?.employee?.user?.name || 'N/A'}</TableCell>
-                          <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 bg-purple-50 text-purple-700 rounded px-2 py-1">{payroll.month || 'N/A'}</TableCell>
-                          <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-green-600">${payroll.base_salary || '0.00'}</TableCell>
-                          <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 text-blue-600">${payroll.bonuses || '0.00'}</TableCell>
-                          <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 text-gray-600">{new Date(payroll.generated_at).toLocaleDateString()}</TableCell>
-                          <TableCell className="px-2 sm:px-4">
-                            <div className="flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                type="button"
-                                className="h-7 w-7 sm:h-8 sm:w-8 hover:bg-blue-50"
-                                onClick={() => handlePayrollView(payroll)}
-                              >
-                                <Eye className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                type="button"
-                                className="h-7 w-7 sm:h-8 sm:w-8 hover:bg-blue-50"
-                                onClick={() => handlePayrollEditOpen(payroll)}
-                              >
-                                <Pencil className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-
-              {(payrollCurrentPage && payrollLastPage && payrollLastPage > 1) && (
-                <div className="flex items-center justify-end gap-2 pt-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    type="button"
-                    disabled={payrollCurrentPage <= 1}
-                    onClick={async () => {
-                      setPayrollLoading(true);
-                      await fetchPayrollPage(payrollCurrentPage - 1);
-                      setPayrollLoading(false);
-                    }}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    type="button"
-                    disabled={payrollCurrentPage >= payrollLastPage}
-                    onClick={async () => {
-                      setPayrollLoading(true);
-                      await fetchPayrollPage(payrollCurrentPage + 1);
-                      setPayrollLoading(false);
-                    }}
-                  >
-                    Next
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Attendance */}
-        <TabsContent value="attendance" className="mt-4 sm:mt-6">
-          {/* ... attendance table (unchanged) */}
-        </TabsContent>
-      </Tabs>
-      <Dialog open={PayRollOpen} onOpenChange={setPayRollOpen}>
-        <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Generate Payroll</DialogTitle>
-            <DialogDescription>Select month to generate payroll for</DialogDescription>
-          </DialogHeader>
-          <select value={mnth}
-            onChange={e => setMonth(e.target.value)}>
-            <option value="">Select month</option>
-            <option value="04">April</option>
-            <option value="08">August</option>
-            <option value="12">December</option>
-            <option value="02">February</option>
-            <option value="01">January</option>
-            <option value="07">July</option>
-            <option value="06">June</option>
-            <option value="03">March</option>
-            <option value="05">May</option>
-            <option value="11">November</option>
-            <option value="10">October</option>
-            <option value="09">September</option>
-          </select>
-          <div className="mt-4">
-            <Label htmlFor="year">Year</Label>
-            <Input
-              id="year"
-              type="number"
-              value={year}
-              onChange={(e) => setYear(parseInt(e.target.value))}
-              placeholder="Enter year"
-              min="2000"
-              max="2100"
-            />
+            <Button onClick={() => setAddEmployeeOpen(true)} className="w-full sm:w-auto text-sm">Add Employee</Button>
           </div>
-          <Button onClick={handleAddPayRoll} className="w-full" disabled={loadingSubmit}>
-            {loadingSubmit ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Adding...
-              </>
-            ) : (
-              'Add PayRoll'
-            )}
-          </Button>
-        </DialogContent>
-      </Dialog>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 sm:gap-4">
+            {E.map((employee) => (
+              <Card key={employee.id}>
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                    <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
+                      <AvatarFallback className="text-xs sm:text-sm">
+                        {employee.name?.split(' ').map(n => n[0]).join('') || 'NA'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-sm sm:text-base truncate">Name: {employee.name}</h4>
+                      <p className="text-xs sm:text-sm text-muted-foreground truncate">Position: {employee.position}</p>
+                      <p className="text-xs text-muted-foreground mt-1 truncate">Department: {employee.department}</p>
+
+                    </div>
+                    <div className="hidden lg:block text-right">
+                      <p className="text-xs sm:text-sm font-medium truncate">{employee.email}</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Role:{employee.role}</p>
+                      <p className="text-xs text-muted-foreground mt-1 truncate">Salary:{employee.salary}</p>
+                    </div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <Badge variant={employee.status === 'active' ? 'default' : 'outline'} className="text-xs">
+                        {employee.status}
+                      </Badge>
+                      <Button variant="outline" size="sm" onClick={() => handleViewProfile(employee)} className="text-xs h-8 flex-1 sm:flex-none">
+                        View Profile
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Add Employee Dialog */}
       <Dialog open={addEmployeeOpen} onOpenChange={setAddEmployeeOpen}>
         <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
@@ -914,7 +437,6 @@ export default function HumanResources() {
           </div>
         </DialogContent>
       </Dialog>
-
       {/* View Profile Dialog */}
       <Dialog open={viewProfileOpen} onOpenChange={setViewProfileOpen}>
         <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
@@ -959,6 +481,207 @@ export default function HumanResources() {
           )}
         </DialogContent>
       </Dialog>
+    </>
+  );
+}
+const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
+  const { toast } = useToast();
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<RequestLeaveStatus | 'all'>('all');
+  const [R, setR] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [Clicked, setClicked] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
+  const getStatusColor = (status: RequestLeaveStatus) => {
+    switch (status) {
+      case 'pending': return 'bg-yellow-500';
+      case 'rejected': return 'bg-destructive';
+      case 'approved': return 'bg-success';
+      default: return 'bg-outline text-black';
+    }
+  };
+  const handleViewRequest = (request: any) => {
+    setSelectedRequest(request);
+    setViewDialogOpen(true);
+  };
+  const getStatusBadge = (status: RequestLeaveStatus) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline">Pending</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive">Rejected</Badge>;
+      case 'approved':
+        return <Badge className="bg-primary">Completed</Badge>;
+    }
+  };
+  useEffect(() => {
+    const fetchData = async () => {
+
+      const response = await fetch("http://127.0.0.1:8000/api/leaves", {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+
+        },
+      });
+      const res = await response.json();
+      const leavesData = res?.data;
+      const leaves = Array.isArray(leavesData)
+        ? leavesData
+        : Array.isArray(leavesData?.data)
+          ? leavesData.data
+          : [];
+      setR(leaves);
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [Clicked]);
+  const handleStatusChange = (Id: string, newStatus: RequestLeaveStatus) => {
+    let res = null;
+    const fetchData = async () => {
+
+      const response = await fetch("http://127.0.0.1:8000/cs/leaves/" + Id + "/status", {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          'X-XSRF-TOKEN': getCsrfToken(),
+        },
+        body: JSON.stringify({
+          'status': newStatus
+        }),
+      });
+      res = await response.json();
+      setClicked((v) => !v);
+      // Call onStatsUpdate to refresh the main stats
+      if (onStatsUpdate) {
+        onStatsUpdate();
+      }
+    }
+    fetchData();
+    toast({
+      title: "Status Updated",
+      description: `Request ${Id} status changed to ${newStatus.replace('_', ' ')}.`,
+    });
+  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading emplyees list...</span>
+      </div>
+    );
+  }
+  return (
+    <>
+      <Card>
+        <CardContent className="p-3 sm:p-6">
+          <div className="flex flex-col gap-2 mb-3 sm:mb-4">
+            <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+              <SelectTrigger className="w-full sm:w-[180px] text-[11px] sm:text-sm h-8 sm:h-9">
+                <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="rounded-md border overflow-x-auto -mx-3 sm:mx-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Employee Id</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Employee Name</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">Type</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell">Status</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">view</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <div className="flex items-center justify-center">
+                        <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                        <span>Loading requests...</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : R?.filter((request) =>
+                  statusFilter === 'all' || String(request.status ?? '').toLowerCase() === statusFilter
+                ).length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <div className="text-muted-foreground">
+                        {statusFilter === 'all' ? 'No requests found' : `No ${statusFilter} requests found`}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  R?.filter((request) =>
+                    statusFilter === 'all' || String(request.status ?? '').toLowerCase() === statusFilter
+                  ).map((request) => (
+                    <TableRow key={request.id}>
+                      <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4">{request.id}</TableCell>
+                      <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[80px] sm:max-w-none truncate">{request?.employee.user?.name || 'N/A'}</TableCell>
+                      <TableCell className="capitalize text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">{request.type || 'N/A'}</TableCell>
+                      <TableCell className="px-2 sm:px-4">
+                        <Select
+                          value={request.status}
+                          onValueChange={(value: RequestLeaveStatus) => handleStatusChange(request.id, value)}
+                        >
+                          <SelectTrigger className="w-[130px] h-8">
+                            <SelectValue>
+                              <Badge className={getStatusColor(request.status)}>
+                                {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                              </Badge>
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="approved">
+                              <Badge className="bg-success">approved</Badge>
+                            </SelectItem>
+                            <SelectItem value="pending">
+                              <Badge className="bg-accent">Pending</Badge>
+                            </SelectItem>
+                            <SelectItem value="rejected">
+                              <Badge className="bg-destructive">rejected</Badge>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+
+                      <TableCell className="px-2 sm:px-4">
+                        <div className="flex gap-0.5 sm:gap-4">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 sm:h-8 sm:w-8"
+                            onClick={() => handleViewRequest(request)}
+                          >
+                            <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* leave request details dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader className="pb-4 border-b">
@@ -1119,6 +842,375 @@ export default function HumanResources() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </>
+  );
+};
+const PayRollTab = () => {
+  const { toast } = useToast();
+  const [payrollCurrentPage, setPayrollCurrentPage] = useState<number | null>(null);
+  const [payrollLastPage, setPayrollLastPage] = useState<number | null>(null);
+  const [payrollEditOpen, setPayrollEditOpen] = useState(false);
+  const [payrollEditId, setPayrollEditId] = useState<number | null>(null);
+  const [payrollEditType, setPayrollEditType] = useState<'bonus' | 'deduction'>('bonus');
+  const [payrollEditAmount, setPayrollEditAmount] = useState('');
+  const [payrollEditNote, setPayrollEditNote] = useState('');
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [PayRollOpen, setPayRollOpen] = useState(false);
+  const [mnth, setMonth] = useState("");
+  const [pr, setpr] = useState<any[]>([]);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [payrollLoading, setPayrollLoading] = useState(false);
+  const [year, setYear] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [Clicked, setClicked] = useState(false);
+  const [R, setR] = useState([]);
+  const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
+  const pendingApprovalsCount = Array.isArray(R)
+    ? R.filter((request: any) => String(request?.status ?? '').toLowerCase() === 'pending').length
+    : 0;
+
+  const onLeaveCount = Array.isArray(R)
+    ? R.filter((request: any) => String(request?.status ?? '').toLowerCase() === 'approved').length
+    : 0;
+  const handleAddPayRoll = async () => {
+    setLoadingSubmit(true);
+    setClicked(true);
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/cs/payrolls/generate", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          'X-XSRF-TOKEN': getCsrfToken(),
+        },
+        body: JSON.stringify({
+          'month': year + "-" + mnth
+        }),
+      });
+
+      const result = await response.json();
+      console.log(result.message);
+      if (response.ok) {
+        toast({
+          title: "PayRoll Added",
+        });
+
+        setPayRollOpen(false);
+      } else {
+        toast({
+          title: "Error",
+          description: result.message || "Failed to add PayRoll",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingSubmit(false);
+    }
+  };
+
+  const handlePayrollView = (payroll: any) => {
+    setSelectedRequest(payroll);
+    setDetailsOpen(true);
+
+  };
+  const fetchD = async () => {
+
+    const response = await fetch("http://127.0.0.1:8000/cs/payrolls/" + payrollEditId + "/adjustments", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        'X-XSRF-TOKEN': getCsrfToken(),
+      },
+      body: JSON.stringify({
+        'type': payrollEditType,
+        'amount': payrollEditAmount,
+        'note': payrollEditNote,
+      }),
+    });
+    const res = await response.json();
+    setClicked((v) => !v);
+  }
+
+  const handlePayrollEditOpen = (payroll: any) => {
+    setPayrollEditId(payroll?.id ?? null);
+    setPayrollEditType('bonus');
+    setPayrollEditAmount('');
+    setPayrollEditNote('');
+    setPayrollEditOpen(true);
+
+  };
+
+  const fetchPayrollPage = async (pageNumber: number) => {
+
+    const response = await fetch(`http://127.0.0.1:8000/api/payrolls?page=${pageNumber}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+
+      },
+    });
+    const res = await response.json();
+    const pageData = res?.data;
+    setpr(Array.isArray(pageData?.data) ? pageData.data : []);
+    setPayrollCurrentPage(typeof pageData?.current_page === 'number' ? pageData.current_page : null);
+    setPayrollLastPage(typeof pageData?.last_page === 'number' ? pageData.last_page : null);
+  };
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchPayrollPage(1);
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [Clicked]);
+  const handleSave = () => {
+    setPayrollEditOpen(false);
+    fetchD();
+  }
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading emplyees list...</span>
+      </div>
+    );
+  }
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+            <div>
+              <CardTitle className="text-lg sm:text-xl">Payroll Records</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Employee payroll information</CardDescription>
+            </div>
+            <Button onClick={() => setPayRollOpen(true)} className="w-full sm:w-auto text-sm">Generate payroll</Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+            <div>
+              {payrollCurrentPage && payrollLastPage ? `Page ${payrollCurrentPage} of ${payrollLastPage}` : null}
+            </div>
+            <div>
+              Showing {pr?.length || 0}
+            </div>
+          </div>
+          <div className="rounded-md border overflow-x-auto -mx-3 sm:mx-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Employee ID</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Employee Name</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Month</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Base Salary</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Bonuses</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Generated Date</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {payrollLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      <div className="flex items-center justify-center">
+                        <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                        <span>Loading payroll records...</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : pr?.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      <div className="text-muted-foreground">
+                        No payroll records found
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  pr?.map((payroll) => (
+                    <TableRow key={payroll.id} className="hover:bg-gray-50 transition-colors">
+                      <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4 text-blue-600">{payroll.employee_id}</TableCell>
+                      <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[80px] sm:max-w-none truncate font-medium">{payroll?.employee?.user?.name || 'N/A'}</TableCell>
+                      <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 bg-purple-50 text-purple-700 rounded px-2 py-1">{payroll.month || 'N/A'}</TableCell>
+                      <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-green-600">${payroll.base_salary || '0.00'}</TableCell>
+                      <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 text-blue-600">${payroll.bonuses || '0.00'}</TableCell>
+                      <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 text-gray-600">{new Date(payroll.generated_at).toLocaleDateString()}</TableCell>
+                      <TableCell className="px-2 sm:px-4">
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            type="button"
+                            className="h-7 w-7 sm:h-8 sm:w-8 hover:bg-blue-50"
+                            onClick={() => handlePayrollView(payroll)}
+                          >
+                            <Eye className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            type="button"
+                            className="h-7 w-7 sm:h-8 sm:w-8 hover:bg-blue-50"
+                            onClick={() => handlePayrollEditOpen(payroll)}
+                          >
+                            <Pencil className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          {(payrollCurrentPage && payrollLastPage && payrollLastPage > 1) && (
+            <div className="flex items-center justify-end gap-2 pt-3">
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                disabled={payrollCurrentPage <= 1}
+                onClick={async () => {
+                  setPayrollLoading(true);
+                  await fetchPayrollPage(payrollCurrentPage - 1);
+                  setPayrollLoading(false);
+                }} >Previous</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                disabled={payrollCurrentPage >= payrollLastPage}
+                onClick={async () => {
+                  setPayrollLoading(true);
+                  await fetchPayrollPage(payrollCurrentPage + 1);
+                  setPayrollLoading(false);
+                }}
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <Dialog open={PayRollOpen} onOpenChange={setPayRollOpen}>
+        <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Generate Payroll</DialogTitle>
+            <DialogDescription>Select month to generate payroll for</DialogDescription>
+          </DialogHeader>
+          <select value={mnth}
+            onChange={e => setMonth(e.target.value)}>
+            <option value="">Select month</option>
+            <option value="04">April</option>
+            <option value="08">August</option>
+            <option value="12">December</option>
+            <option value="02">February</option>
+            <option value="01">January</option>
+            <option value="07">July</option>
+            <option value="06">June</option>
+            <option value="03">March</option>
+            <option value="05">May</option>
+            <option value="11">November</option>
+            <option value="10">October</option>
+            <option value="09">September</option>
+          </select>
+          <div className="mt-4">
+            <Label htmlFor="year">Year</Label>
+            <Input
+              id="year"
+              type="number"
+              value={year}
+              onChange={(e) => setYear(parseInt(e.target.value))}
+              placeholder="Enter year"
+              min="2000"
+              max="2100"
+            />
+          </div>
+          <Button onClick={handleAddPayRoll} className="w-full" disabled={loadingSubmit}>
+            {loadingSubmit ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Adding...
+              </>
+            ) : (
+              'Add PayRoll'
+            )}
+          </Button>
+        </DialogContent>
+      </Dialog>
+      {/* edit payroll dialog */}
+      <Dialog open={payrollEditOpen} onOpenChange={setPayrollEditOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Payroll</DialogTitle>
+            <DialogDescription>
+              Add a bonus or deduction
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label>Type</Label>
+              <Select value={payrollEditType} onValueChange={(v: 'bonus' | 'deduction') => setPayrollEditType(v)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bonus">Bonus</SelectItem>
+                  <SelectItem value="deduction">Deduction</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="payroll-edit-amount">Amount</Label>
+              <Input
+                id="payroll-edit-amount"
+                type="number"
+                value={payrollEditAmount}
+                onChange={(e) => setPayrollEditAmount(e.target.value)}
+                placeholder="Enter amount"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="payroll-edit-note">Note (optional)</Label>
+              <Input
+                id="payroll-edit-note"
+                value={payrollEditNote}
+                onChange={(e) => setPayrollEditNote(e.target.value)}
+                placeholder="Optional note"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPayrollEditOpen(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                handleSave()
+              }}
+              disabled={!payrollEditId || !payrollEditAmount}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* payroll details dialog */}
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
         <DialogContent className="sm:max-w-[525px]">
           <DialogHeader>
@@ -1207,66 +1299,7 @@ export default function HumanResources() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <Dialog open={payrollEditOpen} onOpenChange={setPayrollEditOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Payroll</DialogTitle>
-            <DialogDescription>
-              Add a bonus or deduction
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div>
-              <Label>Type</Label>
-              <Select value={payrollEditType} onValueChange={(v: 'bonus' | 'deduction') => setPayrollEditType(v)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bonus">Bonus</SelectItem>
-                  <SelectItem value="deduction">Deduction</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="payroll-edit-amount">Amount</Label>
-              <Input
-                id="payroll-edit-amount"
-                type="number"
-                value={payrollEditAmount}
-                onChange={(e) => setPayrollEditAmount(e.target.value)}
-                placeholder="Enter amount"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="payroll-edit-note">Note (optional)</Label>
-              <Input
-                id="payroll-edit-note"
-                value={payrollEditNote}
-                onChange={(e) => setPayrollEditNote(e.target.value)}
-                placeholder="Optional note"
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setPayrollEditOpen(false)}>Cancel</Button>
-            <Button
-              onClick={() => {
-                handleSave()
-              }}
-              disabled={!payrollEditId || !payrollEditAmount}
-            >
-              Save
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
+    </>
+  )
 }
 

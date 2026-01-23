@@ -64,14 +64,15 @@ Route::middleware([EnsureTokenIsValid::class])->group(function () {
     });
     
     
-
+    //dashboardsData routes
     Route::middleware(['role:admin|hr_manager'])->group(function () {
         Route::get('/hr/dashboard/stats', [HRDashboardController::class, 'dashboardStats']);
         Route::get('/hr/dashboard/pending-leave-requests', [HRDashboardController::class, 'pendingLeaveRequests']);
         Route::get('/upcoming-count', [EventController::class, 'getUpcomingEventsCount']);
         Route::get('/hr/dashboard/total-tasks', [HRDashboardController::class, 'countTodoTasks']);
+        Route::get('/humanResource/stat', [HRDashboardController::class, 'humanResStat']);
     });
-
+    //admin dashboard stat route
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/admin/dashboard/permits-requests/monthly-counts', [AdminDashboardController::class, 'monthlyPermitsAndRequestsCounts']);
         Route::get('/admin/dashboard/totals', [AdminDashboardController::class, 'totals']);
@@ -122,24 +123,14 @@ Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleStripeWeb
 Route::middleware([EnsureTokenIsValid::class])->group(function () {
     // citizen payments
     Route::get('/payments/my-payments', [PaymentController::class, 'myPayments']);
-    // Create payment
-    Route::post('/payments', [PaymentController::class, 'store']);
-    // Bulk payment creation
-    Route::post('/payments/bulk', [BulkPaymentController::class, 'store']);
     // List all payments (admin / finance)
     Route::get('/payments', [PaymentController::class, 'index']);  
     // Get sum of pending payments (admin/clerk only)
     Route::get('/payments/pending-total', [PaymentController::class, 'getPendingPaymentsSum']);
     // Get payment summary (admin / finance)
     Route::get('/payments/summary', [PaymentController::class, 'getPaymentSummary']);
-    // Update payment
-    Route::put('/payments/{payment}', [PaymentController::class, 'updateStatus']);
     // View specific payment (must be last)
     Route::get('/payments/{payment}', [PaymentController::class, 'show']);
-    // delete payment
-    Route::delete('/payments/{payment}', [PaymentController::class, 'destroy']);
-    // we still need payment process integration here
-    Route::post('/payments/{payment}/pay', [PaymentController::class, 'beginStripePayment']); 
 });
 
 // Project routes

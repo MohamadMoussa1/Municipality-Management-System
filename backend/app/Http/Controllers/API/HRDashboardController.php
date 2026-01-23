@@ -46,6 +46,26 @@ class HRDashboardController extends Controller
             'employees_by_department' => $result,
         ], 200);
     }
+    public function humanResStat(Request $request): JsonResponse
+    {
+        if (!$request->user() || !in_array($request->user()->role, [ 'admin'])) {
+            return response()->json([
+                'message' => 'Unauthorized.'
+            ], 403);
+        }
+
+        $totalEmployees = Employee::count();
+        $pendingLeaveRequests = Leave::where('status', 'pending')->count();
+        $totalApprovedLeaveRequests = Leave::where('status', 'approved')->count();
+        $totalLeaveRequests = Leave::count();
+
+        return response()->json([
+            'total_employees' => $totalEmployees,
+            'total_leave_request'=>$totalLeaveRequests,
+            'total_approved_leave_requests'=>$totalApprovedLeaveRequests,
+            'pending_leave_requests'=>$pendingLeaveRequests
+        ], 200);
+    }
 
     public function pendingLeaveRequests(Request $request): JsonResponse
     {

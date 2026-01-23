@@ -175,4 +175,18 @@ Route::middleware([EnsureTokenIsValid::class])->group(function () {
     // Add bonus or deduction
     Route::post('cs/payrolls/{payroll}/adjustments', [PayrollController::class, 'addAdjustment']);
 });
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleStripeWebhook']);
+
+Route::middleware([EnsureTokenIsValid::class])->group(function () {
+    // Create payment
+    Route::post('/cs/payments', [PaymentController::class, 'store']);
+    // Bulk payment creation
+    Route::post('/cs/payments/bulk', [BulkPaymentController::class, 'store']);
+    // Update payment
+    Route::put('/cs/payments/{payment}', [PaymentController::class, 'updateStatus']);
+    // delete payment
+    Route::delete('/cs/payments/{payment}', [PaymentController::class, 'destroy']);
+    // we still need payment process integration here
+    Route::post('/cs/payments/{payment}/pay', [PaymentController::class, 'beginStripePayment']); 
+});
 require __DIR__.'/settings.php';

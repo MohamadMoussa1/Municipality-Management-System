@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Clock, CheckCircle, XCircle, AlertCircle, Trash2, Edit, Search, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import  getCsrfToken  from '../../lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -229,10 +231,10 @@ if (loading) {
     }
   
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/payments", {
+      const res = await fetch("http://127.0.0.1:8000/cs/payments", {
         method: "POST",
         credentials:"include",
-        headers: { "Content-Type": "application/json", "Accept": "application/json",},
+        headers: { "Content-Type": "application/json", "Accept": "application/json",  'X-XSRF-TOKEN':getCsrfToken(),},
         body: JSON.stringify({
           citizen_id: Number(form.citizen_id),
           amount: Number(form.amount),
@@ -269,10 +271,10 @@ if (loading) {
       return;
     }
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/payments/bulk", {
+      const res = await fetch("http://127.0.0.1:8000/cs/payments/bulk", {
         method: "POST",
         credentials:"include",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        headers: { "Content-Type": "application/json", "Accept": "application/json",  'X-XSRF-TOKEN':getCsrfToken(), },
         body: JSON.stringify({
           citizen_ids: bulkForm.citizen_ids.map(Number),
           amount: Number(bulkForm.amount),
@@ -302,10 +304,10 @@ if (loading) {
   // Update payment
   const handleUpdatePayment = async () => {
    
-    const res = await fetch(`http://127.0.0.1:8000/api/payments/${selectedPayment.id}`, {
+    const res = await fetch(`http://127.0.0.1:8000/cs/payments/${selectedPayment.id}`, {
       method: "PUT",
       credentials:"include",
-      headers: { "Content-Type": "application/json", "Accept": "application/json"},
+      headers: { "Content-Type": "application/json", "Accept": "application/json",  'X-XSRF-TOKEN':getCsrfToken(),},
       body: JSON.stringify({
         status: editForm.status,
         amount: editForm.amount ? Number(editForm.amount) : undefined,
@@ -324,10 +326,10 @@ if (loading) {
 
   // Delete payment
   const handleDeletePayment = async (id) => {
-    const res = await fetch(`http://127.0.0.1:8000/api/payments/${id}`, {
+    const res = await fetch(`http://127.0.0.1:8000/cs/payments/${id}`, {
       method: "DELETE",
       credentials:"include",
-      headers: {"Accept": "application/json" }
+      headers: {"Accept": "application/json",  'X-XSRF-TOKEN':getCsrfToken(), }
     });
     if (res.status === 401) {
       toast.error("Session expired. Please login again.");
