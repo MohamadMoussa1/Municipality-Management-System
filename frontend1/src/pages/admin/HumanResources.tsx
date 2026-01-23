@@ -136,10 +136,13 @@ const EmployeesTab = () => {
   const [addEmployeeOpen, setAddEmployeeOpen] = useState(false);
   const [E, setE] = useState([]);
   const [viewProfileOpen, setViewProfileOpen] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [Clicked, setClicked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [employeeCurrentPage, setEmployeeCurrentPage] = useState<number | null>(null);
+  const [employeeLastPage, setEmployeeLastPage] = useState<number | null>(null);
+  const [employeeLoading, setEmployeeLoading] = useState(false);
   const [newEmployee, setNewEmployee] = useState({
     name: '',
     email: '',
@@ -221,20 +224,24 @@ const EmployeesTab = () => {
       setLoadingSubmit(false);
     }
   };
+  const fetchEmployeePage = async (pageNumber: number) => {
+    const response = await fetch(`http://127.0.0.1:8000/api/employees?page=${pageNumber}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    });
+    const res = await response.json();
+    setE(Array.isArray(res?.data) ? res.data : []);
+    setEmployeeCurrentPage(typeof res?.current_page === 'number' ? res.current_page : null);
+    setEmployeeLastPage(typeof res?.last_page === 'number' ? res.last_page : null);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
-
-      const response = await fetch("http://127.0.0.1:8000/api/employees", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-
-        },
-      });
-      const res = await response.json();
-      setE(res.data);
+      await fetchEmployeePage(1);
       setLoading(false);
     };
     fetchData();
@@ -259,42 +266,86 @@ const EmployeesTab = () => {
             </div>
             <Button onClick={() => setAddEmployeeOpen(true)} className="w-full sm:w-auto text-sm">Add Employee</Button>
           </div>
+          <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
+            <div>
+              {employeeCurrentPage && employeeLastPage ? `Page ${employeeCurrentPage} of ${employeeLastPage}` : null}
+            </div>
+            <div>
+              Showing {E?.length || 0}
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:gap-4">
-            {E.map((employee) => (
-              <Card key={employee.id}>
-                <CardContent className="p-3 sm:p-4">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                    <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
-                      <AvatarFallback className="text-xs sm:text-sm">
-                        {employee.name?.split(' ').map(n => n[0]).join('') || 'NA'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-sm sm:text-base truncate">Name: {employee.name}</h4>
-                      <p className="text-xs sm:text-sm text-muted-foreground truncate">Position: {employee.position}</p>
-                      <p className="text-xs text-muted-foreground mt-1 truncate">Department: {employee.department}</p>
+          {employeeLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2">Loading employees...</span>
+            </div>
+          ) : (
+            <>
+              <div className="grid gap-3 sm:gap-4">
+                {E.map((employee) => (
+                  <Card key={employee.id}>
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                        <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
+                          <AvatarFallback className="text-xs sm:text-sm">
+                            {employee.name?.split(' ').map(n => n[0]).join('') || 'NA'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-sm sm:text-base truncate">Name: {employee.name}</h4>
+                          <p className="text-xs sm:text-sm text-muted-foreground truncate">Position: {employee.position}</p>
+                          <p className="text-xs text-muted-foreground mt-1 truncate">Department: {employee.department}</p>
 
-                    </div>
-                    <div className="hidden lg:block text-right">
-                      <p className="text-xs sm:text-sm font-medium truncate">{employee.email}</p>
-                      <p className="text-xs sm:text-sm text-muted-foreground">Role:{employee.role}</p>
-                      <p className="text-xs text-muted-foreground mt-1 truncate">Salary:{employee.salary}</p>
-                    </div>
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
-                      <Badge variant={employee.status === 'active' ? 'default' : 'outline'} className="text-xs">
-                        {employee.status}
-                      </Badge>
-                      <Button variant="outline" size="sm" onClick={() => handleViewProfile(employee)} className="text-xs h-8 flex-1 sm:flex-none">
-                        View Profile
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                        </div>
+                        <div className="hidden lg:block text-right">
+                          <p className="text-xs sm:text-sm font-medium truncate">{employee.email}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">Role:{employee.role}</p>
+                          <p className="text-xs text-muted-foreground mt-1 truncate">Salary:{employee.salary}</p>
+                        </div>
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                          <Badge variant={employee.status === 'active' ? 'default' : 'outline'} className="text-xs">
+                            {employee.user.status}
+                          </Badge>
+                          <Button variant="outline" size="sm" onClick={() => handleViewProfile(employee)} className="text-xs h-8 flex-1 sm:flex-none">
+                            View Profile
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              {(employeeCurrentPage && employeeLastPage && employeeLastPage > 1) && (
+                <div className="flex items-center justify-end gap-2 pt-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    disabled={employeeCurrentPage <= 1}
+                    onClick={async () => {
+                      setEmployeeLoading(true);
+                      await fetchEmployeePage(employeeCurrentPage - 1);
+                      setEmployeeLoading(false);
+                    }} >Previous</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    disabled={employeeCurrentPage >= employeeLastPage}
+                    onClick={async () => {
+                      setEmployeeLoading(true);
+                      await fetchEmployeePage(employeeCurrentPage + 1);
+                      setEmployeeLoading(false);
+                    }}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -442,14 +493,14 @@ const EmployeesTab = () => {
         <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Employee Profile</DialogTitle>
-            <DialogDescription>Complete information for {selectedEmployee?.name}</DialogDescription>
+            <DialogDescription>Complete information for {selectedEmployee?.user.name}</DialogDescription>
           </DialogHeader>
           {selectedEmployee && (
             <div className="space-y-4">
               <div className="flex items-center gap-4 pb-4 border-b">
                 <Avatar className="h-14 w-14 sm:h-16 sm:w-16">
                   <AvatarFallback className="text-base sm:text-lg">
-                    {selectedEmployee.name.split(' ').map(n => n[0]).join('') || 'NA'}
+                    {selectedEmployee.user.name.split(' ').map(n => n[0]).join('') || 'NA'}
                   </AvatarFallback>
                 </Avatar>
                 <div>
@@ -467,7 +518,7 @@ const EmployeesTab = () => {
               </div>
               <div>
                 <p className="text-sm font-medium">Email</p>
-                <p className="text-sm text-muted-foreground">{selectedEmployee.email}</p>
+                <p className="text-sm text-muted-foreground">{selectedEmployee.user.email}</p>
               </div>
               <div>
                 <p className="text-sm font-medium">Hire Date</p>
@@ -492,6 +543,9 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
   const [loading, setLoading] = useState(true);
   const [Clicked, setClicked] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
+  const [leaveCurrentPage, setLeaveCurrentPage] = useState<number | null>(null);
+  const [leaveLastPage, setLeaveLastPage] = useState<number | null>(null);
+  const [leaveLoading, setLeaveLoading] = useState(false);
   const getStatusColor = (status: RequestLeaveStatus) => {
     switch (status) {
       case 'pending': return 'bg-yellow-500';
@@ -514,26 +568,26 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
         return <Badge className="bg-primary">Completed</Badge>;
     }
   };
+  const fetchLeavePage = async (pageNumber: number) => {
+    const response = await fetch(`http://127.0.0.1:8000/api/leaves?page=${pageNumber}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    });
+    const res = await response.json();
+    const pageData = res?.data;
+    const leaves = Array.isArray(pageData?.data) ? pageData.data : [];
+    setR(leaves);
+    setLeaveCurrentPage(typeof pageData?.current_page === 'number' ? pageData.current_page : null);
+    setLeaveLastPage(typeof pageData?.last_page === 'number' ? pageData.last_page : null);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
-
-      const response = await fetch("http://127.0.0.1:8000/api/leaves", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-
-        },
-      });
-      const res = await response.json();
-      const leavesData = res?.data;
-      const leaves = Array.isArray(leavesData)
-        ? leavesData
-        : Array.isArray(leavesData?.data)
-          ? leavesData.data
-          : [];
-      setR(leaves);
+      await fetchLeavePage(1);
       setLoading(false);
     };
 
@@ -580,7 +634,7 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
     <>
       <Card>
         <CardContent className="p-3 sm:p-6">
-          <div className="flex flex-col gap-2 mb-3 sm:mb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 sm:mb-4">
             <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
               <SelectTrigger className="w-full sm:w-[180px] text-[11px] sm:text-sm h-8 sm:h-9">
                 <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -593,6 +647,14 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
                 <SelectItem value="rejected">Rejected</SelectItem>
               </SelectContent>
             </Select>
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <div>
+                {leaveCurrentPage && leaveLastPage ? `Page ${leaveCurrentPage} of ${leaveLastPage}` : null}
+              </div>
+              <div>
+                Showing {R?.length || 0}
+              </div>
+            </div>
           </div>
 
           <div className="rounded-md border overflow-x-auto -mx-3 sm:mx-0">
@@ -607,7 +669,7 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {loading ? (
+                {leaveLoading ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8">
                       <div className="flex items-center justify-center">
@@ -678,6 +740,33 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
               </TableBody>
             </Table>
           </div>
+          {(leaveCurrentPage && leaveLastPage && leaveLastPage > 1) && (
+            <div className="flex items-center justify-end gap-2 pt-3">
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                disabled={leaveCurrentPage <= 1}
+                onClick={async () => {
+                  setLeaveLoading(true);
+                  await fetchLeavePage(leaveCurrentPage - 1);
+                  setLeaveLoading(false);
+                }} >Previous</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                disabled={leaveCurrentPage >= leaveLastPage}
+                onClick={async () => {
+                  setLeaveLoading(true);
+                  await fetchLeavePage(leaveCurrentPage + 1);
+                  setLeaveLoading(false);
+                }}
+              >
+                Next
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 

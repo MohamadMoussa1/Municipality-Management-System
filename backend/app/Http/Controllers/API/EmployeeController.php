@@ -87,8 +87,8 @@ class EmployeeController extends Controller
             ], 403);
         }
 
-        $employees = Employee::with('user')->get();
-        return EmployeeResource::collection($employees);
+        $employees = Employee::with('user')->paginate(3);
+        return response()->json($employees);
     }
 
     /**
