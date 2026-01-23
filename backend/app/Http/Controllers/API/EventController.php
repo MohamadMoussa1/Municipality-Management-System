@@ -62,20 +62,22 @@ class EventController extends Controller
         
         if ($user->hasRole('admin')) {
             // Admin can see all events
-            $events = $query->latest()->get();
+            $events = $query->latest()->paginate(3);;
         } elseif ($user->hasRole('citizen')) {
         // Citizen and other roles can see public and citizen events
             $events = $query->whereIn('target_audience', ['public', 'citizens'])
                           ->latest()
-                          ->get();
+                          ->paginate(3);
         } else {
             // Employee can see public and staff events
             $events = $query->whereIn('target_audience', ['public', 'staff'])
                           ->latest()
-                          ->get();
+                          ->paginate(3);
         }
         
-        return response()->json($events);
+        return response()->json([
+            'data'=>$events
+        ]);
     }
 
     /**

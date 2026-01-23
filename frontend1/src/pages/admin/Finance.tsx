@@ -28,12 +28,12 @@ const paymentTypes = [
 ];
 
 export default function Finance() {
-   const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [payments, setPayments] = useState([]);
   const [citizens, setCitizens] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
-
+  const [Clicked, setClicked] = useState(false);
   // Dialogs for create/update
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
@@ -55,9 +55,32 @@ export default function Finance() {
   const [bulkSearchResult, setBulkSearchResult] = useState(null);
   const [bulkCitizenLoading, setBulkCitizenLoading] = useState(false);
   const [bulkPermissionError, setBulkPermissionError] = useState(null);
-
+  //fetch as pages
+  const [CurrentPage, setCurrentPage] = useState<number | null>(null);
+  const [LastPage, setLastPage] = useState<number | null>(null);
   const navigate = useNavigate();
-
+  const fetchPage = async (pageNumber: number) => {
+      const response = await fetch(`http://127.0.0.1:8000/api/payments?page=${pageNumber}`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+      });
+      const res = await response.json();
+      setPayments(res.data.data);
+      setCurrentPage(res.data.current_page );
+      setLastPage( res.data.last_page);
+    };
+  
+    useEffect(() => {
+      const fetchData = async () => {
+        await fetchPage(1);
+        setLoading(false);
+      };
+      fetchData();
+    }, [Clicked]);
   // Fetch all payments and citizens (for bulk)
   const fetchData = async () => {
     // Payments
@@ -69,7 +92,6 @@ export default function Finance() {
 
       if (paymentsRes.status === 401) {
         toast.error("Session expired. Please login again.");
-        localStorage.removeItem('token');
         navigate('/login');
         return;
       }
@@ -437,6 +459,33 @@ if (loading) {
                 </CardContent>
               </Card>
             ))}
+            {(CurrentPage && LastPage && LastPage > 1) && (
+                <div className="flex items-center justify-end gap-2 pt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    disabled={CurrentPage <= 1}
+                    onClick={async () => {
+                      setLoading(true);
+                      await fetchPage(CurrentPage - 1);
+                      setLoading(false);
+                    }} >Previous</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    disabled={CurrentPage >= LastPage}
+                    onClick={async () => {
+                      setLoading(true);
+                      await fetchPage(CurrentPage + 1);
+                      setLoading(false);
+                    }}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
           </div>
         </CardContent>
       </Card>

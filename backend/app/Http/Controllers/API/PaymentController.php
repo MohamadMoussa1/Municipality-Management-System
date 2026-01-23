@@ -217,17 +217,11 @@ public function getPaymentSummary(Request $request)
          // sorting
         $sortBy = $q['sort_by'] ?? 'date';
         $sortDir = $q['sort_dir'] ?? 'desc';
-        $query->orderBy($sortBy, $sortDir);
-
-        // pagination:may be modified later
-        $perPage = $q['per_page'] ?? 15;
-        $payments = $query->with('citizen')->paginate($perPage)->appends($request->query());
-              
-
+        $result=$query->orderBy($sortBy, $sortDir)->paginate(5);
 
         return response()->json([
             'message' => 'Payments retrieved successfully.',
-            'data' =>  PaymentResource::collection($payments)
+            'data' => $result
         ], 200);
     }
 

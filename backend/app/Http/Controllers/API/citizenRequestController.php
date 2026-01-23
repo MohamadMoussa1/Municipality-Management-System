@@ -136,7 +136,7 @@ class citizenRequestController extends Controller
     {
         $user = $request->user();
         if ($user->role === 'admin') {
-            $requests = CitizenRequest::with('citizen.user')->orderBy('submission_date', 'desc')->get();
+            $requests = CitizenRequest::with('citizen.user')->orderBy('submission_date', 'desc')->paginate(5);
 
             return response()->json([
                 'role' => 'admin',
@@ -158,7 +158,7 @@ class citizenRequestController extends Controller
         }
         // 2. Fetch requests assigned to the employee's department
 
-         $requests = CitizenRequest::with('citizen.user')->orderBy('submission_date', 'desc')->get();
+         $requests = CitizenRequest::with('citizen.user')->orderBy('submission_date', 'desc')->paginate(1);
 
             return response()->json([
                 'role' => 'clerk',

@@ -209,7 +209,7 @@ class PermitController extends Controller
             })
             ->latest();
 
-        $permits = $query->get();
+        $permits = $query->paginate(5);
         
         
 

@@ -69,6 +69,8 @@ export default function Events() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterAudience, setFilterAudience] = useState<string>('all');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [CurrentPage, setCurrentPage] = useState<number | null>(null);
+  const [LastPage, setLastPage] = useState<number | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [formData, setFormData] = useState({
     title: '',
@@ -79,31 +81,28 @@ export default function Events() {
     location: '',
     capacity: '',
   });
-
-  // 5. Fetch all events on component mount
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  // 6. API: Fetch all events
-  const fetchEvents = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('http://127.0.0.1:8000/api/events', {
-        headers: {
-          'Accept': 'application/json',
-        },
-        withCredentials: true,
-      });
-      setEvents(response.data);
-    } catch (error) {
-      console.error('Error fetching events:', error);
-      toast.error('Failed to load events');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  const fetchEvents = async (pageNumber: number) => {
+          const response = await fetch(`http://127.0.0.1:8000/api/events?page=${pageNumber}`, {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+            },
+          });
+          const res = await response.json();
+          setEvents(res.data.data);
+          setCurrentPage(res.data.current_page );
+          setLastPage( res.data.last_page);
+        };
+      
+        useEffect(() => {
+          const fetchData = async () => {
+            await fetchEvents(1);
+            setLoading(false);
+          };
+          fetchData();
+        }, []);
   // 7. API: Create or Update event
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -138,7 +137,7 @@ export default function Events() {
         setEvents(events.map(event =>
           event.id === selectedEvent.id ? response.data : event
         ));
-        await fetchEvents();
+        await fetchEvents(1);
         toast.success('Event updated successfully');
       } else {
         // Create new event
@@ -157,7 +156,7 @@ export default function Events() {
         // Ensure we're using the correct response structure
         const newEvent = response.data?.data || response.data;
         setEvents(prevEvents => [newEvent, ...prevEvents]);
-        await fetchEvents();
+        await fetchEvents(1);
         toast.success('Event created successfully');
       }
 
@@ -538,6 +537,33 @@ export default function Events() {
                       </TableCell>
                     </TableRow>
                   ))}
+                  {(CurrentPage && LastPage && LastPage > 1) && (
+            <div className="flex justify-start gap-2 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                disabled={CurrentPage <= 1}
+                onClick={async () => {
+                  setLoading(true);
+                  await fetchEvents(CurrentPage - 1);
+                  setLoading(false);
+                }} >Previous</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                disabled={CurrentPage >= LastPage}
+                onClick={async () => {
+                  setLoading(true);
+                  await fetchEvents(CurrentPage + 1);
+                  setLoading(false);
+                }}
+              >
+                Next
+              </Button>
+            </div>
+          )}
                 </TableBody>
               </Table>
             </div>

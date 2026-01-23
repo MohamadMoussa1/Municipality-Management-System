@@ -2,10 +2,18 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import  getCsrfToken  from '../../lib/utils';
+import getCsrfToken from '../../lib/utils';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 import { Building2, Clock, CheckCircle, DollarSign, Users, Search, Loader2, Calendar, Target, FileText, XCircle, CheckSquare } from 'lucide-react';
 
@@ -29,6 +37,8 @@ export default function Projects() {
   const [Projects, setProjects] = useState([]);
   const [Clicked, setClicked] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [CurrentPage, setCurrentPage] = useState<number | null>(null);
+    const [LastPage, setLastPage] = useState<number | null>(null);
   const [newProject, setNewProject] = useState({
     name: '',
     department: '',
@@ -48,16 +58,38 @@ export default function Projects() {
       default: return 'bg-accent';
     }
   };
+  const fetchPage = async (pageNumber: number) => {
+        const response = await fetch(`http://127.0.0.1:8000/api/projects?page=${pageNumber}`, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+          },
+        });
+        const res = await response.json();
+        setProjects(res.data.data);
+        setCurrentPage(res.data.current_page );
+        setLastPage( res.data.last_page);
+      };
+    
+      useEffect(() => {
+        const fetchData = async () => {
+          await fetchPage(1);
+          setLoading(false);
+        };
+        fetchData();
+      }, [Clicked]);
   const handleStatusChange = (Id: string, newStatus: RequestProjectStatus) => {
     let res = null;
     const fetchData = async () => {
       const response = await fetch("http://127.0.0.1:8000/cs/projects/" + Id + "/status", {
         method: "PUT",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          'X-XSRF-TOKEN':getCsrfToken(),
+          'X-XSRF-TOKEN': getCsrfToken(),
         },
         body: JSON.stringify({
           'status': newStatus
@@ -72,26 +104,6 @@ export default function Projects() {
       description: `Project ${Id} status changed to ${newStatus.replace('_', ' ')}.`,
     });
   };
-
-
-  useEffect(() => {
-    setClicked(false);
-    const fetchData = async () => {
-      const response = await fetch("http://127.0.0.1:8000/api/projects", {
-        method: "GET",
-        credentials:"include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-         
-        },
-      });
-      const res = await response.json();
-      setProjects(res.data);
-      setLoading(false);
-    };
-    fetchData();
-  }, [Clicked]);
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoadingSubmit(true);
@@ -100,11 +112,11 @@ export default function Projects() {
     try {
       const response = await fetch("http://127.0.0.1:8000/cs/projects", {
         method: "POST",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          'X-XSRF-TOKEN':getCsrfToken(),
+          'X-XSRF-TOKEN': getCsrfToken(),
         },
         body: JSON.stringify({
 
@@ -142,11 +154,11 @@ export default function Projects() {
       try {
         const response = await fetch(`http://127.0.0.1:8000/api/projects/${selectedProject.id}`, {
           method: "GET",
-          credentials:"include",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json",
-           
+
           },
         });
         const res = await response.json();
@@ -170,11 +182,11 @@ export default function Projects() {
     try {
       const response = await fetch("http://127.0.0.1:8000/cs/projects/" + id + "/tasks", {
         method: "POST",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          'X-XSRF-TOKEN':getCsrfToken(),
+          'X-XSRF-TOKEN': getCsrfToken(),
         },
         body: JSON.stringify({
           'title': form.task,
@@ -206,8 +218,8 @@ export default function Projects() {
     setEmployeeResult(null);
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/employees/${encodeURIComponent(EmployeeSearch)}`, {
-        headers: {"Accept": "application/json" },
-        credentials:"include",
+        headers: { "Accept": "application/json" },
+        credentials: "include",
       });
       const body = await res.json().catch(() => null);
       setEmployeeLoading(false);
@@ -357,82 +369,107 @@ export default function Projects() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {Projects?.map((project) => (
-              <Card key={project.id}>
-                <CardContent className="p-6">
-                  <div className="flex flex-col lg:flex-row justify-between gap-4">
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-3">
-                          <div className="p-2 bg-primary/10 rounded-lg">
-                            <Building2 className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold">{project.name}</h3>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Users className="h-3 w-3 text-muted-foreground" />
-                              <p className="text-sm text-muted-foreground">{project.department}</p>
-                            </div>
-                          </div>
-                        </div>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Project Name</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Start Date</TableHead>
+                  <TableHead>End Date</TableHead>
+                  <TableHead>Budget</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Projects?.map((project) => (
+                  <TableRow key={project.id}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-primary" />
+                        {project.name}
                       </div>
-
-                      <div className="flex flex-wrap gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>Start:
-                            {project.start_date.split("T")[0]}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>End:
-                            {project.end_date.split("T")[0]}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-muted-foreground" />
-                          <span>
-                            {project.budget}
-                          </span>
-                        </div>
-                        <Select
-                          value={project.status}
-                          onValueChange={(value: RequestProjectStatus) => handleStatusChange(project.id, value)}
-                        >
-                          <SelectTrigger className="w-[130px] h-8">
-                            <SelectValue>
-                              <Badge className={getStatusColor(project.status)}>
-                                {project.status === 'in_review' ? 'In Review' : project.status.charAt(0).toUpperCase() + project.status.slice(1)}
-                              </Badge>
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="completed">
-                              <Badge className="bg-success">completed</Badge>
-                            </SelectItem>
-                            <SelectItem value="in_progress">
-                              <Badge className="bg-warning">In progress</Badge>
-                            </SelectItem>
-                            <SelectItem value="on_hold">
-                              <Badge className="bg-muted text-black">on_hold</Badge>
-                            </SelectItem>
-                            <SelectItem value="cancelled">
-                              <Badge className="bg-destructive">cancelled</Badge>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Users className="h-3 w-3 text-muted-foreground" />
+                        {project.department}
                       </div>
-                    </div>
-                    <div className="flex lg:flex-col gap-2">
-                      <Button variant="outline" size="sm" onClick={() => handleViewDetails(project)}>View Details</Button>
-                      <Button variant="outline" size="sm" onClick={() => handleAssignTasks(project)}>assign a task</Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    </TableCell>
+                    <TableCell>{project.start_date.split("T")[0]}</TableCell>
+                    <TableCell>{project.end_date.split("T")[0]}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        {project.budget}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={project.status}
+                        onValueChange={(value: RequestProjectStatus) => handleStatusChange(project.id, value)}
+                      >
+                        <SelectTrigger className="w-[130px] h-8">
+                          <SelectValue>
+                            <Badge className={getStatusColor(project.status)}>
+                              {project.status === 'in_review' ? 'In Review' : project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                            </Badge>
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="completed">
+                            <Badge className="bg-success">completed</Badge>
+                          </SelectItem>
+                          <SelectItem value="in_progress">
+                            <Badge className="bg-warning">In progress</Badge>
+                          </SelectItem>
+                          <SelectItem value="on_hold">
+                            <Badge className="bg-muted text-black">on_hold</Badge>
+                          </SelectItem>
+                          <SelectItem value="cancelled">
+                            <Badge className="bg-destructive">cancelled</Badge>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(project)}>View Details</Button>
+                        <Button variant="outline" size="sm" onClick={() => handleAssignTasks(project)}>Assign Task</Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {(CurrentPage && LastPage && LastPage > 1) && (
+            <div className="flex justify-start gap-2 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                disabled={CurrentPage <= 1}
+                onClick={async () => {
+                  setLoading(true);
+                  await fetchPage(CurrentPage - 1);
+                  setLoading(false);
+                }} >Previous</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                disabled={CurrentPage >= LastPage}
+                onClick={async () => {
+                  setLoading(true);
+                  await fetchPage(CurrentPage + 1);
+                  setLoading(false);
+                }}
+              >
+                Next
+              </Button>
+            </div>
+          )}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>

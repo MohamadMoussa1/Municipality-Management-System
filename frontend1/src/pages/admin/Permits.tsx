@@ -34,6 +34,8 @@ export default function Permits() {
   const [P, setP] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [Id, setId] = useState("");
+  const [CurrentPage, setCurrentPage] = useState<number>(1);
+  const [LastPage, setLastPage] = useState<number >(1);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -47,40 +49,28 @@ export default function Permits() {
   if (role == 'admin') {
     isAdmin = true;
   }
-  useEffect(() => {
-    const f = async () => {
-      setClicked(false);    
-      try {
-       
-        const response = await fetch("http://127.0.0.1:8000/api/permits", {
-          method: "GET",
-          credentials:"include",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch permits');
-        }
-
-        const res = await response.json();
-        setP(res.data || []);
-      } catch (error) {
-        console.error("Error fetching permits:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load permits. Please try again.",
-          variant: "destructive",
-        });
-        setP([]);
-      } finally {
-        setLoading(false);
-      }
+  const fetchPage = async (pageNumber: number) => {
+      const response = await fetch(`http://127.0.0.1:8000/api/permits?page=${pageNumber}`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+      });
+      const res = await response.json();
+      setP(res.data.data);
+      setCurrentPage( res.data.current_page );
+      setLastPage( res.data.last_page );
     };
-    f();
-  }, [Clicked]);
+  
+    useEffect(() => {
+      const fetchData = async () => {
+        await fetchPage(1);
+        setLoading(false);
+      };
+      fetchData();
+    }, [Clicked]);
 
   if (loading) {
     return (
@@ -383,6 +373,33 @@ export default function Permits() {
                       </TableCell>
                     </TableRow>
                   ))}
+                  {(CurrentPage && LastPage && LastPage > 1) && (
+                 <div className="flex justify-start gap-2 pt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    disabled={CurrentPage <= 1}
+                    onClick={async () => {
+                      setLoading(true);
+                      await fetchPage(CurrentPage - 1);
+                      setLoading(false);
+                    }} >Previous</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    disabled={CurrentPage >= LastPage}
+                    onClick={async () => {
+                      setLoading(true);
+                      await fetchPage(CurrentPage + 1);
+                      setLoading(false);
+                    }}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
                 </TableBody>
               </Table>
             </div>
