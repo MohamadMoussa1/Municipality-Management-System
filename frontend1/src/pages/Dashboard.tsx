@@ -46,43 +46,12 @@ export default function Dashboard() {
 }
 
 const AdminDashboard = () => {
-  const [info, setinfo] = useState<any>([]);
+ const [info, setinfo] = useState<any>([]);
   const [i, seti] = useState<any>([]);
   const [loading, setLoading] = useState(true);
   const [D, setD] = useState<any>(true);
   const [load, setload] = useState(true);
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch("http://127.0.0.1:8000/api/payments/summary", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-      });
-      const res = await response.json();
-      seti(res);
-      setload(false);
-    };
-    fetchData();
-  }, []);
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch("http://127.0.0.1:8000/api/admin/dashboard/permits-requests/monthly-counts", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-      });
-      const res = await response.json();
-      setD(res);
-      setLoading(false);
-    };
-    fetchData();
-  }, []);
+  
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch("http://127.0.0.1:8000/api/admin/dashboard/totals", {
@@ -95,6 +64,7 @@ const AdminDashboard = () => {
       });
       const res = await response.json();
       setinfo(res);
+      console.log(res);
       setLoading(false);
     };
     fetchData();
@@ -102,22 +72,22 @@ const AdminDashboard = () => {
   let citizenData = null;
   if (!loading && info) {
     citizenData = [
-      { month: 'July', requests: D.requests['2025-07'], permits: D.permits['2025-07'] },
-      { month: 'Aug', requests: D.requests['2025-08'], permits: D.permits['2025-08'] },
-      { month: 'Sep', requests: D.requests['2025-09'], permits: D.permits['2025-09'] },
-      { month: 'Oct', requests: D.requests['2025-10'], permits: D.permits['2025-10'] },
-      { month: 'Nov', requests: D.requests['2025-11'], permits: D.permits['2025-11'] },
-      { month: 'Dec', requests: D.requests['2025-12'], permits: D.permits['2025-12'] },
+      { month: 'July', requests: info.requests['2025-07'], permits: info.permits['2025-07'] },
+      { month: 'Aug', requests: info.requests['2025-08'], permits: info.permits['2025-08'] },
+      { month: 'Sep', requests: info.requests['2025-09'], permits: info.permits['2025-09'] },
+      { month: 'Oct', requests: info.requests['2025-10'], permits: info.permits['2025-10'] },
+      { month: 'Nov', requests: info.requests['2025-11'], permits: info.permits['2025-11'] },
+      { month: 'Dec', requests: info.requests['2025-12'], permits: info.permits['2025-12'] },
     ];
   }
   let financeData = null;
-  if (!load && i) {
+  if (!loading && info) {
     financeData = [
-      { name: 'property tax', value: i.by_type.property_tax.total_amount },
-      { name: 'water bill', value: i.by_type?.water_bill?.total_amount },
-      { name: 'eletricity bill', value: i.by_type?.electricity_bill?.total_amount },
-      { name: 'waste management', value: i.by_type?.waste_management?.total_amount },
-      { name: 'other', value: i.by_type?.other?.total_amount },
+      { name: 'property tax', value: info.by_type.property_tax.total_amount },
+      { name: 'water bill', value: info.by_type?.water_bill?.total_amount },
+      { name: 'eletricity bill', value: info.by_type?.electricity_bill?.total_amount },
+      { name: 'waste management', value: info.by_type?.waste_management?.total_amount },
+      { name: 'other', value: info.by_type?.other?.total_amount },
     ];
   }
   return (
