@@ -361,8 +361,7 @@ export default function Events() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
                   <div className="space-y-2">
                     <Label htmlFor="date">Date *</Label>
                     <Input
@@ -373,27 +372,9 @@ export default function Events() {
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
-                    <Input
-                      id="location"
-                      placeholder="Event venue or address"
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    />
-                  </div>
+                  
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="capacity">Capacity</Label>
-                  <Input
-                    id="capacity"
-                    type="number"
-                    placeholder="Maximum number of attendees"
-                    value={formData.capacity}
-                    onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                    min="1"
-                  />
-                </div>
+                
               </div>
               <DialogFooter>
                 <Button

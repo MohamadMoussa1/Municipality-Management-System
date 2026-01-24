@@ -148,7 +148,9 @@ public function getPaymentSummary(Request $request)
             ]);
             // Notify the citizen about the new payment
             
-            $payment->citizen->user->notify(new \App\Notifications\PaymentCreated($payment));
+            $payment->citizen->user->notify(
+                (new \App\Notifications\PaymentCreated($payment))->delay(now()->addSeconds(1))
+            );
             
             return response()->json([
                 'message' => 'Payment created successfully.',
