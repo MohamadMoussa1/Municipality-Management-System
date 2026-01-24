@@ -108,22 +108,11 @@ class ProjectController extends Controller
         // Apply sorting (default: newest first)
         $sortBy = $request->input('sort_by', 'created_at');
         $sortOrder = $request->input('sort_order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
-
-        // Pagination
-        $perPage = $request->input('per_page', 15);
-        $projects = $query->paginate($perPage);
+        $result=$query->orderBy($sortBy, $sortOrder)->paginate(3);
 
         return response()->json([
-            'data' => $projects->items(),
-            'pagination' => [
-                'total' => $projects->total(),
-                'per_page' => $projects->perPage(),
-                'current_page' => $projects->currentPage(),
-                'last_page' => $projects->lastPage(),
-                'from' => $projects->firstItem(),
-                'to' => $projects->lastItem(),
-            ]
+            'data' =>$result
+            
         ]);
     }
     /**

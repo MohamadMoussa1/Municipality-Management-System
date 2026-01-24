@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import getCsrfToken from '../../lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -50,8 +50,6 @@ type Leave = {
     updated_at?: string;
 };
 
-const API_BASE = 'http://127.0.0.1:8000/api';
-
 // ---- Helpers ----
 
 function formatDate(dateStr: string | null | undefined) {
@@ -92,70 +90,50 @@ function getStatusColor(status: LeaveStatus) {
 // ---- Component ----
 
 export default function MyLeaves() {
-    const navigate = useNavigate();
-
     const [leaves, setLeaves] = useState<Leave[]>([]);
     const [loading, setLoading] = useState(true);
-
     const [newDialogOpen, setNewDialogOpen] = useState(false);
     const [loadingSubmit, setLoadingSubmit] = useState(false);
-
     const [selectedLeave, setSelectedLeave] = useState<Leave | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
-
     // Form state
     const [leaveType, setLeaveType] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [reason, setReason] = useState('');
-
     // Reload flag after submit
     const [refreshKey, setRefreshKey] = useState(0);
+    const [CurrentPage, setCurrentPage] = useState<number>(1);
+    const [LastPage, setLastPage] = useState<number>(1);
+    const [Clicked, setClicked] = useState(false);
+    const navigate = useNavigate();
+    const fetchPage = async (pageNumber: number) => {
+        const response = await fetch(`http://127.0.0.1:8000/api/leaves/my?page=${pageNumber}`, {
+            method: "GET",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+        });
+        const res = await response.json();
+        if (res.status === 401) {
+            toast.error('Session expired. Please login again.');
+            navigate('/login');
+            return;
+        }
+        setLeaves(res.data.data);
+        setCurrentPage(res.data.current_page);
+        setLastPage(res.data.last_page);
+    };
 
-    // Fetch my leaves
+    const fetchData = async () => {
+        await fetchPage(1);
+        setLoading(false);
+    };
     useEffect(() => {
-        const fetchLeaves = async () => {
-            setLoading(true);
-           
-
-            try {
-                const res = await fetch(`${API_BASE}/leaves/my`, {
-                    method: 'GET',
-                    credentials:"include",
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Accept: 'application/json',
-                       
-                    },
-                });
-
-                if (res.status === 401) {
-                    toast.error('Session expired. Please login again.');                
-                    navigate('/login');
-                    return;
-                }
-
-                const body = await res.json().catch(() => null);
-
-                if (res.ok) {
-                    const data = body?.data || body || [];
-                    setLeaves(Array.isArray(data) ? data : []);
-                } else {
-                    toast.error(body?.message || 'Failed to fetch leave requests');
-                    setLeaves([]);
-                }
-            } catch (error) {
-                toast.error('Failed to fetch leave requests. Please try again.');
-                setLeaves([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchLeaves();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [refreshKey]);
-
+        fetchData();
+    }, [Clicked]);
     // Stats
     const stats = {
         total: leaves.length,
@@ -174,13 +152,13 @@ export default function MyLeaves() {
         }
         setLoadingSubmit(true);
         try {
-            const res = await fetch(`${API_BASE}/leaves`, {
+            const res = await fetch(`http://127.0.0.1:8000/cs/leaves`, {
                 method: 'POST',
-                credentials:"include",
+                credentials: "include",
                 headers: {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
-                   
+                    'X-XSRF-TOKEN': getCsrfToken(),
                 },
                 body: JSON.stringify({
                     type: leaveType,
@@ -251,287 +229,370 @@ export default function MyLeaves() {
         );
     }
 
-return (
-    <div className="space-y-6">
-        {/* Header + New Leave Dialog */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h1 className="text-3xl font-bold text-foreground">My Leave Requests</h1>
-                <p className="text-muted-foreground">
-                    Submit and track your leave requests
-                </p>
+    return (
+        <div className="space-y-6">
+            {/* Header + New Leave Dialog */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-foreground">My Leave Requests</h1>
+                    <p className="text-muted-foreground">
+                        Submit and track your leave requests
+                    </p>
+                </div>
+
+                <Dialog open={newDialogOpen} onOpenChange={setNewDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button className="gap-2">
+                            <Plus className="h-4 w-4" />
+                            New Leave Request
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[525px]">
+                        <DialogHeader>
+                            <DialogTitle>Submit New Leave Request</DialogTitle>
+                            <DialogDescription>
+                                Choose leave type and dates, and optionally add a reason.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <form className="grid gap-4 py-4" onSubmit={handleSubmit}>
+                            <div className="space-y-2">
+                                <Label htmlFor="leave-type">Leave Type</Label>
+                                <Select value={leaveType} onValueChange={setLeaveType}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select leave type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="annual">Annual Leave</SelectItem>
+                                        <SelectItem value="sick">Sick Leave</SelectItem>
+                                        <SelectItem value="unpaid">Unpaid Leave</SelectItem>
+                                        <SelectItem value="other">Other</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="start-date">Start Date</Label>
+                                    <Input
+                                        id="start-date"
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="end-date">End Date</Label>
+                                    <Input
+                                        id="end-date"
+                                        type="date"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="reason">Reason (optional)</Label>
+                                <Textarea
+                                    id="reason"
+                                    rows={3}
+                                    placeholder="Add any additional details about your leave"
+                                    value={reason}
+                                    onChange={(e) => setReason(e.target.value)}
+                                />
+                            </div>
+
+                            <DialogFooter>
+                                <Button
+                                    type="submit"
+                                    disabled={loadingSubmit}
+                                >
+                                    {loadingSubmit ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Submitting...
+                                        </>
+                                    ) : (
+                                        'Submit Request'
+                                    )}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
             </div>
 
-            <Dialog open={newDialogOpen} onOpenChange={setNewDialogOpen}>
-                <DialogTrigger asChild>
-                    <Button className="gap-2">
-                        <Plus className="h-4 w-4" />
-                        New Leave Request
-                    </Button>
-                </DialogTrigger>
+            {/* Stats */}
+            <div className="grid gap-4 md:grid-cols-4">
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.total}</div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">Pending</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-yellow-500">
+                            {stats.pending}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">Approved</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-green-500">
+                            {stats.approved}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-red-500">
+                            {stats.rejected}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Leave list */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>Leave Request History</CardTitle>
+                    <CardDescription>
+                        View the status and details of all your leave requests
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {leaves.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                            You have not submitted any leave requests yet.
+                        </p>
+                    ) : (
+                        <div className="space-y-4">
+                            {leaves.map((leave) => (
+                                <Card
+                                    key={leave.id}
+                                    className="hover:shadow-md transition-shadow"
+                                >
+                                    <CardContent className="p-4">
+                                        <div className="flex flex-col sm:flex-row justify-between gap-4">
+                                            <div className="space-y-2 flex-1">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <h3 className="font-semibold">
+                                                        {leave.type.replace('_', ' ').toUpperCase()}
+                                                    </h3>
+                                                    <Badge
+                                                        variant="outline"
+                                                        className={getStatusColor(leave.status)}
+                                                    >
+                                                        <span className="flex items-center gap-1">
+                                                            {getStatusIcon(leave.status)}
+                                                            {leave.status.replace('_', ' ')}
+                                                        </span>
+                                                    </Badge>
+                                                </div>
+
+                                                <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                                                    <span>
+                                                        ID: {leave.id}
+                                                    </span>
+                                                    <span>
+                                                        From:{' '}
+                                                        <span className="font-medium">
+                                                            {formatDate(leave.start_date)}
+                                                        </span>
+                                                    </span>
+                                                    <span>
+                                                        To:{' '}
+                                                        <span className="font-medium">
+                                                            {formatDate(leave.end_date)}
+                                                        </span>
+                                                    </span>
+                                                    {leave.created_at && (
+                                                        <span>
+                                                            Submitted:{' '}
+                                                            <span className="font-medium">
+                                                                {formatDate(leave.created_at)}
+                                                            </span>
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex sm:flex-col gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="flex-1"
+                                                    onClick={() => handleViewDetails(leave)}
+                                                >
+                                                    View Details
+                                                </Button>
+                                                {/* If later you add cancel endpoint, you can put a Cancel button here for pending status */}
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                            {(CurrentPage && LastPage && LastPage > 1) && (
+                                <div className="flex items-center justify-between w-full p-4">
+                                    <div className="text-sm text-muted-foreground">
+                                        Page {CurrentPage} of {LastPage}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled={CurrentPage <= 1}
+                                            onClick={async () => {
+                                                setLoading(true);
+                                                await fetchPage(CurrentPage - 1);
+                                                setLoading(false);
+                                            }}
+                                        >
+                                            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                            Previous
+                                        </Button>
+                                        <div className="flex items-center gap-1">
+                                            {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
+                                                const pageNum = i + 1;
+                                                const isActive = pageNum === CurrentPage;
+                                                return (
+                                                    <Button
+                                                        key={pageNum}
+                                                        variant={isActive ? "default" : "outline"}
+                                                        size="sm"
+                                                        className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                                                            ? "bg-primary text-primary-foreground shadow-sm"
+                                                            : "hover:bg-primary hover:text-primary-foreground"
+                                                            }`}
+                                                        disabled={pageNum > LastPage}
+                                                        onClick={async () => {
+                                                            setLoading(true);
+                                                            await fetchPage(pageNum);
+                                                            setLoading(false);
+                                                        }}
+                                                    >
+                                                        {pageNum}
+                                                    </Button>
+                                                );
+                                            })}
+                                            {LastPage > 5 && (
+                                                <>
+                                                    <span className="text-muted-foreground text-xs px-1">...</span>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                                                        onClick={async () => {
+                                                            setLoading(true);
+                                                            await fetchPage(LastPage);
+                                                            setLoading(false);
+                                                        }}
+                                                    >
+                                                        {LastPage}
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled={CurrentPage >= LastPage}
+                                            onClick={async () => {
+                                                setLoading(true);
+                                                await fetchPage(CurrentPage + 1);
+                                                setLoading(false);
+                                            }}
+                                        >
+                                            Next
+                                            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* Details Dialog */}
+            <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
                 <DialogContent className="sm:max-w-[525px]">
                     <DialogHeader>
-                        <DialogTitle>Submit New Leave Request</DialogTitle>
+                        <DialogTitle>Leave Request Details</DialogTitle>
                         <DialogDescription>
-                            Choose leave type and dates, and optionally add a reason.
+                            Complete information about your leave request
                         </DialogDescription>
                     </DialogHeader>
 
-                    <form className="grid gap-4 py-4" onSubmit={handleSubmit}>
-                        <div className="space-y-2">
-                            <Label htmlFor="leave-type">Leave Type</Label>
-                            <Select value={leaveType} onValueChange={setLeaveType}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select leave type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="annual">Annual Leave</SelectItem>
-                                    <SelectItem value="sick">Sick Leave</SelectItem>
-                                    <SelectItem value="unpaid">Unpaid Leave</SelectItem>
-                                    <SelectItem value="other">Other</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="start-date">Start Date</Label>
-                                <Input
-                                    id="start-date"
-                                    type="date"
-                                    value={startDate}
-                                    onChange={(e) => setStartDate(e.target.value)}
-                                />
+                    {selectedLeave && (
+                        <div className="space-y-4 text-sm">
+                            <div>
+                                <Label>Leave Type</Label>
+                                <p className="text-sm font-medium mt-1">
+                                    {selectedLeave.type.replace('_', ' ').toUpperCase()}
+                                </p>
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="end-date">End Date</Label>
-                                <Input
-                                    id="end-date"
-                                    type="date"
-                                    value={endDate}
-                                    onChange={(e) => setEndDate(e.target.value)}
-                                />
+                            <div>
+                                <Label>Status</Label>
+                                <Badge
+                                    variant="outline"
+                                    className={getStatusColor(selectedLeave.status)}
+                                >
+                                    {selectedLeave.status.replace('_', ' ')}
+                                </Badge>
                             </div>
+                            <div>
+                                <Label>Start Date</Label>
+                                <p className="mt-1">
+                                    {formatDate(selectedLeave.start_date)}
+                                </p>
+                            </div>
+                            <div>
+                                <Label>End Date</Label>
+                                <p className="mt-1">
+                                    {formatDate(selectedLeave.end_date)}
+                                </p>
+                            </div>
+                            {selectedLeave.reason && (
+                                <div>
+                                    <Label>Reason</Label>
+                                    <p className="mt-1 whitespace-pre-line">
+                                        {selectedLeave.reason}
+                                    </p>
+                                </div>
+                            )}
                         </div>
+                    )}
 
-                        <div className="space-y-2">
-                            <Label htmlFor="reason">Reason (optional)</Label>
-                            <Textarea
-                                id="reason"
-                                rows={3}
-                                placeholder="Add any additional details about your leave"
-                                value={reason}
-                                onChange={(e) => setReason(e.target.value)}
-                            />
-                        </div>
-
-                        <DialogFooter>
-                            <Button
-                                type="submit"
-                                disabled={loadingSubmit}
-                            >
-                                {loadingSubmit ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Submitting...
-                                    </>
-                                ) : (
-                                    'Submit Request'
-                                )}
-                            </Button>
-                        </DialogFooter>
-                    </form>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setDetailsOpen(false)}>
+                            Close
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>
-
-        {/* Stats */}
-        <div className="grid gap-4 md:grid-cols-4">
-            <Card>
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">{stats.total}</div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">Pending</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold text-yellow-500">
-                        {stats.pending}
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">Approved</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold text-green-500">
-                        {stats.approved}
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold text-red-500">
-                        {stats.rejected}
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-
-        {/* Leave list */}
-        <Card>
-            <CardHeader>
-                <CardTitle>Leave Request History</CardTitle>
-                <CardDescription>
-                    View the status and details of all your leave requests
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                {leaves.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                        You have not submitted any leave requests yet.
-                    </p>
-                ) : (
-                    <div className="space-y-4">
-                        {leaves.map((leave) => (
-                            <Card
-                                key={leave.id}
-                                className="hover:shadow-md transition-shadow"
-                            >
-                                <CardContent className="p-4">
-                                    <div className="flex flex-col sm:flex-row justify-between gap-4">
-                                        <div className="space-y-2 flex-1">
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <h3 className="font-semibold">
-                                                    {leave.type.replace('_', ' ').toUpperCase()}
-                                                </h3>
-                                                <Badge
-                                                    variant="outline"
-                                                    className={getStatusColor(leave.status)}
-                                                >
-                                                    <span className="flex items-center gap-1">
-                                                        {getStatusIcon(leave.status)}
-                                                        {leave.status.replace('_', ' ')}
-                                                    </span>
-                                                </Badge>
-                                            </div>
-
-                                            <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                                                <span>
-                                                    ID: {leave.id}
-                                                </span>
-                                                <span>
-                                                    From:{' '}
-                                                    <span className="font-medium">
-                                                        {formatDate(leave.start_date)}
-                                                    </span>
-                                                </span>
-                                                <span>
-                                                    To:{' '}
-                                                    <span className="font-medium">
-                                                        {formatDate(leave.end_date)}
-                                                    </span>
-                                                </span>
-                                                {leave.created_at && (
-                                                    <span>
-                                                        Submitted:{' '}
-                                                        <span className="font-medium">
-                                                            {formatDate(leave.created_at)}
-                                                        </span>
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="flex sm:flex-col gap-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="flex-1"
-                                                onClick={() => handleViewDetails(leave)}
-                                            >
-                                                View Details
-                                            </Button>
-                                            {/* If later you add cancel endpoint, you can put a Cancel button here for pending status */}
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                )}
-            </CardContent>
-        </Card>
-
-        {/* Details Dialog */}
-        <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-            <DialogContent className="sm:max-w-[525px]">
-                <DialogHeader>
-                    <DialogTitle>Leave Request Details</DialogTitle>
-                    <DialogDescription>
-                        Complete information about your leave request
-                    </DialogDescription>
-                </DialogHeader>
-
-                {selectedLeave && (
-                    <div className="space-y-4 text-sm">
-                        <div>
-                            <Label>Leave Type</Label>
-                            <p className="text-sm font-medium mt-1">
-                                {selectedLeave.type.replace('_', ' ').toUpperCase()}
-                            </p>
-                        </div>
-                        <div>
-                            <Label>Status</Label>
-                            <Badge
-                                variant="outline"
-                                className={getStatusColor(selectedLeave.status)}
-                            >
-                                {selectedLeave.status.replace('_', ' ')}
-                            </Badge>
-                        </div>
-                        <div>
-                            <Label>Start Date</Label>
-                            <p className="mt-1">
-                                {formatDate(selectedLeave.start_date)}
-                            </p>
-                        </div>
-                        <div>
-                            <Label>End Date</Label>
-                            <p className="mt-1">
-                                {formatDate(selectedLeave.end_date)}
-                            </p>
-                        </div>
-                        {selectedLeave.reason && (
-                            <div>
-                                <Label>Reason</Label>
-                                <p className="mt-1 whitespace-pre-line">
-                                    {selectedLeave.reason}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setDetailsOpen(false)}>
-                        Close
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    </div>
-);
+    );
 }

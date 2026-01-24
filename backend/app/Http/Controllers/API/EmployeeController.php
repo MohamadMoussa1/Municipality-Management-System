@@ -87,8 +87,8 @@ class EmployeeController extends Controller
             ], 403);
         }
 
-        $employees = Employee::with('user')->get();
-        return EmployeeResource::collection($employees);
+        $employees = Employee::with('user')->paginate(3);
+        return response()->json($employees);
     }
 
     /**
@@ -143,9 +143,11 @@ class EmployeeController extends Controller
         $tasks = $employee->tasks()
             ->with(['project', 'assignee.user']) // Eager load relationships
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(1);
 
-        return TaskResource::collection($tasks);
+        return response()->json([
+               'data'=>$tasks
+            ], 200);
     }
 
     /**

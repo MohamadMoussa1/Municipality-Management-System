@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DollarSign, CreditCard, Download, AlertCircle, Clock, CheckCircle, XCircle } from 'lucide-react';
+import getCsrfToken from '../../lib/utils';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -14,6 +15,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 export default function MyPayments() {
   const [payments, setPayments] = useState([]);
@@ -23,37 +32,35 @@ export default function MyPayments() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [payLoading, setPayLoading] = useState(false);
+  const [Clicked, setClicked] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
+  const [citizenLastPage, setCitizenLastPage] = useState(1);
+  const [citizenCurrentPage, setCitizenCurrentPage] = useState(1);
+  const fetchPage = async (pageNumber: number) => {
+    const response = await fetch(`http://127.0.0.1:8000/api/payments/my-payments?page=${pageNumber}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    });
+    const res = await response.json();
+    console.log(res)
+    setPayments(res.data.data);
+    setCitizenCurrentPage(res.data.current_page);
+    setCitizenLastPage(res.data.last_page);
+  };
 
   const fetchData = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("http://127.0.0.1:8000/api/payments/my-payments", {
-        method: "GET",
-        credentials:"include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-      });
-      if (response.status === 401) {
-        toast.error("Session expired. Please login again.");
-        localStorage.removeItem('token');
-        navigate('/login');
-        return;
-      }
-      const res = await response.json().catch(() => null);
-      setPayments(res?.data || []);
-    } catch (e) {
-      toast.error("Failed to fetch payments. Please try again.");
-      setPayments([]);
-    }
+    await fetchPage(1);
     setLoading(false);
   };
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [Clicked]);
+
 
   // Handle redirect back from Stripe (success/cancel)
   const location = useLocation();
@@ -73,7 +80,7 @@ export default function MyPayments() {
         const poll = async () => {
           attempts++;
           try {
-            const r = await fetch(`http://127.0.0.1:8000/api/payments/${id}`, { headers: { Accept: 'application/json' },credentials:"include" });
+            const r = await fetch(`http://127.0.0.1:8000/api/payments/${id}`, { headers: { Accept: 'application/json' }, credentials: "include" });
             if (r.status === 401) {
               toast.error('Session expired. Please login again.');
               navigate('/login');
@@ -113,15 +120,15 @@ export default function MyPayments() {
   const handlePayNow = async (payment) => {
     if (payLoading) return;
     setPayLoading(true);
-   
+
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/payments/${payment.id}/pay`, {
+      const response = await fetch(`http://127.0.0.1:8000/cs/payments/${payment.id}/pay`, {
         method: "POST",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          
+          'X-XSRF-TOKEN': getCsrfToken(),
         },
       });
       if (response.status === 401) {
@@ -140,7 +147,7 @@ export default function MyPayments() {
       toast.error("Failed to initiate payment.");
     }
     setPayLoading(false);
-  }; 
+  };
 
   const handleDownloadReceipt = (payment) => {
     const receiptData = `Municipality Management System
@@ -171,7 +178,7 @@ Thank you for your payment!
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/payments/${id}`, {
         method: "GET",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
@@ -203,7 +210,7 @@ Thank you for your payment!
       case 'refunded': return <AlertCircle className="h-4 w-4" />;
       default: return null;
     }
-  }; 
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -302,7 +309,7 @@ Thank you for your payment!
                       </Button>
 
                       {/* fetch fresh details */}
-                      
+
                       {payment.status === 'pending' && (
                         <Button variant="outline" size="sm" className="flex-1" onClick={() => handlePayNow(payment)}>
                           <CreditCard className="h-4 w-4" /> Pay Now
@@ -318,6 +325,97 @@ Thank you for your payment!
                 </CardContent>
               </Card>
             ))}
+            {(citizenCurrentPage && citizenLastPage && citizenLastPage > 1) && (
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell colSpan={5} className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-muted-foreground">
+                          Page {citizenCurrentPage} of {citizenLastPage}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={citizenCurrentPage <= 1}
+                            onClick={async () => {
+                              setLoading(true);
+                              await fetchPage(citizenCurrentPage - 1);
+                              setLoading(false);
+                            }}
+                          >
+                            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Previous
+                          </Button>
+                          <div className="flex items-center gap-1">
+                            {Array.from({ length: Math.min(5, citizenLastPage) }, (_, i) => {
+                              const pageNum = i + 1;
+                              const isActive = pageNum === citizenCurrentPage;
+                              return (
+                                <Button
+                                  key={pageNum}
+                                  variant={isActive ? "default" : "outline"}
+                                  size="sm"
+                                  className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                    : "hover:bg-primary hover:text-primary-foreground"
+                                    }`}
+                                  disabled={pageNum > citizenLastPage}
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    await fetchPage(pageNum);
+                                    setLoading(false);
+                                  }}
+                                >
+                                  {pageNum}
+                                </Button>
+                              );
+                            })}
+                            {citizenLastPage > 5 && (
+                              <>
+                                <span className="text-muted-foreground text-xs px-1">...</span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    await fetchPage(citizenLastPage);
+                                    setLoading(false);
+                                  }}
+                                >
+                                  {citizenLastPage}
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={citizenCurrentPage >= citizenLastPage}
+                            onClick={async () => {
+                              setLoading(true);
+                              await fetchPage(citizenCurrentPage + 1);
+                              setLoading(false);
+                            }}
+                          >
+                            Next
+                            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Button>
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            )}
           </div>
         </CardContent>
       </Card>

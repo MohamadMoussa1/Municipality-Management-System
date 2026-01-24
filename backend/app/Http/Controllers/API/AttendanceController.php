@@ -155,7 +155,7 @@ class AttendanceController extends Controller
         }
 
         // Get final results
-        $attendance = $query->get();
+        $attendance = $query->paginate(3);
 
         return response()->json([
             'message' => 'Attendance list retrieved successfully.',

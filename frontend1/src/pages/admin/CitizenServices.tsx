@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import getCsrfToken from '../../lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -36,10 +37,40 @@ export default function CitizenServices() {
   const [statusFilter, setStatusFilter] = useState<RequestStatus | 'all'>('all');
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
+
+  const [citizenLoading, setCitizenLoading] = useState(false);
   const [Clicked, setClicked] = useState(false);
+
   const [R, setR] = useState([]);
   const [loading, setLoading] = useState(true);
   const { role } = useAuth();
+
+  const [citizenLastPage, setCitizenLastPage] = useState(1);
+  const [citizenCurrentPage, setCitizenCurrentPage] = useState(1);
+  const fetchPage = async (pageNumber: number) => {
+    const response = await fetch(`http://127.0.0.1:8000/api/requests/department?page=${pageNumber}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    });
+    const res = await response.json();
+    setR(res.requests.data);
+    setCitizenCurrentPage(res.requests.current_page);
+    setCitizenLastPage(res.requests.last_page);
+  };
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchPage(1);
+      setLoading(false);
+    };
+    fetchData();
+  }, [Clicked]);
+
   let isAdminClerk = null;
   if (role == 'admin' || role == 'clerk') {
     isAdminClerk = true;
@@ -57,12 +88,13 @@ export default function CitizenServices() {
   const handleDeleteRequest = (Rid: string) => {
     let res = null;
     const fetchData = async () => {
-      const response = await fetch("http://127.0.0.1:8000/api/requests/" + Rid, {
+      const response = await fetch("http://127.0.0.1:8000/cs/requests/" + Rid, {
         method: "DELETE",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
+          'X-XSRF-TOKEN': getCsrfToken(),
         },
       });
       res = await response.json();
@@ -78,14 +110,15 @@ export default function CitizenServices() {
   const handleStatusChange = (Id: string, newStatus: RequestStatus) => {
     let res = null;
     const fetchData = async () => {
-      
-      const response = await fetch("http://127.0.0.1:8000/api/requests/" + Id + "/status", {
+
+      const response = await fetch("http://127.0.0.1:8000/cs/requests/" + Id + "/status", {
         method: "PUT",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-        
+          'X-XSRF-TOKEN': getCsrfToken(),
+
         },
         body: JSON.stringify({
           'status': newStatus
@@ -100,30 +133,6 @@ export default function CitizenServices() {
       description: `Permit ${Id} status changed to ${newStatus.replace('_', ' ')}.`,
     });
   };
-
-  useEffect(() => {
-    setClicked(false);
-    const fetchData = async () => {
-  
-      const response = await fetch("http://127.0.0.1:8000/api/requests/department", {
-        method: "GET",
-        credentials:"include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-         
-        },
-      });
-      const res = await response.json();
-      console.log(res.requests)
-      setR(res.requests);
-      setLoading(false);
-    };
-
-    fetchData();
-  }, [Clicked]);
-
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -132,17 +141,10 @@ export default function CitizenServices() {
       </div>
     );
   }
-
-
-
   const handleViewRequest = (request: any) => {
     setSelectedRequest(request);
     setViewDialogOpen(true);
   };
-
-
-
-
 
   const getStatusBadge = (status: RequestStatus) => {
     switch (status) {
@@ -173,7 +175,7 @@ export default function CitizenServices() {
         </Card>
         <Card>
           <CardContent className="p-2.5 sm:p-4 md:p-6">
-            <div className="text-base sm:text-xl md:text-2xl font-bold text-warning">{R?.filter(r => r.status === 'pending').length}</div>
+            <div className="text-base sm:text-xl md:text-2xl font-bold text-warning">{R?.filter(r => r?.status === 'pending')?.length}</div>
             <div className="text-[9px] sm:text-xs md:text-sm text-muted-foreground leading-tight">Pending</div>
           </CardContent>
         </Card>
@@ -293,6 +295,93 @@ export default function CitizenServices() {
                     </TableCell>
                   </TableRow>
                 ))}
+          {(citizenCurrentPage && citizenLastPage && citizenLastPage > 1) && (
+              <TableRow>
+                <TableCell colSpan={6} className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground">
+                      Page {citizenCurrentPage} of {citizenLastPage}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={citizenCurrentPage <= 1}
+                        onClick={async () => {
+                          setLoading(true);
+                          await fetchPage(citizenCurrentPage - 1);
+                          setLoading(false);
+                        }}
+                      >
+                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Previous
+                      </Button>
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: Math.min(5, citizenLastPage) }, (_, i) => {
+                          const pageNum = i + 1;
+                          const isActive = pageNum === citizenCurrentPage;
+                          return (
+                            <Button
+                              key={pageNum}
+                              variant={isActive ? "default" : "outline"}
+                              size="sm"
+                              className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "hover:bg-primary hover:text-primary-foreground"
+                                }`}
+                              disabled={pageNum > citizenLastPage}
+                              onClick={async () => {
+                                setLoading(true);
+                                await fetchPage(pageNum);
+                                setLoading(false);
+                              }}
+                            >
+                              {pageNum}
+                            </Button>
+                          );
+                        })}
+                        {citizenLastPage > 5 && (
+                          <>
+                            <span className="text-muted-foreground text-xs px-1">...</span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                              onClick={async () => {
+                                setLoading(true);
+                                await fetchPage(citizenLastPage);
+                                setLoading(false);
+                              }}
+                            >
+                              {citizenLastPage}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={citizenCurrentPage >= citizenLastPage}
+                        onClick={async () => {
+                          setLoading(true);
+                          await fetchPage(citizenCurrentPage + 1);
+                          setLoading(false);
+                        }}
+                      >
+                        Next
+                        <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Button>
+                    </div>
+                  </div>
+                </TableCell>
+              </TableRow>
+             )}
               </TableBody>
             </Table>
           </div>
@@ -359,6 +448,7 @@ export default function CitizenServices() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
+
   );
 }

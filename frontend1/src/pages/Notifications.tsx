@@ -8,19 +8,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNotifications } from '@/contexts/NotificationContext';
 
 export default function Notifications() {
-  const { 
-    notifications, 
-    unreadCount, 
-    markAsRead, 
-    markAllAsRead, 
+  const {
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
     deleteNotification,
     fetchNotifications,
-    loading 
+    loading,
+    citizenCurrentPage,
+    citizenLastPage
   } = useNotifications();
 
   // Fetch notifications when page mounts
   useEffect(() => {
-    fetchNotifications();
+    fetchNotifications(1);
   }, []);
 
   const getTypeIcon = (type?: 'info' | 'success' | 'warning' | 'error') => {
@@ -43,182 +45,216 @@ export default function Notifications() {
     }
   };
 
-  const NotificationCard = ({ notification }: { notification: Notification }) => (
-    <Card 
-      className={`hover:shadow-md transition-shadow ${!notification.read_at ? 'border-primary/50 bg-primary/5' : ''}`}
-    >
-      <CardContent className="p-4">
-        <div className="flex gap-3">
-          <div className="mt-1">
-            {getTypeIcon(notification.data.type)}
-          </div>
-          <div className="flex-1 space-y-2">
-            <div className="flex items-start justify-between gap-2">
-              <div className="space-y-1 flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold">{notification.data.title}</h3>
-                  {!notification.read_at && (
-                    <Badge variant="secondary" className="bg-primary/20 text-primary">
-                      New
-                    </Badge>
-                  )}
-                  {notification.data.type && (
-                    <Badge variant="secondary" className={getTypeColor(notification.data.type)}>
-                      {notification.data.type}
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground">{notification.data.message}</p>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(notification.created_at).toLocaleString()}
-                </p>
-              </div>
-              <div className="flex gap-1">
-                {!notification.read_at && (
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => markAsRead(notification.id)}
-                    className="h-8 w-8"
-                  >
-                    <CheckCheck className="h-4 w-4" />
-                  </Button>
-                )}
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => deleteNotification(notification.id)}
-                  className="h-8 w-8 text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+  const NotificationCard = ({ notification }: { notification: Notification }) => {
+    // Debug: Log the notification structure
+    console.log('Notification data:', notification);
+
+    // Defensive checks to prevent undefined errors
+    if (!notification || !notification.data) {
+      console.warn('Invalid notification structure:', notification);
+      return null;
+    }
+
+    return (
+      <Card
+        className={`hover:shadow-md transition-shadow ${!notification.read_at ? 'border-primary/50 bg-primary/5' : ''}`}
+      >
+        <CardContent className="p-4">
+          <div className="flex gap-3">
+            <div className="mt-1">
+              {getTypeIcon(notification.data.type)}
             </div>
-            {notification.data.link && (
-              <Button variant="link" className="h-auto p-0 text-sm">
-                View Details →
-              </Button>
-            )}
+            <div className="flex-1 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-1 flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold">{notification.data.title}</h3>
+                    {!notification.read_at && (
+                      <Badge variant="secondary" className="bg-primary/20 text-primary">
+                        New
+                      </Badge>
+                    )}
+                    {notification.data.type && (
+                      <Badge variant="secondary" className={getTypeColor(notification.data.type)}>
+                        {notification.data.type}
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">{notification.data.message}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(notification.created_at).toLocaleString()}
+                  </p>
+                </div>
+                <div className="flex gap-1">
+                  {!notification.read_at && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => markAsRead(notification.id)}
+                      className="h-8 w-8"
+                    >
+                      <CheckCheck className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => deleteNotification(notification.id)}
+                    className="h-8 w-8 text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              {notification.data.link && (
+                <Button variant="link" className="h-auto p-0 text-sm">
+                  View Details →
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   const unreadNotifications = notifications.filter(n => !n.read_at);
   const readNotifications = notifications.filter(n => n.read_at);
 
   return (
     <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-              <Bell className="h-8 w-8" />
-              Notifications
-            </h1>
-            <p className="text-muted-foreground">
-              You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={fetchNotifications} 
-              disabled={loading}
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={markAllAsRead} 
-              disabled={unreadCount === 0 || loading}
-            >
-              <CheckCheck className="h-4 w-4 mr-2" />
-              Mark All as Read
-            </Button>
-          </div>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+            <Bell className="h-8 w-8" />
+            Notifications
+          </h1>
+          <p className="text-muted-foreground">
+            You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+          </p>
         </div>
-
-        <Tabs defaultValue="all" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="all">
-              All ({notifications.length})
-            </TabsTrigger>
-            <TabsTrigger value="unread">
-              Unread ({unreadCount})
-            </TabsTrigger>
-            <TabsTrigger value="read">
-              Read ({readNotifications.length})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="all" className="space-y-4">
-            {loading ? (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <RefreshCw className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
-                  <p className="text-muted-foreground">Loading notifications...</p>
-                </CardContent>
-              </Card>
-            ) : notifications.length === 0 ? (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No notifications</p>
-                </CardContent>
-              </Card>
-            ) : (
-              notifications.map(notification => (
-                <NotificationCard key={notification.id} notification={notification} />
-              ))
-            )}
-          </TabsContent>
-
-          <TabsContent value="unread" className="space-y-4">
-            {loading ? (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <RefreshCw className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
-                  <p className="text-muted-foreground">Loading notifications...</p>
-                </CardContent>
-              </Card>
-            ) : unreadNotifications.length === 0 ? (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <CheckCheck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No unread notifications</p>
-                </CardContent>
-              </Card>
-            ) : (
-              unreadNotifications.map(notification => (
-                <NotificationCard key={notification.id} notification={notification} />
-              ))
-            )}
-          </TabsContent>
-
-          <TabsContent value="read" className="space-y-4">
-            {loading ? (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <RefreshCw className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
-                  <p className="text-muted-foreground">Loading notifications...</p>
-                </CardContent>
-              </Card>
-            ) : readNotifications.length === 0 ? (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <Info className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No read notifications</p>
-                </CardContent>
-              </Card>
-            ) : (
-              readNotifications.map(notification => (
-                <NotificationCard key={notification.id} notification={notification} />
-              ))
-            )}
-          </TabsContent>
-        </Tabs>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => fetchNotifications(1)}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button
+            variant="outline"
+            onClick={markAllAsRead}
+            disabled={unreadCount === 0 || loading}
+          >
+            <CheckCheck className="h-4 w-4 mr-2" />
+            Mark All as Read
+          </Button>
+        </div>
       </div>
+
+      <Tabs defaultValue="all" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="all">
+            All ({notifications.length})
+          </TabsTrigger>
+          <TabsTrigger value="unread">
+            Unread ({unreadCount})
+          </TabsTrigger>
+          <TabsTrigger value="read">
+            Read ({readNotifications.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all" className="space-y-4">
+          {loading ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <RefreshCw className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
+                <p className="text-muted-foreground">Loading notifications...</p>
+              </CardContent>
+            </Card>
+          ) : notifications.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No notifications</p>
+              </CardContent>
+            </Card>
+          ) : (
+            notifications.map(notification => (
+              <NotificationCard key={notification.id} notification={notification} />
+            ))
+          )}
+        </TabsContent>
+
+        <TabsContent value="unread" className="space-y-4">
+          {loading ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <RefreshCw className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
+                <p className="text-muted-foreground">Loading notifications...</p>
+              </CardContent>
+            </Card>
+          ) : unreadNotifications.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <CheckCheck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No unread notifications</p>
+              </CardContent>
+            </Card>
+          ) : (
+            unreadNotifications.map(notification => (
+              <NotificationCard key={notification.id} notification={notification} />
+            ))
+          )}
+        </TabsContent>
+
+        <TabsContent value="read" className="space-y-4">
+          {loading ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <RefreshCw className="h-12 w-12 mx-auto text-muted-foreground mb-4 animate-spin" />
+                <p className="text-muted-foreground">Loading notifications...</p>
+              </CardContent>
+            </Card>
+          ) : readNotifications.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Info className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No read notifications</p>
+              </CardContent>
+            </Card>
+          ) : (
+            readNotifications.map(notification => (
+              <NotificationCard key={notification.id} notification={notification} />
+            ))
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {(citizenCurrentPage && citizenLastPage && citizenLastPage > 1) && (
+        <div className="flex justify-start gap-2 pt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            type="button"
+            disabled={citizenCurrentPage <= 1 || loading}
+            onClick={() => fetchNotifications(citizenCurrentPage - 1)}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            type="button"
+            disabled={citizenCurrentPage >= citizenLastPage || loading}
+            onClick={() => fetchNotifications(citizenCurrentPage + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }

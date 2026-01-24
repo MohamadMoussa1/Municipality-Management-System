@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import getCsrfToken from '../../lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
@@ -22,52 +23,57 @@ interface DashboardLayoutProps {
 }
 
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  const { role, user,logout } = useAuth();
+  const { role, user, logout } = useAuth();
   const { unreadCount, clearNotifications } = useNotifications();
   const navigate = useNavigate();
-  const  handleProfile=() => {
-      switch (role) {
+  const handleProfile = () => {
+    switch (role) {
       case 'citizen':
         navigate('/profile');
         return;
       default:
         navigate('/profileEmployee');
-        return ;
-      
-  }
-}
-let isAdmin=null;
-if(role == "admin"){
-  isAdmin=true;
-}
-  const  handleLogout =async () => {
-    
-      const response = await fetch("http://127.0.0.1:8000/api/auth/logout", {
-        method: "POST",
-        credentials:"include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-      });
-      let res=null;
-      try{
-       res=await response.json();
-      }
-      catch(e){
-          console.log("an error happened");
-      }
+        return;
 
-      toast.success(res.message,{ duration: 4000 });
-      clearNotifications();
-      logout();
-      navigate('/login');
+    }
+  }
+  let isAdmin = null;
+  if (role == "admin") {
+    isAdmin = true;
+  }
+
+  const handleLogout = async () => {
+    const response = await fetch("http://127.0.0.1:8000/cs/auth/logout", {
+      method: "POST",
+      credentials: 'include',
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        'X-XSRF-TOKEN': getCsrfToken(),
+      },
+    });
+    let res = null;
+    try {
+      res = await response.json();
+      if (response.status === 200) {
+        toast.success(res.message, { duration: 4000 });
+        clearNotifications();
+        logout();
+        navigate('/login');
+      } else {
+        toast.error(res.message || "Logout failed");
+      }
+    }
+    catch (e) {
+      console.log("an error happened");
+      toast.error("An error occurred during logout");
+    }
   };
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
-        
+
         <div className="flex-1 flex flex-col">
           <header className="h-16 border-b bg-card sticky top-0 z-10 flex items-center justify-between px-6">
             <div className="flex items-center gap-4">
@@ -103,9 +109,9 @@ if(role == "admin"){
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2">
-                    <img 
-                      src={getRolePhoto(role || 'citizen')} 
-                      alt="Profile" 
+                    <img
+                      src={getRolePhoto(role || 'citizen')}
+                      alt="Profile"
                       className="h-8 w-8 rounded-full"
                     />
                     <div className="text-left hidden md:block">
@@ -117,7 +123,7 @@ if(role == "admin"){
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {!isAdmin &&<DropdownMenuItem onClick={handleProfile}>
+                  {!isAdmin && <DropdownMenuItem onClick={handleProfile}>
                     <User className="mr-2 h-4 w-4" />
                     Profile
                   </DropdownMenuItem>}

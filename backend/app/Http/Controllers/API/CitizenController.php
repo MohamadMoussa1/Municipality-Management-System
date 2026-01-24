@@ -27,8 +27,8 @@ class CitizenController extends Controller
             ], 403);
         }
 
-       $citizens = Citizen::with('user')->get();
-        return CitizenResource::collection($citizens);
+       $citizens = Citizen::with('user')->paginate(1);
+      
     
 
         return response()->json(['data' => $citizens]);

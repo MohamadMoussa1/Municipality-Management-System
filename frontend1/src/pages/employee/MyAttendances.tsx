@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, CheckCircle, XCircle, LogIn, LogOut ,Loader2} from 'lucide-react';
+import { Clock, CheckCircle, LogIn, LogOut ,Loader2} from 'lucide-react';
+import  getCsrfToken  from '../../lib/utils';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -22,45 +23,34 @@ export default function MyAttendances() {
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [detailsCheckoutLoading, setDetailsCheckoutLoading] = useState(false);
-
   const navigate = useNavigate();
-
+  const [CurrentPage, setCurrentPage] = useState<number>(1);
+  const [LastPage, setLastPage] = useState<number>(1);
+  const [Clicked, setClicked] = useState(false);
+  const fetchPage = async (pageNumber: number) => {
+    const response = await fetch(`http://127.0.0.1:8000/api/attendance?page=${pageNumber}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    });
+    const res = await response.json();
+    setAttendances(res.data.data);
+    setCurrentPage(res.data.current_page);
+    setLastPage(res.data.last_page);
+  };
   const fetchData = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('http://127.0.0.1:8000/api/attendance', {
-        headers: {  Accept: 'application/json' },
-        credentials:"include",
-      });
-      if (res.status === 401) {
-        toast.error('Session expired. Please login again.');
-       
-        navigate('/login');
-        return;
-      }
-      if (res.ok) {
-        const body = await res.json().catch(() => null);
-        const items = body?.data || body || [];
-        setAttendances(items);
-        // set today's attendance if present (normalize date string)
-        const today = items.find(a => ymd(a.date) === todayStr);
-        setTodayAttendance(today || null);
-      } else {
-        const body = await res.json().catch(() => null);
-        toast.error(body?.message || 'Failed to fetch attendances');
-        setAttendances([]);
-        setTodayAttendance(null);
-      }
-    } catch (e) {
-      toast.error('Failed to fetch attendances. Please try again.');
-      setAttendances([]);
-    }
+    await fetchPage(1);
     setLoading(false);
   };
+  useEffect(() => {
+    fetchData();
+  }, [Clicked]);
 
   const [todayAttendance, setTodayAttendance] = useState(null);
   const todayStr = new Date().toISOString().split('T')[0];
-
   useEffect(() => {
     fetchData();
   }, []);
@@ -69,10 +59,10 @@ export default function MyAttendances() {
     if (actionLoading) return;
     setActionLoading(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/attendance/check-in', {
+      const res = await fetch('http://127.0.0.1:8000/cs/attendance/check-in', {
         method: 'POST',
         credentials:"include",
-        headers: { Accept: 'application/json' },
+        headers: { Accept: 'application/json', 'X-XSRF-TOKEN':getCsrfToken(), },
       });
 
       if (res.status === 401) {
@@ -124,10 +114,10 @@ export default function MyAttendances() {
     if (actionLoading) return;
     setActionLoading(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/attendance/check-out', {
+      const res = await fetch('http://127.0.0.1:8000/cs/attendance/check-out', {
         method: 'POST',
         credentials:"include",
-        headers: { Accept: 'application/json' },
+        headers: { Accept: 'application/json', 'X-XSRF-TOKEN':getCsrfToken(), },
       });
 
       if (res.status === 401) {
@@ -212,10 +202,10 @@ export default function MyAttendances() {
     
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/attendance/check-out', {
+      const res = await fetch('http://127.0.0.1:8000/cs/attendance/check-out', {
         method: 'POST',
         credentials:"include",
-        headers: {  Accept: 'application/json' },
+        headers: {  Accept: 'application/json' , 'X-XSRF-TOKEN':getCsrfToken(),},
       });
 
       if (res.status === 401) {
@@ -368,6 +358,89 @@ export default function MyAttendances() {
               </Card>
             ))}
             {attendances.length === 0 && !loading && <div className="text-sm text-muted-foreground">No attendance records found.</div>}
+            {(CurrentPage && LastPage && LastPage > 1) && (
+                  <div className="flex items-center justify-between w-full p-4">
+                    <div className="text-sm text-muted-foreground">
+                      Page {CurrentPage} of {LastPage}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={CurrentPage <= 1}
+                        onClick={async () => {
+                          setLoading(true);
+                          await fetchPage(CurrentPage - 1);
+                          setLoading(false);
+                        }}
+                      >
+                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Previous
+                      </Button>
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
+                          const pageNum = i + 1;
+                          const isActive = pageNum === CurrentPage;
+                          return (
+                            <Button
+                              key={pageNum}
+                              variant={isActive ? "default" : "outline"}
+                              size="sm"
+                              className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "hover:bg-primary hover:text-primary-foreground"
+                                }`}
+                              disabled={pageNum > LastPage}
+                              onClick={async () => {
+                                setLoading(true);
+                                await fetchPage(pageNum);
+                                setLoading(false);
+                              }}
+                            >
+                              {pageNum}
+                            </Button>
+                          );
+                        })}
+                        {LastPage > 5 && (
+                          <>
+                            <span className="text-muted-foreground text-xs px-1">...</span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                              onClick={async () => {
+                                setLoading(true);
+                                await fetchPage(LastPage);
+                                setLoading(false);
+                              }}
+                            >
+                              {LastPage}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={CurrentPage >= LastPage}
+                        onClick={async () => {
+                          setLoading(true);
+                          await fetchPage(CurrentPage + 1);
+                          setLoading(false);
+                        }}
+                      >
+                        Next
+                        <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Button>
+                    </div>
+                  </div>
+            )}
           </div>
         </CardContent>
       </Card>

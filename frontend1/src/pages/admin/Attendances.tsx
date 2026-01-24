@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Search, Clock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Edit, Search, Clock, CheckCircle, Loader2 } from 'lucide-react';
+import getCsrfToken from '../../lib/utils';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -33,106 +34,45 @@ export default function Attendances() {
   const [editForm, setEditForm] = useState({ check_in: '', check_out: '' });
   const [loading, setLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
-
+  const [CurrentPage, setCurrentPage] = useState<number>(1);
+  const [LastPage, setLastPage] = useState<number>(1);
+  const [Clicked, setClicked] = useState(false);
   const navigate = useNavigate();
-
-  const fetchEmployees = async () => {
-    
-    try {
-      const res = await fetch('http://127.0.0.1:8000/api/employees', {
-        headers: {  Accept: 'application/json' },
-        credentials:"include",
-      });
-      if (res.status === 401) {
-        toast.error('Session expired. Please login again.');
-        localStorage.removeItem('token');
-        navigate('/login');
-        return;
-      }
-      if (res.ok) {
-        const body = await res.json().catch(() => null);
-        setEmployees(body?.data || body || []);
-      } else if (res.status === 403) {
-        setEmployees([]);
-      } else {
-        setEmployees([]);
-      }
-    } catch (e) {
-      setEmployees([]);
-    }
+  const fetchPage = async (pageNumber: number) => {
+    const response = await fetch(`http://127.0.0.1:8000/api/attendance?page=${pageNumber}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    });
+    const res = await response.json();
+    console.log(res)
+    setAttendances(res.data.data);
+    setCurrentPage(res.data.current_page);
+    setLastPage(res.data.last_page);
   };
 
   const fetchData = async () => {
-    setLoading(true);
-   
-    try {
-      const params = new URLSearchParams();
-      if (filters.employee_id) params.set('employee_id', filters.employee_id);
-      if (filters.department && filters.department !== 'all') params.set('department', filters.department);
-      if (filters.from_date) params.set('from_date', filters.from_date);
-      if (filters.to_date) params.set('to_date', filters.to_date);
-      if (filters.missing_checkout) params.set('missing_checkout', '1');
-
-      const res = await fetch(`http://127.0.0.1:8000/api/attendance?${params.toString()}`, {
-        headers: { Accept: 'application/json' },
-        credentials:"include",
-      });
-
-      if (res.status === 401) {
-        toast.error('Session expired. Please login again.');
-        localStorage.removeItem('token');
-        navigate('/login');
-        return;
-      }
-
-      const body = await res.json().catch(() => null);
-      if (res.ok) {
-        setAttendances(body?.data || body || []);
-      } else {
-        toast.error(body?.message || 'Failed to fetch attendances');
-        setAttendances([]);
-      }
-    } catch (e) {
-      toast.error('Failed to fetch attendances. Please try again.');
-      setAttendances([]);
-    }
+    await fetchPage(1);
     setLoading(false);
   };
-
   useEffect(() => {
-    fetchEmployees();
     fetchData();
-  }, []);
-
-  const openDetails = async (id) => {
-   
-    try {
-      const res = await fetch(`http://127.0.0.1:8000/api/attendance/${id}`, {
-        headers: { Accept: 'application/json' },
-        credentials:"include",
-      });
-      if (res.status === 401) {
-        toast.error('Session expired. Please login again.');
-        localStorage.removeItem('token');
-        navigate('/login');
-        return;
-      }
-      const body = await res.json().catch(() => null);
-      if (res.ok) {
-        setSelected(body?.attendance || body?.data || body);
-        setDetailsOpen(true);
-      } else {
-        toast.error(body?.message || 'Failed to fetch attendance');
-      }
-    } catch (e) {
-      toast.error('Failed to fetch attendance details.');
-    }
-  };
-
+  }, [Clicked]);
   const openEdit = (attendance) => {
     setSelected(attendance);
     setEditForm({ check_in: attendance.check_in || '', check_out: attendance.check_out || '' });
     setEditOpen(true);
+  };
+
+  const openDetails = (attendanceId) => {
+    const attendance = attendances.find(a => a.id === attendanceId);
+    if (attendance) {
+      setSelected(attendance);
+      setDetailsOpen(true);
+    }
   };
 
   const handleUpdate = async () => {
@@ -144,15 +84,14 @@ export default function Attendances() {
     }
     setEditLoading(true);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/attendance/${selected.id}`, {
+      const res = await fetch(`http://127.0.0.1:8000/cs/attendance/${selected.id}`, {
         method: 'PUT',
-        headers: {  Accept: 'application/json', 'Content-Type': 'application/json' },
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken(), },
         body: JSON.stringify({ check_in: editForm.check_in || null, check_out: editForm.check_out || null }),
-        credentials:"include",
+        credentials: "include",
       });
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');
-        localStorage.removeItem('token');
         navigate('/login');
         return;
       }
@@ -196,7 +135,7 @@ export default function Attendances() {
           <p className="text-muted-foreground">List, filter and manage employee attendances</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={fetchData} variant="outline"><Search className="h-4 w-4 mr-2"/> Refresh</Button>
+          <Button onClick={fetchData} variant="outline"><Search className="h-4 w-4 mr-2" /> Refresh</Button>
         </div>
       </div>
 
@@ -268,7 +207,7 @@ export default function Attendances() {
                         <h3 className="font-semibold">{new Date(a.date).toLocaleDateString()}</h3>
                         <Badge variant="outline" className={!a.check_out ? 'bg-yellow-500/10 text-yellow-500' : 'bg-green-500/10 text-green-500'}>
                           <span className="flex items-center gap-1">
-                            {!a.check_out ? <Clock className="h-4 w-4"/> : <CheckCircle className="h-4 w-4"/>}
+                            {!a.check_out ? <Clock className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
                             {!a.check_out ? 'Missing checkout' : `${a.hours_worked} hrs`}
                           </span>
                         </Badge>
@@ -282,13 +221,96 @@ export default function Attendances() {
                     </div>
                     <div className="flex sm:flex-col gap-2">
                       <Button variant="outline" size="sm" className="flex-1" onClick={() => openDetails(a.id)}>View Details</Button>
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => openEdit(a)}><Edit className="h-4 w-4"/> Edit</Button>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => openEdit(a)}><Edit className="h-4 w-4" /> Edit</Button>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
             {attendances.length === 0 && !loading && <div className="text-sm text-muted-foreground">No attendance records found.</div>}
+            {(CurrentPage && LastPage && LastPage > 1) && (
+              <div className="flex items-center justify-between w-full p-4">
+                <div className="text-sm text-muted-foreground">
+                  Page {CurrentPage} of {LastPage}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={CurrentPage <= 1}
+                    onClick={async () => {
+                      setLoading(true);
+                      await fetchPage(CurrentPage - 1);
+                      setLoading(false);
+                    }}
+                  >
+                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Previous
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
+                      const pageNum = i + 1;
+                      const isActive = pageNum === CurrentPage;
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={isActive ? "default" : "outline"}
+                          size="sm"
+                          className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "hover:bg-primary hover:text-primary-foreground"
+                            }`}
+                          disabled={pageNum > LastPage}
+                          onClick={async () => {
+                            setLoading(true);
+                            await fetchPage(pageNum);
+                            setLoading(false);
+                          }}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                    {LastPage > 5 && (
+                      <>
+                        <span className="text-muted-foreground text-xs px-1">...</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                          onClick={async () => {
+                            setLoading(true);
+                            await fetchPage(LastPage);
+                            setLoading(false);
+                          }}
+                        >
+                          {LastPage}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={CurrentPage >= LastPage}
+                    onClick={async () => {
+                      setLoading(true);
+                      await fetchPage(CurrentPage + 1);
+                      setLoading(false);
+                    }}
+                  >
+                    Next
+                    <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -340,10 +362,6 @@ export default function Attendances() {
       </Dialog>
     </div>
   );
-}
-
-function fmt(s) {
-  return s ? new Date(s).toLocaleString() : '-';
 }
 
 function toLocalDatetimeVal(s) {

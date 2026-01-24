@@ -148,7 +148,9 @@ public function getPaymentSummary(Request $request)
             ]);
             // Notify the citizen about the new payment
             
-            $payment->citizen->user->notify(new \App\Notifications\PaymentCreated($payment));
+            $payment->citizen->user->notify(
+                (new \App\Notifications\PaymentCreated($payment))->delay(now()->addSeconds(1))
+            );
             
             return response()->json([
                 'message' => 'Payment created successfully.',
@@ -217,17 +219,11 @@ public function getPaymentSummary(Request $request)
          // sorting
         $sortBy = $q['sort_by'] ?? 'date';
         $sortDir = $q['sort_dir'] ?? 'desc';
-        $query->orderBy($sortBy, $sortDir);
-
-        // pagination:may be modified later
-        $perPage = $q['per_page'] ?? 15;
-        $payments = $query->with('citizen')->paginate($perPage)->appends($request->query());
-              
-
+        $result=$query->orderBy($sortBy, $sortDir)->paginate(5);
 
         return response()->json([
             'message' => 'Payments retrieved successfully.',
-            'data' =>  PaymentResource::collection($payments)
+            'data' => $result
         ], 200);
     }
 
@@ -347,12 +343,12 @@ public function getPaymentSummary(Request $request)
 
         $payments = $q->with('citizen')
                         ->orderBy($sortBy, $sortDir)
-                        ->paginate($perPage)
-                        ->appends($request->query());
+                        ->paginate(3);
+                        
 
         return response()->json([
             'message' => 'Payments fetched successfully.',
-            'data' => PaymentResource::collection($payments)
+            'data' => $payments
         ], 200);
     }
 

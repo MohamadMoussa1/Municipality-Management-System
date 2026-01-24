@@ -19,28 +19,30 @@ export default function MyPayroll() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [Clicked, setClicked] = useState(false);
   const [pr, setpr] = useState<any[]>([]);
+  const [CurrentPage, setCurrentPage] = useState<number>(1);
+  const [LastPage, setLastPage] = useState<number>(1);
   const [loading, setLoading] = useState(true);
+
+  const fetchPage = async (pageNumber: number) => {
+
+    const response = await fetch(`http://127.0.0.1:8000/api/payrolls?page=${pageNumber}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    });
+    const res = await response.json();
+    setpr(res?.data?.data);
+    setCurrentPage(res.data.current_page);
+    setLastPage(res.data.last_page);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    setClicked(false);
-    const fetchData = async () => {
-     
-      const response = await fetch("http://127.0.0.1:8000/api/payrolls", {
-        method: "GET",
-        credentials:"include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-      });
-      const res = await response.json();
-      console.log(res.data.data);
-      setpr(res?.data?.data);
-      setLoading(false);
-    };
-
-    fetchData();
+    fetchPage(1);
   }, [Clicked]);
-
   const handlePayrollView = (payroll: any) => {
     setSelectedRequest(payroll);
     setDetailsOpen(true);
@@ -54,7 +56,7 @@ export default function MyPayroll() {
       </div>
     );
   }
- 
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -131,6 +133,89 @@ export default function MyPayroll() {
                 </TableBody>
               </Table>
             </div>
+            {(CurrentPage && LastPage && LastPage > 1) && (
+              <div className="flex items-center justify-between w-full p-4 pt-2 mb-1">
+                <div className="text-sm text-muted-foreground ">
+                  Page {CurrentPage} of {LastPage}
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={CurrentPage <= 1}
+                    onClick={async () => {
+                      setLoading(true);
+                      await fetchPage(CurrentPage - 1);
+                      setLoading(false);
+                    }}
+                  >
+                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Previous
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
+                      const pageNum = i + 1;
+                      const isActive = pageNum === CurrentPage;
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={isActive ? "default" : "outline"}
+                          size="sm"
+                          className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "hover:bg-primary hover:text-primary-foreground"
+                            }`}
+                          disabled={pageNum > LastPage}
+                          onClick={async () => {
+                            setLoading(true);
+                            await fetchPage(pageNum);
+                            setLoading(false);
+                          }}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                    {LastPage > 5 && (
+                      <>
+                        <span className="text-muted-foreground text-xs px-1">...</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                          onClick={async () => {
+                            setLoading(true);
+                            await fetchPage(LastPage);
+                            setLoading(false);
+                          }}
+                        >
+                          {LastPage}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={CurrentPage >= LastPage}
+                    onClick={async () => {
+                      setLoading(true);
+                      await fetchPage(CurrentPage + 1);
+                      setLoading(false);
+                    }}
+                  >
+                    Next
+                    <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
         <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
@@ -142,78 +227,80 @@ export default function MyPayroll() {
               </DialogDescription>
             </DialogHeader>
             {selectedRequest && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Employee ID</Label>
-                    <p className="text-sm font-medium mt-1">{selectedRequest.employee_id}</p>
-                  </div>
-                  <div>
-                    <Label>Employee Name</Label>
-                    <p className="text-sm font-medium mt-1">{selectedRequest.employee?.user?.name || 'N/A'}</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Month</Label>
-                    <p className="text-sm font-medium mt-1">{selectedRequest.month}</p>
-                  </div>
-                  <div>
-                    <Label>Position</Label>
-                    <p className="text-sm font-medium mt-1">{selectedRequest.employee?.position || 'N/A'}</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Department</Label>
-                    <p className="text-sm font-medium mt-1">{selectedRequest.employee?.department || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <Label>Hire Date</Label>
-                    <p className="text-sm font-medium mt-1">{new Date(selectedRequest.employee?.hire_date).toLocaleDateString()}</p>
-                  </div>
-                </div>
-                <div className="border-t pt-4">
+              <div className="space-y-6">
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium w-1/3">Employee ID</TableCell>
+                      <TableCell>{selectedRequest.employee_id}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Employee Name</TableCell>
+                      <TableCell>{selectedRequest.employee?.user?.name || 'N/A'}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Month</TableCell>
+                      <TableCell>{selectedRequest.month}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Position</TableCell>
+                      <TableCell>{selectedRequest.employee?.position || 'N/A'}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Department</TableCell>
+                      <TableCell>{selectedRequest.employee?.department || 'N/A'}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Hire Date</TableCell>
+                      <TableCell>{new Date(selectedRequest.employee?.hire_date).toLocaleDateString()}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+
+                <div>
                   <h4 className="font-semibold mb-3">Financial Details</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Base Salary</Label>
-                      <p className="text-sm font-medium mt-1 text-green-600">${selectedRequest.base_salary}</p>
-                    </div>
-                    <div>
-                      <Label>Bonuses</Label>
-                      <p className="text-sm font-medium mt-1 text-blue-600">${selectedRequest.bonuses}</p>
-                    </div>
-                    <div>
-                      <Label>Deductions</Label>
-                      <p className="text-sm font-medium mt-1 text-red-600">${selectedRequest.deductions}</p>
-                    </div>
-                    <div>
-                      <Label>Net Salary</Label>
-                      <p className="text-sm font-medium mt-1 text-purple-600 font-semibold">${selectedRequest.net_salary}</p>
-                    </div>
-                  </div>
+                  <Table>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="font-medium w-1/3">Base Salary</TableCell>
+                        <TableCell className="text-green-600 font-medium">${selectedRequest.base_salary}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Bonuses</TableCell>
+                        <TableCell className="text-blue-600 font-medium">${selectedRequest.bonuses}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Deductions</TableCell>
+                        <TableCell className="text-red-600 font-medium">${selectedRequest.deductions}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-semibold">Net Salary</TableCell>
+                        <TableCell className="text-purple-600 font-semibold">${selectedRequest.net_salary}</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Generated Date</Label>
-                    <p className="text-sm font-medium mt-1">{new Date(selectedRequest.generated_at).toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <Label>Generated By</Label>
-                    <p className="text-sm font-medium mt-1">{selectedRequest.generated_by}</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Created At</Label>
-                    <p className="text-sm font-medium mt-1">{new Date(selectedRequest.created_at).toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <Label>Updated At</Label>
-                    <p className="text-sm font-medium mt-1">{new Date(selectedRequest.updated_at).toLocaleString()}</p>
-                  </div>
-                </div>
+
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium w-1/3">Generated Date</TableCell>
+                      <TableCell>{new Date(selectedRequest.generated_at).toLocaleString()}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Generated By</TableCell>
+                      <TableCell>{selectedRequest.generated_by}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Created At</TableCell>
+                      <TableCell>{new Date(selectedRequest.created_at).toLocaleString()}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-medium">Updated At</TableCell>
+                      <TableCell>{new Date(selectedRequest.updated_at).toLocaleString()}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
               </div>
             )}
             <DialogFooter>

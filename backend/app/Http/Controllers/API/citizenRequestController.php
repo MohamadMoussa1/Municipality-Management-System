@@ -123,11 +123,11 @@ class citizenRequestController extends Controller
             ], 403);
         }
 
-        $requests = CitizenRequest::where('citizen_id', $user->citizen->id)->orderBy('submission_date', 'desc')->get();;
+        $requests = CitizenRequest::where('citizen_id', $user->citizen->id)->orderBy('submission_date', 'desc')->paginate(3);
 
         return response()->json([
             'message' => 'My requests fetched successfully.',
-            'requests' => CitizenRequestResource::collection($requests)
+            'requests' => $requests
         ], 200);
     }
 
@@ -136,7 +136,7 @@ class citizenRequestController extends Controller
     {
         $user = $request->user();
         if ($user->role === 'admin') {
-            $requests = CitizenRequest::orderBy('submission_date', 'desc')->get();
+            $requests = CitizenRequest::with('citizen.user')->orderBy('submission_date', 'desc')->paginate(5);
 
             return response()->json([
                 'role' => 'admin',
@@ -158,7 +158,7 @@ class citizenRequestController extends Controller
         }
         // 2. Fetch requests assigned to the employee's department
 
-         $requests = CitizenRequest::with('citizen.user')->orderBy('submission_date', 'desc')->get();
+         $requests = CitizenRequest::with('citizen.user')->orderBy('submission_date', 'desc')->paginate(1);
 
             return response()->json([
                 'role' => 'clerk',
@@ -186,15 +186,14 @@ class citizenRequestController extends Controller
         }
 
         // update status
-        $citizenRequest->status = $request->status;
-        if($request->status === 'completed'){
-            $citizenRequest->completion_date = now();
-        }
-        $citizenRequest->save();
-
-        // Send notification to citizen
-        $citizenRequest->citizen->user->notify(new \App\Notifications\CitizenRequestStatusUpdated($citizenRequest));
+        $citizenRequest->update([
+            'status' => $request->status,
+            'completion_date' => $request->status === 'completed' ? now() : $citizenRequest->completion_date
+        ]);
         
+        $citizenRequest->citizen->user->notify(
+            (new \App\Notifications\CitizenRequestStatusUpdated($citizenRequest))->delay(now()->addSeconds(1))
+        );
         return response()->json([
             'message' => 'Request status updated successfully.',
             'request' => $citizenRequest

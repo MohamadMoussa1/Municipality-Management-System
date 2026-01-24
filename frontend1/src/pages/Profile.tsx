@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getRolePhoto } from '@/lib/rolePhotos';
 import { useNavigate } from 'react-router-dom';
-
+import  getCsrfToken  from '../lib/utils';
 export default function Profile() {
   const navigate = useNavigate();
   const { role } = useAuth();
@@ -83,14 +83,13 @@ export default function Profile() {
     setLoadingSubmit(true);
     try {
 
-      const response = await fetch(
-        'http://127.0.0.1:8000/api/citizens/me/update',
-        {
+      const response = await fetch('http://127.0.0.1:8000/cs/citizens/me/update',{
           method: 'PUT',
           credentials:"include",
           headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
+            'X-XSRF-TOKEN':getCsrfToken(),
           },
           body: JSON.stringify({
             name: form.name,

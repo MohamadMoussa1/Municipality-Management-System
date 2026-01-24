@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import getCsrfToken from '../../lib/utils';
 import { useNavigate } from 'react-router-dom'
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -55,7 +56,7 @@ interface Event {
 type EventAudience = 'public' | 'staff' | 'citizens';
 
 // 3. API base URL
-const API_URL = 'http://127.0.0.1:8000/api';
+
 
 export default function Events() {
   const navigate = useNavigate();
@@ -68,6 +69,8 @@ export default function Events() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterAudience, setFilterAudience] = useState<string>('all');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [CurrentPage, setCurrentPage] = useState<number | null>(null);
+  const [LastPage, setLastPage] = useState<number | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [formData, setFormData] = useState({
     title: '',
@@ -78,31 +81,28 @@ export default function Events() {
     location: '',
     capacity: '',
   });
-
-  // 5. Fetch all events on component mount
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  // 6. API: Fetch all events
-  const fetchEvents = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${API_URL}/events`, {
-        headers: {
-          'Accept': 'application/json',
-        },
-        withCredentials: true,
-      });
-      setEvents(response.data);
-    } catch (error) {
-      console.error('Error fetching events:', error);
-      toast.error('Failed to load events');
-    } finally {
-      setLoading(false);
-    }
+  const fetchEvents = async (pageNumber: number) => {
+    const response = await fetch(`http://127.0.0.1:8000/api/events?page=${pageNumber}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    });
+    const res = await response.json();
+    setEvents(res.data.data);
+    setCurrentPage(res.data.current_page);
+    setLastPage(res.data.last_page);
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchEvents(1);
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
   // 7. API: Create or Update event
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -123,12 +123,13 @@ export default function Events() {
       if (selectedEvent) {
         // Update existing event
         const response = await axios.put(
-          `${API_URL}/events/${selectedEvent.id}`,
+          `http://127.0.0.1:8000/cs/events/${selectedEvent.id}`,
           eventData,
           {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
+              'X-XSRF-TOKEN': getCsrfToken(),
             },
             withCredentials: true,
           }
@@ -136,18 +137,18 @@ export default function Events() {
         setEvents(events.map(event =>
           event.id === selectedEvent.id ? response.data : event
         ));
-        await fetchEvents();
+        await fetchEvents(1);
         toast.success('Event updated successfully');
       } else {
         // Create new event
         const response = await axios.post(
-          `${API_URL}/events`,
+          `http://127.0.0.1:8000/cs/events`,
           eventData,
           {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
-
+              'X-XSRF-TOKEN': getCsrfToken(),
             },
             withCredentials: true,
           }
@@ -155,7 +156,7 @@ export default function Events() {
         // Ensure we're using the correct response structure
         const newEvent = response.data?.data || response.data;
         setEvents(prevEvents => [newEvent, ...prevEvents]);
-        await fetchEvents();
+        await fetchEvents(1);
         toast.success('Event created successfully');
       }
 
@@ -173,7 +174,7 @@ export default function Events() {
   // 8. API: View event details
   const handleViewEvent = async (eventId: number) => {
     try {
-      const response = await axios.get(`${API_URL}/events/${eventId}`, {
+      const response = await axios.get(`http://127.0.0.1:8000/api/events/${eventId}`, {
         headers: {
           'Accept': 'application/json',
         },
@@ -206,10 +207,11 @@ export default function Events() {
   // 9.1 Handle delete event
   const handleDeleteEvent = async (eventId: number) => {
     try {
-      await axios.delete(`${API_URL}/events/${eventId}`, {
+      await axios.delete(`http://127.0.0.1:8000/cs/events/${eventId}`, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
+          'X-XSRF-TOKEN': getCsrfToken(),
         },
         withCredentials: true,
       });
@@ -359,8 +361,7 @@ export default function Events() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
                   <div className="space-y-2">
                     <Label htmlFor="date">Date *</Label>
                     <Input
@@ -371,27 +372,9 @@ export default function Events() {
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
-                    <Input
-                      id="location"
-                      placeholder="Event venue or address"
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    />
-                  </div>
+                  
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="capacity">Capacity</Label>
-                  <Input
-                    id="capacity"
-                    type="number"
-                    placeholder="Maximum number of attendees"
-                    value={formData.capacity}
-                    onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                    min="1"
-                  />
-                </div>
+                
               </div>
               <DialogFooter>
                 <Button
@@ -467,76 +450,161 @@ export default function Events() {
               No events found. Create a new event to get started.
             </div>
           ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Event</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Audience</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredEvents.map((event) => (
-                    <TableRow key={event.id} className="hover:bg-muted/50">
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          {event.title}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="max-w-xs truncate" title={event.description}>
-                          {event.description || 'No description'}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          {new Date(event.date).toLocaleDateString()}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={getStatusColor(event.status)}>
-                          {event.status || 'upcoming'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          {getAudienceLabel(event.target_audience as EventAudience)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+            <div className="w-full">
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Event</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Audience</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredEvents.map((event) => (
+                      <TableRow key={event.id} className="hover:bg-muted/50">
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            {event.title}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-xs truncate" title={event.description}>
+                            {event.description || 'No description'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            {new Date(event.date).toLocaleDateString()}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={getStatusColor(event.status)}>
+                            {event.status || 'upcoming'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {getAudienceLabel(event.target_audience as EventAudience)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditEvent(event)}
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                if (window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+                                  handleDeleteEvent(event.id);
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              {(CurrentPage && LastPage && LastPage > 1) && (
+                <div className="flex items-center justify-between w-full p-4">
+                  <div className="text-sm text-muted-foreground">
+                    Page {CurrentPage} of {LastPage}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={CurrentPage <= 1}
+                      onClick={async () => {
+                        setLoading(true);
+                        await fetchEvents(CurrentPage - 1);
+                        setLoading(false);
+                      }}
+                    >
+                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                      Previous
+                    </Button>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
+                        const pageNum = i + 1;
+                        const isActive = pageNum === CurrentPage;
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant={isActive ? "default" : "outline"}
+                            size="sm"
+                            className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                              ? "bg-primary text-primary-foreground shadow-sm"
+                              : "hover:bg-primary hover:text-primary-foreground"
+                              }`}
+                            disabled={pageNum > LastPage}
+                            onClick={async () => {
+                              setLoading(true);
+                              await fetchEvents(pageNum);
+                              setLoading(false);
+                            }}
+                          >
+                            {pageNum}
+                          </Button>
+                        );
+                      })}
+                      {LastPage > 5 && (
+                        <>
+                          <span className="text-muted-foreground text-xs px-1">...</span>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleEditEvent(event)}
-                          >
-                            <Edit className="h-4 w-4 mr-1" />
-                            Edit
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => {
-                              if (window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
-                                handleDeleteEvent(event.id);
-                              }
+                            className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                            onClick={async () => {
+                              setLoading(true);
+                              await fetchEvents(LastPage);
+                              setLoading(false);
                             }}
                           >
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Delete
+                            {LastPage}
                           </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                        </>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={CurrentPage >= LastPage}
+                      onClick={async () => {
+                        setLoading(true);
+                        await fetchEvents(CurrentPage + 1);
+                        setLoading(false);
+                      }}
+                    >
+                      Next
+                      <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

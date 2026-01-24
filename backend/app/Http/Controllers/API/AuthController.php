@@ -60,10 +60,10 @@ class AuthController extends Controller
             60 * 24, // 24 hours
             null,
             null,
-            true, // secure
+            false, // secure
             true, // httpOnly
             false, // raw
-            'None' // sameSite
+            'Lax' // sameSite
         );
 
         return response()->json([
@@ -105,7 +105,7 @@ class AuthController extends Controller
             // Generate API token
             $token = $user->createToken('auth-token')->plainTextToken;
 
-            $cookie = cookie('auth_token',$token,60 * 24,null, null, true, true, false, 'None');
+            $cookie = cookie('auth_token',$token,60 * 24,null, null, false, true, false, 'Lax');
             return response()->json([
                 'status' => true,
                 'message'=>'registration succesuffly'

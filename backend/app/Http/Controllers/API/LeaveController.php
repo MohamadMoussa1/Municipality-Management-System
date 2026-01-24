@@ -74,7 +74,7 @@ class LeaveController extends Controller
 
         $leaves = Leave::where('employee_id', $employee->id)
             ->orderBy('start_date', 'desc')
-            ->get();
+            ->paginate(1);
 
         return response()->json([
             'message' => 'Leave requests retrieved successfully.',
@@ -122,11 +122,14 @@ class LeaveController extends Controller
         if ($request->filled('to')) {
             $query->whereDate('end_date', '<=', $request->to);
         }
-
-        $leaves = $query
-            ->orderBy('created_at', 'desc')
-            ->get();
-
+        
+        // Order by status (pending first), then by created_at (newest first)
+        $query->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
+              ->orderBy('created_at', 'desc');
+        
+        $leaves = $query->paginate(5);
+        
+       
         return response()->json([
             'message' => 'Leave requests retrieved successfully.',
             'data' => $leaves

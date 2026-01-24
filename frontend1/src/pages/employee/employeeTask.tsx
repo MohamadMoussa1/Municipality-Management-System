@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import getCsrfToken from '../../lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -38,6 +39,31 @@ export default function EmployeeTasks() {
   const [Clicked, setClicked] = useState(false);
   const [Tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [CurrentPage, setCurrentPage] = useState<number>(1);
+  const [LastPage, setLastPage] = useState<number>(1);
+  const fetchPage = async (pageNumber: number) => {
+    const response = await fetch(`http://127.0.0.1:8000/api/employees/me/tasks?page=${pageNumber}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    });
+    const res = await response.json();
+    console.log(res)
+    setTasks(res.data.data);
+    setCurrentPage(res.data.current_page);
+    setLastPage(res.data.last_page);
+  };
+
+  const fetchData = async () => {
+    await fetchPage(1);
+    setLoading(false);
+  };
+  useEffect(() => {
+    fetchData();
+  }, [Clicked]);
   const getStatusColor = (status: RequestTaskStatus) => {
     switch (status) {
       case 'in_progress': return 'bg-accent';
@@ -51,13 +77,14 @@ export default function EmployeeTasks() {
   const handleStatusChange = (Id: string, newStatus: RequestStatus) => {
     let res = null;
     const fetchData = async () => {
-      
-      const response = await fetch("http://127.0.0.1:8000/api/employees/tasks/" + Id + "/status", {
+
+      const response = await fetch("http://127.0.0.1:8000/cs/employees/tasks/" + Id + "/status", {
         method: "PUT",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
+          'X-XSRF-TOKEN': getCsrfToken(),
         },
         body: JSON.stringify({
           'status': newStatus
@@ -73,27 +100,6 @@ export default function EmployeeTasks() {
     });
   };
 
-  useEffect(() => {
-    setClicked(false);
-    const fetchData = async () => {
-      const response = await fetch("http://127.0.0.1:8000/api/employees/me/tasks", {
-        method: "GET",
-        credentials:"include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-      });
-      const res = await response.json();
-
-      setTasks(res.data);
-      setLoading(false);
-    };
-
-    fetchData();
-  }, [Clicked]);
-
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -107,7 +113,7 @@ export default function EmployeeTasks() {
     setViewDialogOpen(true);
   };
   const getStatusBadge = (status: RequestProjectStatus) => {
-      switch (status) {
+    switch (status) {
       case 'in_progress':
         return <Badge className="bg-accent">In Progress</Badge>;
       case 'on_hold':
@@ -247,6 +253,93 @@ export default function EmployeeTasks() {
                     </TableCell>
                   </TableRow>
                 ))}
+                {(CurrentPage && LastPage && LastPage > 1) && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="p-0">
+                      <div className="flex items-center justify-between w-full p-4 bg-muted/30 border-t">
+                        <div className="text-sm font-medium text-muted-foreground">
+                          Page {CurrentPage} of {LastPage}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={CurrentPage <= 1}
+                            onClick={async () => {
+                              setLoading(true);
+                              await fetchPage(CurrentPage - 1);
+                              setLoading(false);
+                            }}
+                          >
+                            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Previous
+                          </Button>
+                          <div className="flex items-center gap-1">
+                            {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
+                              const pageNum = i + 1;
+                              const isActive = pageNum === CurrentPage;
+                              return (
+                                <Button
+                                  key={pageNum}
+                                  variant={isActive ? "default" : "outline"}
+                                  size="sm"
+                                  className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                    : "hover:bg-primary hover:text-primary-foreground"
+                                    }`}
+                                  disabled={pageNum > LastPage}
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    await fetchPage(pageNum);
+                                    setLoading(false);
+                                  }}
+                                >
+                                  {pageNum}
+                                </Button>
+                              );
+                            })}
+                            {LastPage > 5 && (
+                              <>
+                                <span className="text-muted-foreground text-xs px-1">...</span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    await fetchPage(LastPage);
+                                    setLoading(false);
+                                  }}
+                                >
+                                  {LastPage}
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={CurrentPage >= LastPage}
+                            onClick={async () => {
+                              setLoading(true);
+                              await fetchPage(CurrentPage + 1);
+                              setLoading(false);
+                            }}
+                          >
+                            Next
+                            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Button>
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
