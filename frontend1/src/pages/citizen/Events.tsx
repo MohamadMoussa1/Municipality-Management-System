@@ -20,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 
 interface Event {
   id: number;
@@ -38,30 +39,32 @@ export default function CitizenEvents() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [Clicked, setClicked] = useState(false);
+  const [citizenLastPage, setCitizenLastPage] = useState(1);
+  const [citizenCurrentPage, setCitizenCurrentPage] = useState(1);
+  const fetchPage = async (pageNumber: number) => {
+    const response = await fetch(`http://127.0.0.1:8000/api/events?page=${pageNumber}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    });
+    const res = await response.json();
+    setEvents(res.data.data);
+    setCitizenCurrentPage(res.data.current_page);
+    setCitizenLastPage(res.data.last_page);
+  };
+
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/api/events', {
-          headers: {
-            'Accept': 'application/json',
-          },
-          withCredentials: true,
-        });
-        console.log(response);
-        setEvents(response.data);
-      } catch (err) {
-        console.error('Error fetching events:', err);
-        setError('Failed to load events. Please try again later.');
-        toast.error('Failed to load events');
-      } finally {
-        setLoading(false);
-      }
+    const fetchData = async () => {
+      await fetchPage(1);
+      setLoading(false);
     };
-
-    fetchEvents();
-  }, []);
-
+    fetchData();
+  }, [Clicked]);
   // Filter events based on search and filters
   const filteredEvents = events.filter((event) => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -213,6 +216,33 @@ export default function CitizenEvents() {
                           </TableCell>
                         </TableRow>
                       ))}
+                      {(citizenCurrentPage && citizenLastPage && citizenLastPage > 1) && (
+                        <div className="flex justify-start gap-2 pt-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            type="button"
+                            disabled={citizenCurrentPage <= 1}
+                            onClick={async () => {
+                              setLoading(true);
+                              await fetchPage(citizenCurrentPage - 1);
+                              setLoading(false);
+                            }} >Previous</Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            type="button"
+                            disabled={citizenCurrentPage >= citizenLastPage}
+                            onClick={async () => {
+                              setLoading(true);
+                              await fetchPage(citizenCurrentPage + 1);
+                              setLoading(false);
+                            }}
+                          >
+                            Next
+                          </Button>
+                        </div>
+                      )}
                     </TableBody>
                   </Table>
                 </div>

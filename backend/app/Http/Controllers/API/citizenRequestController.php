@@ -123,11 +123,11 @@ class citizenRequestController extends Controller
             ], 403);
         }
 
-        $requests = CitizenRequest::where('citizen_id', $user->citizen->id)->orderBy('submission_date', 'desc')->get();;
+        $requests = CitizenRequest::where('citizen_id', $user->citizen->id)->orderBy('submission_date', 'desc')->paginate(3);
 
         return response()->json([
             'message' => 'My requests fetched successfully.',
-            'requests' => CitizenRequestResource::collection($requests)
+            'requests' => $requests
         ], 200);
     }
 

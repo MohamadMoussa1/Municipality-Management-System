@@ -179,7 +179,7 @@ class PermitController extends Controller
                 'created_at'
                 ])
                 ->latest()
-                ->get();
+                ->paginate(3);
 
             return response()->json([
                 'data' => $permits

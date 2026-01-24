@@ -38,14 +38,15 @@ export default function CitizenServices() {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
 
-  const [citizenLastPage, setCitizenLastPage] = useState(1);
-  const [citizenCurrentPage, setCitizenCurrentPage] = useState(1);
   const [citizenLoading, setCitizenLoading] = useState(false);
   const [Clicked, setClicked] = useState(false);
 
   const [R, setR] = useState([]);
   const [loading, setLoading] = useState(true);
   const { role } = useAuth();
+  
+  const [citizenLastPage, setCitizenLastPage] = useState(1);
+  const [citizenCurrentPage, setCitizenCurrentPage] = useState(1);
   const fetchPage = async (pageNumber: number) => {
     const response = await fetch(`http://127.0.0.1:8000/api/requests/department?page=${pageNumber}`, {
       method: "GET",

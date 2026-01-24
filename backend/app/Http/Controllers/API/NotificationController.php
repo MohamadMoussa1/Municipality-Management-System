@@ -14,7 +14,7 @@ class NotificationController extends Controller
     {
         return response()->json([
             'status' => 'success',
-            'notifications' => auth()->user()->notifications,
+            'notifications' => auth()->user()->notifications()->paginate(5),
         ]);
     }
      /**

@@ -341,12 +341,12 @@ public function getPaymentSummary(Request $request)
 
         $payments = $q->with('citizen')
                         ->orderBy($sortBy, $sortDir)
-                        ->paginate($perPage)
-                        ->appends($request->query());
+                        ->paginate(3);
+                        
 
         return response()->json([
             'message' => 'Payments fetched successfully.',
-            'data' => PaymentResource::collection($payments)
+            'data' => $payments
         ], 200);
     }
 

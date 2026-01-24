@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, FileText, Calendar, Loader2 } from 'lucide-react';
-import  getCsrfToken  from '../../lib/utils';
+import getCsrfToken from '../../lib/utils';
 import {
   User,
   Phone,
@@ -43,6 +44,31 @@ export default function MyPermits() {
   const [files, setFiles] = useState<File[]>([]);
   const [Clicked, setClicked] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [LastPage, setLastPage] = useState(1);
+    const [CurrentPage, setCurrentPage] = useState(1);
+    const fetchPage = async (pageNumber: number) => {
+      const response = await fetch(`http://127.0.0.1:8000/api/permits/my-permits?page=${pageNumber}`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+      });
+      const res = await response.json();
+      setP(res.data.data);
+      setCurrentPage(res.data.current_page);
+      setLastPage(res.data.last_page);
+    };
+  
+  
+    useEffect(() => {
+      const fetchData = async () => {
+        await fetchPage(1);
+        setLoading(false);
+      };
+      fetchData();
+    }, [Clicked]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoadingSubmit(true);
@@ -55,10 +81,10 @@ export default function MyPermits() {
       });
       const response = await fetch("http://127.0.0.1:8000/cs/permits", {
         method: "POST",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Accept": "application/json",
-          'X-XSRF-TOKEN':getCsrfToken(),
+          'X-XSRF-TOKEN': getCsrfToken(),
         },
         body: formData,
       });
@@ -80,31 +106,6 @@ export default function MyPermits() {
       setLoadingSubmit(false);
     }
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setClicked(false);
-      const response = await fetch("http://127.0.0.1:8000/api/permits/my-permits", {
-        method: "GET",
-        credentials:"include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-      });
-      let res = null;
-      try {
-        res = await response.json();
-        setP(res.data);
-      }
-      catch (e) {
-        console.log("errorr");
-      }
-      setLoading(false);
-    };
-
-    fetchData();
-  }, [Clicked]);
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -118,7 +119,7 @@ export default function MyPermits() {
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/permits/${id}`, {
         method: 'GET',
-        credentials:"include",
+        credentials: "include",
         headers: {
           Accept: 'application/json',
         },
@@ -126,6 +127,7 @@ export default function MyPermits() {
 
       if (response.ok) {
         const res = await response.json();
+        
         setSelectedPermit(res.data);
         setDetailsOpen(true);
       } else {
@@ -289,77 +291,120 @@ This is an official permit issued by the municipality.
           <CardDescription>View and manage your permit applications</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {P.map((permit) => (
-              <Card key={permit.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="space-y-4">
-                    <div className="flex flex-col sm:flex-row justify-between gap-4">
-                      <div className="space-y-2 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold">{permit.type.replace('_', ' ').toUpperCase()} LICENSE</h3>
-                          <Badge variant="outline" className={getStatusColor(permit.status)}>
-                            {permit.status.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{permit.description}</p>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Permit Type</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Permit ID</TableHead>
+                  <TableHead>Issue Date</TableHead>
+                  <TableHead>Expiry Date</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {P.map((permit) => (
+                  <TableRow key={permit.id}>
+                    <TableCell className="font-medium">
+                      {permit.type.replace('_', ' ').toUpperCase()} LICENSE
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={getStatusColor(permit.status)}>
+                        {permit.status.replace('_', ' ')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        {permit.id}
                       </div>
-                      <div className="flex sm:flex-col gap-2">
-                        <Button variant="outline" size="sm" className="flex-1" onClick={() => handleViewDetails(permit.id)}>
+                    </TableCell>
+                    <TableCell>
+                      {permit.issue_date ? (
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          {permit.issue_date.split("T")[0]}
+                        </div>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {permit.expiry_date ? (
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          {permit.expiry_date.split("T")[0]}
+                        </div>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(permit.id)}>
                           View Details
                         </Button>
                         {permit.status === 'completed' && (
-                          <Button variant="outline" size="sm" className="flex-1" onClick={() => handleDownload(permit)}>
+                          <Button variant="outline" size="sm" onClick={() => handleDownload(permit)}>
                             Download
                           </Button>
                         )}
                       </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-xs text-muted-foreground">Permit ID</p>
-                          <p className="font-medium">{permit.id}</p>
-                        </div>
-                      </div>
-                      {permit.issue_date && (<div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-xs text-muted-foreground">Issue Date</p>
-                          <p className="font-medium">{permit.issue_date?.split("T")[0]}</p>
-                        </div>
-                      </div>)}
-                      {permit.expiry_date && (
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-xs text-muted-foreground">Expires</p>
-                            <p className="font-medium">{permit.expiry_date?.split("T")[0]}</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {permit.related_documents && permit.related_documents.length > 0 && (
-                      <div>
-                        <p className="text-sm font-medium mb-2">Documents:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {permit.related_documents.map((doc, idx) => (
-                            <Badge key={idx} variant="secondary" className="gap-1">
-                              <FileText className="h-3 w-3" />
-                              {doc}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                 {(CurrentPage && LastPage && LastPage > 1) && (
+            <div className="flex justify-start gap-2 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                disabled={CurrentPage <= 1}
+                onClick={async () => {
+                  setLoading(true);
+                  await fetchPage(CurrentPage - 1);
+                  setLoading(false);
+                }} >Previous</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                disabled={CurrentPage >= LastPage}
+                onClick={async () => {
+                  setLoading(true);
+                  await fetchPage(CurrentPage + 1);
+                  setLoading(false);
+                }}
+              >
+                Next
+              </Button>
+            </div>
+          )}
+              </TableBody>
+            </Table>
           </div>
+
+          {P.some(permit => permit.related_documents && permit.related_documents.length > 0) && (
+            <div className="mt-4">
+              <h4 className="text-sm font-medium mb-2">Related Documents:</h4>
+              <div className="space-y-2">
+                {P.filter(permit => permit.related_documents && permit.related_documents.length > 0).map((permit) => (
+                  <div key={permit.id} className="flex items-center gap-2 text-sm">
+                    <span className="font-medium">{permit.id}:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {permit.related_documents.map((doc, idx) => (
+                        <Badge key={idx} variant="secondary" className="gap-1 text-xs">
+                          <FileText className="h-3 w-3" />
+                          {doc}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
