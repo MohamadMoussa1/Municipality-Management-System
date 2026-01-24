@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Clock, CheckCircle, XCircle, AlertCircle, Trash2, Edit, Search, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import  getCsrfToken  from '../../lib/utils';
+import getCsrfToken from '../../lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { TableRow, TableCell } from '@/components/ui/table';
 
 const paymentTypes = [
   { value: 'property_tax', label: 'Property Tax' },
@@ -60,34 +61,34 @@ export default function Finance() {
   const [LastPage, setLastPage] = useState<number | null>(null);
   const navigate = useNavigate();
   const fetchPage = async (pageNumber: number) => {
-      const response = await fetch(`http://127.0.0.1:8000/api/payments?page=${pageNumber}`, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-      });
-      const res = await response.json();
-      setPayments(res.data.data);
-      setCurrentPage(res.data.current_page );
-      setLastPage( res.data.last_page);
+    const response = await fetch(`http://127.0.0.1:8000/api/payments?page=${pageNumber}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    });
+    const res = await response.json();
+    setPayments(res.data.data);
+    setCurrentPage(res.data.current_page);
+    setLastPage(res.data.last_page);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchPage(1);
+      setLoading(false);
     };
-  
-    useEffect(() => {
-      const fetchData = async () => {
-        await fetchPage(1);
-        setLoading(false);
-      };
-      fetchData();
-    }, [Clicked]);
+    fetchData();
+  }, [Clicked]);
   // Fetch all payments and citizens (for bulk)
   const fetchData = async () => {
     // Payments
     try {
       const paymentsRes = await fetch("http://127.0.0.1:8000/api/payments", {
-        headers: {"Accept": "application/json" },
-        credentials:"include",
+        headers: { "Accept": "application/json" },
+        credentials: "include",
       });
 
       if (paymentsRes.status === 401) {
@@ -113,7 +114,7 @@ export default function Finance() {
     try {
       const citizensRes = await fetch("http://127.0.0.1:8000/api/citizens", {
         headers: { "Accept": "application/json" },
-        credentials:"include",
+        credentials: "include",
       });
       if (citizensRes.status === 401) {
         toast.error("Session expired. Please login again.");
@@ -142,7 +143,7 @@ export default function Finance() {
   useEffect(() => {
     fetchData();
   }, []);
-if (loading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -158,7 +159,7 @@ if (loading) {
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/citizens/${encodeURIComponent(citizenSearch)}`, {
         headers: { "Accept": "application/json" },
-        credentials:"include",
+        credentials: "include",
       });
       const body = await res.json().catch(() => null);
       setCitizenLoading(false);
@@ -189,11 +190,11 @@ if (loading) {
     if (!bulkSearch) return;
     setBulkCitizenLoading(true);
     setBulkSearchResult(null);
-  
+
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/citizens/${encodeURIComponent(bulkSearch)}`, {
         headers: { "Accept": "application/json" },
-        credentials:"include",
+        credentials: "include",
       });
       const body = await res.json().catch(() => null);
       setBulkCitizenLoading(false);
@@ -251,12 +252,12 @@ if (loading) {
       toast.error("Please select a citizen first.");
       return;
     }
-  
+
     try {
       const res = await fetch("http://127.0.0.1:8000/cs/payments", {
         method: "POST",
-        credentials:"include",
-        headers: { "Content-Type": "application/json", "Accept": "application/json",  'X-XSRF-TOKEN':getCsrfToken(),},
+        credentials: "include",
+        headers: { "Content-Type": "application/json", "Accept": "application/json", 'X-XSRF-TOKEN': getCsrfToken(), },
         body: JSON.stringify({
           citizen_id: Number(form.citizen_id),
           amount: Number(form.amount),
@@ -295,8 +296,8 @@ if (loading) {
     try {
       const res = await fetch("http://127.0.0.1:8000/cs/payments/bulk", {
         method: "POST",
-        credentials:"include",
-        headers: { "Content-Type": "application/json", "Accept": "application/json",  'X-XSRF-TOKEN':getCsrfToken(), },
+        credentials: "include",
+        headers: { "Content-Type": "application/json", "Accept": "application/json", 'X-XSRF-TOKEN': getCsrfToken(), },
         body: JSON.stringify({
           citizen_ids: bulkForm.citizen_ids.map(Number),
           amount: Number(bulkForm.amount),
@@ -325,11 +326,11 @@ if (loading) {
 
   // Update payment
   const handleUpdatePayment = async () => {
-   
+
     const res = await fetch(`http://127.0.0.1:8000/cs/payments/${selectedPayment.id}`, {
       method: "PUT",
-      credentials:"include",
-      headers: { "Content-Type": "application/json", "Accept": "application/json",  'X-XSRF-TOKEN':getCsrfToken(),},
+      credentials: "include",
+      headers: { "Content-Type": "application/json", "Accept": "application/json", 'X-XSRF-TOKEN': getCsrfToken(), },
       body: JSON.stringify({
         status: editForm.status,
         amount: editForm.amount ? Number(editForm.amount) : undefined,
@@ -350,8 +351,8 @@ if (loading) {
   const handleDeletePayment = async (id) => {
     const res = await fetch(`http://127.0.0.1:8000/cs/payments/${id}`, {
       method: "DELETE",
-      credentials:"include",
-      headers: {"Accept": "application/json",  'X-XSRF-TOKEN':getCsrfToken(), }
+      credentials: "include",
+      headers: { "Accept": "application/json", 'X-XSRF-TOKEN': getCsrfToken(), }
     });
     if (res.status === 401) {
       toast.error("Session expired. Please login again.");
@@ -460,21 +461,73 @@ if (loading) {
               </Card>
             ))}
             {(CurrentPage && LastPage && LastPage > 1) && (
-                <div className="flex items-center justify-end gap-2 pt-4">
+              <div className="flex items-center justify-between w-full p-4">
+                <div className="text-sm text-muted-foreground">
+                  Page {CurrentPage} of {LastPage}
+                </div>
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    type="button"
+                    className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={CurrentPage <= 1}
                     onClick={async () => {
                       setLoading(true);
                       await fetchPage(CurrentPage - 1);
                       setLoading(false);
-                    }} >Previous</Button>
+                    }}
+                  >
+                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Previous
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
+                      const pageNum = i + 1;
+                      const isActive = pageNum === CurrentPage;
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={isActive ? "default" : "outline"}
+                          size="sm"
+                          className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "hover:bg-primary hover:text-primary-foreground"
+                            }`}
+                          disabled={pageNum > LastPage}
+                          onClick={async () => {
+                            setLoading(true);
+                            await fetchPage(pageNum);
+                            setLoading(false);
+                          }}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                    {LastPage > 5 && (
+                      <>
+                        <span className="text-muted-foreground text-xs px-1">...</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                          onClick={async () => {
+                            setLoading(true);
+                            await fetchPage(LastPage);
+                            setLoading(false);
+                          }}
+                        >
+                          {LastPage}
+                        </Button>
+                      </>
+                    )}
+                  </div>
                   <Button
                     variant="outline"
                     size="sm"
-                    type="button"
+                    className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={CurrentPage >= LastPage}
                     onClick={async () => {
                       setLoading(true);
@@ -483,9 +536,13 @@ if (loading) {
                     }}
                   >
                     Next
+                    <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </Button>
                 </div>
-              )}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

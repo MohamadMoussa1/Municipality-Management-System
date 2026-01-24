@@ -38,7 +38,7 @@ export default function Projects() {
   const [Clicked, setClicked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [CurrentPage, setCurrentPage] = useState<number | null>(null);
-    const [LastPage, setLastPage] = useState<number | null>(null);
+  const [LastPage, setLastPage] = useState<number | null>(null);
   const [newProject, setNewProject] = useState({
     name: '',
     department: '',
@@ -59,27 +59,27 @@ export default function Projects() {
     }
   };
   const fetchPage = async (pageNumber: number) => {
-        const response = await fetch(`http://127.0.0.1:8000/api/projects?page=${pageNumber}`, {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-          },
-        });
-        const res = await response.json();
-        setProjects(res.data.data);
-        setCurrentPage(res.data.current_page );
-        setLastPage( res.data.last_page);
-      };
-    
-      useEffect(() => {
-        const fetchData = async () => {
-          await fetchPage(1);
-          setLoading(false);
-        };
-        fetchData();
-      }, [Clicked]);
+    const response = await fetch(`http://127.0.0.1:8000/api/projects?page=${pageNumber}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    });
+    const res = await response.json();
+    setProjects(res.data.data);
+    setCurrentPage(res.data.current_page);
+    setLastPage(res.data.last_page);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchPage(1);
+      setLoading(false);
+    };
+    fetchData();
+  }, [Clicked]);
   const handleStatusChange = (Id: string, newStatus: RequestProjectStatus) => {
     let res = null;
     const fetchData = async () => {
@@ -442,32 +442,92 @@ export default function Projects() {
                   </TableRow>
                 ))}
                 {(CurrentPage && LastPage && LastPage > 1) && (
-            <div className="flex justify-start gap-2 pt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                type="button"
-                disabled={CurrentPage <= 1}
-                onClick={async () => {
-                  setLoading(true);
-                  await fetchPage(CurrentPage - 1);
-                  setLoading(false);
-                }} >Previous</Button>
-              <Button
-                variant="outline"
-                size="sm"
-                type="button"
-                disabled={CurrentPage >= LastPage}
-                onClick={async () => {
-                  setLoading(true);
-                  await fetchPage(CurrentPage + 1);
-                  setLoading(false);
-                }}
-              >
-                Next
-              </Button>
-            </div>
-          )}
+                  <TableRow>
+                    <TableCell colSpan={7} className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-muted-foreground">
+                          Page {CurrentPage} of {LastPage}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={CurrentPage <= 1}
+                            onClick={async () => {
+                              setLoading(true);
+                              await fetchPage(CurrentPage - 1);
+                              setLoading(false);
+                            }}
+                          >
+                            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Previous
+                          </Button>
+                          <div className="flex items-center gap-1">
+                            {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
+                              const pageNum = i + 1;
+                              const isActive = pageNum === CurrentPage;
+                              return (
+                                <Button
+                                  key={pageNum}
+                                  variant={isActive ? "default" : "outline"}
+                                  size="sm"
+                                  className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                    : "hover:bg-primary hover:text-primary-foreground"
+                                    }`}
+                                  disabled={pageNum > LastPage}
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    await fetchPage(pageNum);
+                                    setLoading(false);
+                                  }}
+                                >
+                                  {pageNum}
+                                </Button>
+                              );
+                            })}
+                            {LastPage > 5 && (
+                              <>
+                                <span className="text-muted-foreground text-xs px-1">...</span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    await fetchPage(LastPage);
+                                    setLoading(false);
+                                  }}
+                                >
+                                  {LastPage}
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={CurrentPage >= LastPage}
+                            onClick={async () => {
+                              setLoading(true);
+                              await fetchPage(CurrentPage + 1);
+                              setLoading(false);
+                            }}
+                          >
+                            Next
+                            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Button>
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>

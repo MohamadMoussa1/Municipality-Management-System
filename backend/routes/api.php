@@ -20,12 +20,7 @@ use App\Http\Controllers\API\AdminDashboardController;
 use App\Http\Controllers\API\HRDashboardController;
 use App\Http\Middleware\EnsureTokenIsValid;
 
-// Public routes
-Route::prefix('auth')->group(function () {
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register']);
-});
-
+  
 // Protected routes
 Route::middleware([EnsureTokenIsValid::class])->group(function () {
     // Citizen routes

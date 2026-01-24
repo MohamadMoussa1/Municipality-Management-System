@@ -217,31 +217,91 @@ export default function CitizenEvents() {
                         </TableRow>
                       ))}
                       {(citizenCurrentPage && citizenLastPage && citizenLastPage > 1) && (
-                        <div className="flex justify-start gap-2 pt-4">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            type="button"
-                            disabled={citizenCurrentPage <= 1}
-                            onClick={async () => {
-                              setLoading(true);
-                              await fetchPage(citizenCurrentPage - 1);
-                              setLoading(false);
-                            }} >Previous</Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            type="button"
-                            disabled={citizenCurrentPage >= citizenLastPage}
-                            onClick={async () => {
-                              setLoading(true);
-                              await fetchPage(citizenCurrentPage + 1);
-                              setLoading(false);
-                            }}
-                          >
-                            Next
-                          </Button>
-                        </div>
+                        <TableRow>
+                          <TableCell colSpan={5} className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="text-sm text-muted-foreground">
+                                Page {citizenCurrentPage} of {citizenLastPage}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                                  disabled={citizenCurrentPage <= 1}
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    await fetchPage(citizenCurrentPage - 1);
+                                    setLoading(false);
+                                  }}
+                                >
+                                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                  </svg>
+                                  Previous
+                                </Button>
+                                <div className="flex items-center gap-1">
+                                  {Array.from({ length: Math.min(5, citizenLastPage) }, (_, i) => {
+                                    const pageNum = i + 1;
+                                    const isActive = pageNum === citizenCurrentPage;
+                                    return (
+                                      <Button
+                                        key={pageNum}
+                                        variant={isActive ? "default" : "outline"}
+                                        size="sm"
+                                        className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                                            ? "bg-primary text-primary-foreground shadow-sm"
+                                            : "hover:bg-primary hover:text-primary-foreground"
+                                          }`}
+                                        disabled={pageNum > citizenLastPage}
+                                        onClick={async () => {
+                                          setLoading(true);
+                                          await fetchPage(pageNum);
+                                          setLoading(false);
+                                        }}
+                                      >
+                                        {pageNum}
+                                      </Button>
+                                    );
+                                  })}
+                                  {citizenLastPage > 5 && (
+                                    <>
+                                      <span className="text-muted-foreground text-xs px-1">...</span>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                                        onClick={async () => {
+                                          setLoading(true);
+                                          await fetchPage(citizenLastPage);
+                                          setLoading(false);
+                                        }}
+                                      >
+                                        {citizenLastPage}
+                                      </Button>
+                                    </>
+                                  )}
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                                  disabled={citizenCurrentPage >= citizenLastPage}
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    await fetchPage(citizenCurrentPage + 1);
+                                    setLoading(false);
+                                  }}
+                                >
+                                  Next
+                                  <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                  </svg>
+                                </Button>
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
                       )}
                     </TableBody>
                   </Table>

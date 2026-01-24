@@ -29,32 +29,34 @@ export function CitizenList() {
   const { toast } = useToast();
   const [C, setC] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [clicked, setClicked] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  const fetchCitizens = useCallback(async () => {
-    try {
-
-      const response = await fetch("http://127.0.0.1:8000/api/citizens", {
+  const [CurrentPage, setCurrentPage] = useState<number>(1);
+  const [LastPage, setLastPage] = useState<number>(1);
+  const [Clicked, setClicked] = useState(false);
+  
+    const fetchPage = async (pageNumber: number) => {
+      const response = await fetch(`http://127.0.0.1:8000/api/citizens?page=${pageNumber}`, {
         method: "GET",
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-
         },
       });
       const res = await response.json();
-      setC(res.data);
-    } catch (error) {
-      console.log("error");
-    }
-    setLoading(false);
-  }, [toast]);
-
-  useEffect(() => {
-    fetchCitizens();
-  }, [fetchCitizens, refreshTrigger, clicked]);
-
+      
+      setC(res.data.data);
+      setCurrentPage(res.data.current_page);
+      setLastPage(res.data.last_page);
+    };
+  
+    const fetchData = async () => {
+      await fetchPage(1);
+      setLoading(false);
+    };
+    useEffect(() => {
+      fetchData();
+    }, [Clicked]);
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -81,15 +83,15 @@ export function CitizenList() {
   const handleEditClick = (citizen: any) => {
     setFormData({
       id: citizen.id,
-      name: citizen.name,
-      email: citizen.email,
+      name: citizen.user.name,
+      email: citizen.user.email,
       password: "",
       password_confirmation: "",
       national_id: citizen.national_id,
       address: citizen.address,
       contact: citizen.contact,
       date_of_birth: citizen.date_of_birth,
-      status: citizen.status,
+      status: citizen.user.status,
     });
     setEditStatus(citizen.status);
     setIsEditDialogOpen(true);
@@ -313,7 +315,7 @@ export function CitizenList() {
 
                   <div className="space-y-1 min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                      <p className="font-semibold text-foreground text-sm sm:text-base">{citizen.name}</p>
+                      <p className="font-semibold text-foreground text-sm sm:text-base">{citizen.user.name}</p>
                       <Badge
                         variant={citizen.status === "active" ? "default" : "secondary"}
                         className={`text-xs ${citizen.status === "active"
@@ -321,13 +323,13 @@ export function CitizenList() {
                           : "bg-muted text-muted-foreground"
                           }`}
                       >
-                        {citizen.status}
+                        {citizen.user.status}
                       </Badge>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                       <span className="flex items-center gap-1 truncate">
                         <Mail className="h-3 w-3 shrink-0" />
-                        <span className="truncate">{citizen.status}</span>
+                        <span className="truncate">{citizen.user.status}</span>
                       </span>
                       <span className="flex items-center gap-1">
                         <Phone className="h-3 w-3 shrink-0" />
@@ -359,6 +361,89 @@ export function CitizenList() {
               <div className="text-center py-8 sm:py-12 text-muted-foreground">
                 <Users className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-4 opacity-50" />
                 <p className="text-sm sm:text-base">No citizens found</p>
+              </div>
+            )}
+            {(CurrentPage && LastPage && LastPage > 1) && (
+              <div className="flex items-center justify-between w-full p-4">
+                <div className="text-sm text-muted-foreground">
+                  Page {CurrentPage} of {LastPage}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={CurrentPage <= 1}
+                    onClick={async () => {
+                      setLoading(true);
+                      await fetchPage(CurrentPage - 1);
+                      setLoading(false);
+                    }}
+                  >
+                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Previous
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
+                      const pageNum = i + 1;
+                      const isActive = pageNum === CurrentPage;
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={isActive ? "default" : "outline"}
+                          size="sm"
+                          className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "hover:bg-primary hover:text-primary-foreground"
+                            }`}
+                          disabled={pageNum > LastPage}
+                          onClick={async () => {
+                            setLoading(true);
+                            await fetchPage(pageNum);
+                            setLoading(false);
+                          }}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                    {LastPage > 5 && (
+                      <>
+                        <span className="text-muted-foreground text-xs px-1">...</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                          onClick={async () => {
+                            setLoading(true);
+                            await fetchPage(LastPage);
+                            setLoading(false);
+                          }}
+                        >
+                          {LastPage}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={CurrentPage >= LastPage}
+                    onClick={async () => {
+                      setLoading(true);
+                      await fetchPage(CurrentPage + 1);
+                      setLoading(false);
+                    }}
+                  >
+                    Next
+                    <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Button>
+                </div>
               </div>
             )}
           </div>

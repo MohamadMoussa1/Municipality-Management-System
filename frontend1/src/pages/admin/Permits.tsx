@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
-import  getCsrfToken  from '../../lib/utils';
+import getCsrfToken from '../../lib/utils';
 import {
   Table,
   TableBody,
@@ -35,7 +35,7 @@ export default function Permits() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [Id, setId] = useState("");
   const [CurrentPage, setCurrentPage] = useState<number>(1);
-  const [LastPage, setLastPage] = useState<number >(1);
+  const [LastPage, setLastPage] = useState<number>(1);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -50,27 +50,27 @@ export default function Permits() {
     isAdmin = true;
   }
   const fetchPage = async (pageNumber: number) => {
-      const response = await fetch(`http://127.0.0.1:8000/api/permits?page=${pageNumber}`, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-      });
-      const res = await response.json();
-      setP(res.data.data);
-      setCurrentPage( res.data.current_page );
-      setLastPage( res.data.last_page );
+    const response = await fetch(`http://127.0.0.1:8000/api/permits?page=${pageNumber}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    });
+    const res = await response.json();
+    setP(res.data.data);
+    setCurrentPage(res.data.current_page);
+    setLastPage(res.data.last_page);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchPage(1);
+      setLoading(false);
     };
-  
-    useEffect(() => {
-      const fetchData = async () => {
-        await fetchPage(1);
-        setLoading(false);
-      };
-      fetchData();
-    }, [Clicked]);
+    fetchData();
+  }, [Clicked]);
 
   if (loading) {
     return (
@@ -88,11 +88,11 @@ export default function Permits() {
           setClicked(true);
           const response = await fetch(`http://127.0.0.1:8000/cs/permits/${Id}/status`, {
             method: "PUT",
-            credentials:"include",
+            credentials: "include",
             headers: {
               "Content-Type": "application/json",
               "Accept": "application/json",
-              'X-XSRF-TOKEN':getCsrfToken(),
+              'X-XSRF-TOKEN': getCsrfToken(),
             },
             body: JSON.stringify({
               status: selectedStatus,
@@ -125,11 +125,11 @@ export default function Permits() {
         try {
           const response = await fetch(`http://127.0.0.1:8000/cs/permits/${Id}/status`, {
             method: "PUT",
-            credentials:"include",
+            credentials: "include",
             headers: {
               "Content-Type": "application/json",
               "Accept": "application/json",
-              'X-XSRF-TOKEN':getCsrfToken(),
+              'X-XSRF-TOKEN': getCsrfToken(),
             },
             body: JSON.stringify({
               status: selectedStatus,
@@ -176,11 +176,11 @@ export default function Permits() {
     const fetchData = async () => {
       const response = await fetch("http://127.0.0.1:8000/cs/permits/" + Pid, {
         method: "DELETE",
-        credentials:"include",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json",
-          'X-XSRF-TOKEN':getCsrfToken(),
+          'X-XSRF-TOKEN': getCsrfToken(),
         },
       });
       res = await response.json();
@@ -197,7 +197,7 @@ export default function Permits() {
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/permits/${p}`, {
         method: 'GET',
-        credentials:"include",
+        credentials: "include",
         headers: {
           Accept: 'application/json',
         },
@@ -241,7 +241,7 @@ export default function Permits() {
   const handleDownload = (link: string, id: string) => {
     console.log(link)
     try {
-      window.open(link,"_blank")
+      window.open(link, "_blank")
 
       toast({
         title: "Success",
@@ -341,9 +341,9 @@ export default function Permits() {
                       </TableCell>
                       <TableCell>
                         <Select
-                          value={p.status}   
+                          value={p.status}
                         >
-                          <SelectValue> 
+                          <SelectValue>
                             <Badge className={getStatusColor(p.status)}>
                               {p.status === 'in_review' ? 'In Review' : p.status.charAt(0).toUpperCase() + p.status.slice(1)}
                             </Badge>
@@ -374,32 +374,92 @@ export default function Permits() {
                     </TableRow>
                   ))}
                   {(CurrentPage && LastPage && LastPage > 1) && (
-                 <div className="flex justify-start gap-2 pt-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    type="button"
-                    disabled={CurrentPage <= 1}
-                    onClick={async () => {
-                      setLoading(true);
-                      await fetchPage(CurrentPage - 1);
-                      setLoading(false);
-                    }} >Previous</Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    type="button"
-                    disabled={CurrentPage >= LastPage}
-                    onClick={async () => {
-                      setLoading(true);
-                      await fetchPage(CurrentPage + 1);
-                      setLoading(false);
-                    }}
-                  >
-                    Next
-                  </Button>
-                </div>
-              )}
+                    <TableRow>
+                      <TableCell colSpan={6} className="p-4">
+                        <div className="flex items-center justify-between w-full">
+                          <div className="text-sm text-muted-foreground">
+                            Page {CurrentPage} of {LastPage}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                              disabled={CurrentPage <= 1}
+                              onClick={async () => {
+                                setLoading(true);
+                                await fetchPage(CurrentPage - 1);
+                                setLoading(false);
+                              }}
+                            >
+                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                              </svg>
+                              Previous
+                            </Button>
+                            <div className="flex items-center gap-1">
+                              {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
+                                const pageNum = i + 1;
+                                const isActive = pageNum === CurrentPage;
+                                return (
+                                  <Button
+                                    key={pageNum}
+                                    variant={isActive ? "default" : "outline"}
+                                    size="sm"
+                                    className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                                      ? "bg-primary text-primary-foreground shadow-sm"
+                                      : "hover:bg-primary hover:text-primary-foreground"
+                                      }`}
+                                    disabled={pageNum > LastPage}
+                                    onClick={async () => {
+                                      setLoading(true);
+                                      await fetchPage(pageNum);
+                                      setLoading(false);
+                                    }}
+                                  >
+                                    {pageNum}
+                                  </Button>
+                                );
+                              })}
+                              {LastPage > 5 && (
+                                <>
+                                  <span className="text-muted-foreground text-xs px-1">...</span>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                                    onClick={async () => {
+                                      setLoading(true);
+                                      await fetchPage(LastPage);
+                                      setLoading(false);
+                                    }}
+                                  >
+                                    {LastPage}
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                              disabled={CurrentPage >= LastPage}
+                              onClick={async () => {
+                                setLoading(true);
+                                await fetchPage(CurrentPage + 1);
+                                setLoading(false);
+                              }}
+                            >
+                              Next
+                              <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </Button>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -557,7 +617,7 @@ export default function Permits() {
                 });
                 return;
               }
-               handleStatusChange(Id, selectedStatus)
+              handleStatusChange(Id, selectedStatus)
             }}
             className="space-y-6"
           >

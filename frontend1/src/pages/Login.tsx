@@ -59,7 +59,7 @@ export default function Login() {
     e.preventDefault();
     setLoadingSubmit(true);
     try{
-      const response = await fetch("http://127.0.0.1:8000/api/auth/login", {
+      const response = await fetch("http://127.0.0.1:8000/cs/auth/login", {
         method: "POST",
         credentials:"include",
         headers: {
@@ -95,11 +95,13 @@ export default function Login() {
   
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch("http://127.0.0.1:8000/api/auth/register", {
+    const response = await fetch("http://127.0.0.1:8000/cs/auth/register", {
       method: "POST",
+      credentials:"include",
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
+         'X-XSRF-TOKEN': getCsrfToken(),
       },
       body: JSON.stringify({
         name: Data.name,
@@ -271,7 +273,7 @@ export default function Login() {
                     <Input
                       id="NID"
                       name="national_id"
-                      type="number"
+                      type="text "
                       placeholder="national ID"
                       value={Data.national_id}
                       onChange={handleChangeSignIn}

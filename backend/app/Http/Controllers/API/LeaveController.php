@@ -74,7 +74,7 @@ class LeaveController extends Controller
 
         $leaves = Leave::where('employee_id', $employee->id)
             ->orderBy('start_date', 'desc')
-            ->get();
+            ->paginate(1);
 
         return response()->json([
             'message' => 'Leave requests retrieved successfully.',

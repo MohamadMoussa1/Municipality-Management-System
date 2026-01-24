@@ -41,8 +41,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         },
       });
       const res = await response.json();
-      console.log('API Response:', res);
-
       // Handle Laravel pagination structure
       if (res.notifications && res.notifications.data) {
         setNotifications(res.notifications.data);
@@ -85,6 +83,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
       await axios.post(
         `http://127.0.0.1:8000/cs/notifications/${id}/read`,
+        {},
         {
           headers: {
             'Accept': 'application/json',
@@ -106,6 +105,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
       await axios.post(
         `http://127.0.0.1:8000/cs/notifications/read-all`,
+        {},
         {
           headers: {
             'Accept': 'application/json',

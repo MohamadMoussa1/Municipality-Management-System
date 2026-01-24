@@ -38,10 +38,6 @@ Route::get('/payment-success/{id}', function ($id) use ($frontend) {
 });
 
 
-// Route::middleware('auth:sanctum')->group(function () {
-//     Route::get('/api/citizens/my-requests', [CitizenRequestController::class, 'myRequests']);
-// });
-
 Route::get('/payment-cancel/{id}', function ($id) use ($frontend) {
     $payment = Payment::findOrFail($id);
     if ($payment->status !== 'failed') {
@@ -49,14 +45,14 @@ Route::get('/payment-cancel/{id}', function ($id) use ($frontend) {
     }
     return redirect($frontend . '/citizen/payments?payment=failed&id=' . $id);
 });
-Route::post('/cs/test-csrf', function () {
-    return response()->json(['ok' => true]);
-});
-
-
-
-
+    // Public routes
+    Route::prefix('/cs/auth')->group(function () {
+          Route::post('/login', [AuthController::class, 'login']);
+          Route::post('/register', [AuthController::class, 'register']);
+           
+    });
 Route::middleware([EnsureTokenIsValid::class])->group(function () {
+   
     //auth logout
     Route::post('/cs/auth/logout', [AuthController::class, 'logout']);
     // Citizen routes
@@ -176,7 +172,7 @@ Route::middleware([EnsureTokenIsValid::class])->group(function () {
     Route::post('cs/payrolls/{payroll}/adjustments', [PayrollController::class, 'addAdjustment']);
 });
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleStripeWebhook']);
-
+//payments route
 Route::middleware([EnsureTokenIsValid::class])->group(function () {
     // Create payment
     Route::post('/cs/payments', [PaymentController::class, 'store']);

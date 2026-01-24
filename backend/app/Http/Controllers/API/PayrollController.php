@@ -145,20 +145,20 @@ class PayrollController extends Controller
             ], 403);
         }
 
-        $query->where('employee_id', $employeeId);
+        $query->where('employee_id', $employeeId)->paginate(1);
     }
 
     if ($request->filled('month')) {
-        $query->where('month', $request->month);
+        $query->where('month', $request->month)->paginate(1);
     }
 
     if ($request->filled('employee_id')) {
         if ($isAdmin || $isHrManager) {
-            $query->where('employee_id', $request->employee_id);
+            $query->where('employee_id', $request->employee_id)->paginate(1);
         }
     }
 
-    $payrolls = $query->paginate(10);
+    $payrolls = $query->paginate(1);
 
     return response()->json([
         'message' => 'Payroll records retrieved successfully.',
