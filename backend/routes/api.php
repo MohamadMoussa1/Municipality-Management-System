@@ -19,15 +19,15 @@ use App\Http\Controllers\API\PayrollController;
 use App\Http\Controllers\API\AdminDashboardController;
 use App\Http\Controllers\API\HRDashboardController;
 use App\Http\Middleware\EnsureTokenIsValid;
+use App\Http\Controllers\API\CitizenDashboardController;
 
-  
 // Protected routes
 Route::middleware([EnsureTokenIsValid::class])->group(function () {
     // Citizen routes
     Route::prefix('citizens')->group(function () {
         // Get current authenticated citizen's info
         Route::get('/me', [CitizenController::class, 'me']);       
-    
+        Route::get('/dashboard', [CitizenDashboardController::class, 'dashboard']);
         Route::middleware(['role:admin|finance_officer'])->group(function () {
         // Get all citizens (admin only)
             Route::get('/', [CitizenController::class, 'index']);
