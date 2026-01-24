@@ -24,8 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { TableCell, TableRow } from '@/components/ui/table';
-
 export default function MyRequests() {
   const navigate = useNavigate();
   const [selectedRequest, setSelectedRequest] = useState<CitizenRequest | null>(null);
@@ -89,7 +87,7 @@ export default function MyRequests() {
 
       const result = await response.json();
       navigate('/citizen/requests');
-      setClicked(true);
+      setClicked(prev => !prev);
       toast.message(result.message);
     } catch (e) {
       console.log("error");
@@ -117,11 +115,10 @@ export default function MyRequests() {
         },
       });
       res = await response.json();
-      console.log(res.message);
       toast.success(res.message);
     }
     fetchData();
-    setClicked(true);
+    setClicked(prev => !prev);  
 
   };
 

@@ -94,7 +94,7 @@ export default function MyPermits() {
         setvalue("");
         setFiles([]);
         setSubmitOpen(false);
-        setClicked(true);
+        setClicked(prev => !prev);
         toast.success('Permit application submitted successfully!');
       } else {
         throw new Error(res.message || 'Failed to submit application');
@@ -114,31 +114,10 @@ export default function MyPermits() {
       </div>
     );
   }
-  const handleViewDetails = async (id: string) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`http://127.0.0.1:8000/api/permits/${id}`, {
-        method: 'GET',
-        credentials: "include",
-        headers: {
-          Accept: 'application/json',
-        },
-      });
 
-      if (response.ok) {
-        const res = await response.json();
-
-        setSelectedPermit(res.data);
-        setDetailsOpen(true);
-      } else {
-        toast.error('Failed to load permit details');
-      }
-    } catch (error) {
-      console.error('Error fetching permit details:', error);
-      toast.error('Failed to load permit details');
-    } finally {
-      setLoading(false);
-    }
+  const handleViewDetails = (permit: Permit) => {
+    setSelectedPermit(permit);
+    setDetailsOpen(true);
   };
 
   const handleDownload = (permit: Permit) => {
@@ -342,7 +321,7 @@ This is an official permit issued by the municipality.
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(permit.id)}>
+                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(permit)}>
                           View Details
                         </Button>
                         {permit.status === 'completed' && (

@@ -188,9 +188,10 @@ export default function Permits() {
         title: "Success",
         description: res.message,
       });
+      // Trigger data refresh after successful deletion
+      setClicked(prev => !prev);
     }
     fetchData();
-    setClicked(true);
   };
   const handleViewPermit = async (p: string) => {
     setLoading(true);

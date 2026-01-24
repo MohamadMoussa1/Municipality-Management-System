@@ -104,7 +104,7 @@ export default function CitizenServices() {
       });
     }
     fetchData();
-    setClicked(true);
+    setClicked(prev => !prev);
 
   };
   const handleStatusChange = (Id: string, newStatus: RequestStatus) => {
