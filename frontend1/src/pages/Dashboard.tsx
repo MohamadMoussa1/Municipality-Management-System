@@ -194,89 +194,117 @@ const CitizenDashboard = () => {
   const [ue, setue] = useState<any>([]);
   const [p, setp] = useState<any>([]);
   useEffect(() => {
-    const fetchRequests = async () => {
+  //   const fetchRequests = async () => {
 
-      const response = await fetch("http://127.0.0.1:8000/api/requests/latest", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
+  //     const response = await fetch("http://127.0.0.1:8000/api/requests/latest", {
+  //       method: "GET",
+  //       credentials: "include",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Accept": "application/json",
 
-        },
-      });
-      const res = await response.json();
-      setloading(false);
-      setrequestsL(res.requests);
-      console.log(requestsL);
+  //       },
+  //     });
+  //     const res = await response.json();
+  //     setloading(false);
+  //     setrequestsL(res.requests);
+  //     console.log(requestsL);
 
-    };
-    const fetchEvents = async () => {
+  //   };
+  //   const fetchEvents = async () => {
 
-      const response = await fetch("http://127.0.0.1:8000/api/events/upcoming-count", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
+  //     const response = await fetch("http://127.0.0.1:8000/api/events/upcoming-count", {
+  //       method: "GET",
+  //       credentials: "include",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Accept": "application/json",
 
-        },
-      });
-      const res = await response.json();
-      setloading(false);
-      setue(res);
+  //       },
+  //     });
+  //     const res = await response.json();
+  //     setloading(false);
+  //     setue(res);
 
-    };
-    const fetchRequestsCounts = async () => {
+  //   };
+  //   const fetchRequestsCounts = async () => {
 
-      const response = await fetch("http://127.0.0.1:8000/api/requests/counts", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
+  //     const response = await fetch("http://127.0.0.1:8000/api/requests/counts", {
+  //       method: "GET",
+  //       credentials: "include",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Accept": "application/json",
 
-        },
-      });
-      const res = await response.json();
-      setloading(false);
-      setUCEC(res);
+  //       },
+  //     });
+  //     const res = await response.json();
+  //     setloading(false);
+  //     setUCEC(res);
 
-    };
-    const fetchPermitCount = async () => {
-      const response = await fetch("http://127.0.0.1:8000/api/permits/permit-counts", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-      });
-      const res = await response.json();
-      setloading(false);
-      setpc(res);
+  //   };
+  //   const fetchPermitCount = async () => {
+  //     const response = await fetch("http://127.0.0.1:8000/api/permits/permit-counts", {
+  //       method: "GET",
+  //       credentials: "include",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Accept": "application/json",
+  //       },
+  //     });
+  //     const res = await response.json();
+  //     setloading(false);
+  //     setpc(res);
 
-    };
-    const fetchPayments = async () => {
-      const response = await fetch("http://127.0.0.1:8000/api/payments/pending-total", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-      });
-      const res = await response.json();
-      setloading(false);
-      setLoading(false);
-      setp(res);
+  //   };
+  //   const fetchPayments = async () => {
+  //     const response = await fetch("http://127.0.0.1:8000/api/payments/pending-total", {
+  //       method: "GET",
+  //       credentials: "include",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Accept": "application/json",
+  //       },
+  //     });
+  //     const res = await response.json();
+  //     setloading(false);
+  //     setLoading(false);
+  //     setp(res);
 
-    };
-    fetchRequestsCounts();
-    fetchPermitCount();
-    fetchEvents();
-    fetchRequests();
-    fetchPayments();
+  //   };
+  //   fetchRequestsCounts();
+  //   fetchPermitCount();
+  //   fetchEvents();
+  //   fetchRequests();
+  //   fetchPayments();
+
+  //here fetch the dashboard api
+  const fetchDashboard = async () => {
+    const response = await fetch("http://127.0.0.1:8000/api/citizens/dashboard", {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    });
+    const res = await response.json();
+     setloading(false);
+     setLoading(false);
+    console.log(res);
+    // Set all the state variables from the dashboard response
+    setrequestsL(res.latest_requests.requests);
+    setue(res.upcoming_events);
+    setUCEC(res.completed_requests);
+    setpc(res.permit_counts);
+    setp(res.pending_payments);
+    
+    // Dispatch event to trigger notification fetch
+    window.dispatchEvent(new Event('dashboardLoaded'));
+  };
+  
+  fetchDashboard();
+
   }, []);
 
 
