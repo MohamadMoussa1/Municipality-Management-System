@@ -160,7 +160,7 @@ export default function CitizenServices() {
   };
 
   return (
-    <div className="space-y-3 sm:space-y-6 p-2 sm:p-0">
+    <div className="space-y-3 sm:space-y-6 p-2 sm:p-0 overflow-x-hidden">
       <div className="px-2 sm:px-0">
         <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground">Citizen Services</h1>
         <p className="text-[11px] sm:text-sm md:text-base text-muted-foreground mt-0.5 sm:mt-1">Manage citizen requests and applications</p>
@@ -220,16 +220,16 @@ export default function CitizenServices() {
             </Select>
           </div>
 
-          <div className="rounded-md border overflow-x-auto -mx-3 sm:mx-0">
+          <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">ID</TableHead>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Citizen</TableHead>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">Type</TableHead>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Status</TableHead>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell">Submitted</TableHead>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Actions</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm px-2 sm:px-4 min-w-[60px]">ID</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm px-2 sm:px-4 min-w-[100px]">Citizen</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm px-2 sm:px-4 hidden md:table-cell min-w-[80px]">Type</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm px-2 sm:px-4 min-w-[80px]">Status</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm px-2 sm:px-4 hidden sm:table-cell min-w-[100px]">Submitted</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm px-2 sm:px-4 min-w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -238,14 +238,14 @@ export default function CitizenServices() {
                 ).map((request) => (
                   <TableRow key={request.id}>
                     <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4">{request.id}</TableCell>
-                    <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[80px] sm:max-w-none truncate">{request?.citizen?.user?.name}</TableCell>
-                    <TableCell className="capitalize text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">{request.type.replace('_', ' ')}</TableCell>
+                    <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[100px] truncate">{request?.citizen?.user?.name}</TableCell>
+                    <TableCell className="capitalize text-[10px] sm:text-sm px-2 sm:px-4 hidden md:table-cell">{request.type.replace('_', ' ')}</TableCell>
                     <TableCell className="px-2 sm:px-4">
                       <Select
                         value={request.status}
                         onValueChange={(value: RequestStatus) => handleStatusChange(request.id, value)}
                       >
-                        <SelectTrigger className="w-[130px] h-8">
+                        <SelectTrigger className="w-[90px] sm:w-[110px] h-7 sm:h-8">
                           <SelectValue>
                             <Badge className={getStatusColor(request.status)}>
                               {request.status === 'in_review' ? 'In Review' : request.status.charAt(0).toUpperCase() + request.status.slice(1)}
@@ -268,13 +268,13 @@ export default function CitizenServices() {
                         </SelectContent>
                       </Select>
                     </TableCell>
-                    <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell">{new Date(request.submission_date).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 hidden sm:table-cell">{new Date(request.submission_date).toLocaleDateString()}</TableCell>
                     <TableCell className="px-2 sm:px-4">
-                      <div className="flex gap-0.5 sm:gap-4">
+                      <div className="flex gap-0.5 sm:gap-2">
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 sm:h-8 sm:w-8"
+                          className="h-6 w-6 sm:h-8 sm:w-8"
                           onClick={() => handleViewRequest(request)}
                         >
                           <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -284,135 +284,135 @@ export default function CitizenServices() {
                           <Button
                             variant="destructive"
                             size="sm"
-                            className="h-8 px-2 bg-gradient-to-r from-destructive to-destructive/80 hover:from-destructive/90 hover:to-destructive/70 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 border-0 rounded-md flex items-center gap-1.5 self-center"
+                            className="h-6 sm:h-8 px-1.5 sm:px-3 text-[10px] sm:text-xs bg-gradient-to-r from-destructive to-destructive/80 hover:from-destructive/90 hover:to-destructive/70 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 border-0 rounded-md flex items-center gap-1 self-center"
                             onClick={() => handleDeleteRequest(request.id)}
                           >
                             <XCircle className="h-3 w-3" />
-                            Delete
+                            <span className="hidden sm:inline">Delete</span>
                           </Button>
                         )}
                       </div>
                     </TableCell>
                   </TableRow>
                 ))}
-          {(citizenCurrentPage && citizenLastPage && citizenLastPage > 1) && (
-              <TableRow>
-                <TableCell colSpan={6} className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">
-                      Page {citizenCurrentPage} of {citizenLastPage}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={citizenCurrentPage <= 1}
-                        onClick={async () => {
-                          setLoading(true);
-                          await fetchPage(citizenCurrentPage - 1);
-                          setLoading(false);
-                        }}
-                      >
-                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                        Previous
-                      </Button>
-                      <div className="flex items-center gap-1">
-                        {Array.from({ length: Math.min(5, citizenLastPage) }, (_, i) => {
-                          const pageNum = i + 1;
-                          const isActive = pageNum === citizenCurrentPage;
-                          return (
-                            <Button
-                              key={pageNum}
-                              variant={isActive ? "default" : "outline"}
-                              size="sm"
-                              className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
-                                ? "bg-primary text-primary-foreground shadow-sm"
-                                : "hover:bg-primary hover:text-primary-foreground"
-                                }`}
-                              disabled={pageNum > citizenLastPage}
-                              onClick={async () => {
-                                setLoading(true);
-                                await fetchPage(pageNum);
-                                setLoading(false);
-                              }}
-                            >
-                              {pageNum}
-                            </Button>
-                          );
-                        })}
-                        {citizenLastPage > 5 && (
-                          <>
-                            <span className="text-muted-foreground text-xs px-1">...</span>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
-                              onClick={async () => {
-                                setLoading(true);
-                                await fetchPage(citizenLastPage);
-                                setLoading(false);
-                              }}
-                            >
-                              {citizenLastPage}
-                            </Button>
-                          </>
-                        )}
+                {(citizenCurrentPage && citizenLastPage && citizenLastPage > 1) && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="p-4">
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="text-sm text-muted-foreground">
+                          Page {citizenCurrentPage} of {citizenLastPage}
+                        </div>
+                        <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 px-2 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={citizenCurrentPage <= 1}
+                            onClick={async () => {
+                              setLoading(true);
+                              await fetchPage(citizenCurrentPage - 1);
+                              setLoading(false);
+                            }}
+                          >
+                            <svg className="w-3 h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                            <span className="hidden sm:inline">Previous</span>
+                          </Button>
+                          <div className="flex items-center gap-1">
+                            {Array.from({ length: Math.min(5, citizenLastPage) }, (_, i) => {
+                              const pageNum = i + 1;
+                              const isActive = pageNum === citizenCurrentPage;
+                              return (
+                                <Button
+                                  key={pageNum}
+                                  variant={isActive ? "default" : "outline"}
+                                  size="sm"
+                                  className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                    : "hover:bg-primary hover:text-primary-foreground"
+                                    }`}
+                                  disabled={pageNum > citizenLastPage}
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    await fetchPage(pageNum);
+                                    setLoading(false);
+                                  }}
+                                >
+                                  {pageNum}
+                                </Button>
+                              );
+                            })}
+                            {citizenLastPage > 5 && (
+                              <>
+                                <span className="text-muted-foreground text-xs px-1">...</span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    await fetchPage(citizenLastPage);
+                                    setLoading(false);
+                                  }}
+                                >
+                                  {citizenLastPage}
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 px-2 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={citizenCurrentPage >= citizenLastPage}
+                            onClick={async () => {
+                              setLoading(true);
+                              await fetchPage(citizenCurrentPage + 1);
+                              setLoading(false);
+                            }}
+                          >
+                            <span className="hidden sm:inline">Next</span>
+                            <svg className="w-3 h-3 sm:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Button>
+                        </div>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={citizenCurrentPage >= citizenLastPage}
-                        onClick={async () => {
-                          setLoading(true);
-                          await fetchPage(citizenCurrentPage + 1);
-                          setLoading(false);
-                        }}
-                      >
-                        Next
-                        <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </Button>
-                    </div>
-                  </div>
-                </TableCell>
-              </TableRow>
-             )}
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
+
         </CardContent>
       </Card>
 
       {/* View Request Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[600px] max-w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Request Details</DialogTitle>
-
+            <DialogTitle className="text-lg">Request Details</DialogTitle>
           </DialogHeader>
           {selectedRequest && (
             <div className="space-y-4">
-              <div className="grid grid-cols-1 sm :grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-muted-foreground">Request ID</Label>
+                  <Label className="text-muted-foreground text-sm">Request ID</Label>
                   <div className="flex items-center gap-2">
                     <FileText className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium text-sm">{selectedRequest.id}</span>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-muted-foreground">Status</Label>
+                  <Label className="text-muted-foreground text-sm">Status</Label>
                   <div>{getStatusBadge(selectedRequest.status)}</div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-muted-foreground">Citizen Name</Label>
+                <Label className="text-muted-foreground text-sm">Citizen Name</Label>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-muted-foreground" />
                   <span className="font-medium text-sm">{selectedRequest?.citizen?.user?.name}</span>
@@ -420,12 +420,12 @@ export default function CitizenServices() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-muted-foreground">Request Type</Label>
+                <Label className="text-muted-foreground text-sm">Request Type</Label>
                 <div className="font-medium capitalize text-sm">{selectedRequest.type.replace('_', ' ')}</div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-muted-foreground">Submission Date</Label>
+                  <Label className="text-muted-foreground text-sm">Submission Date</Label>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">{selectedRequest.submission_date.split("T")[0]}</span>
@@ -433,7 +433,7 @@ export default function CitizenServices() {
                 </div>
                 {selectedRequest.completion_date && (
                   <div className="space-y-2">
-                    <Label className="text-muted-foreground">Completion Date</Label>
+                    <Label className="text-muted-foreground text-sm">Completion Date</Label>
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">{selectedRequest.completion_date.split("T")[0]}</span>
@@ -443,8 +443,8 @@ export default function CitizenServices() {
               </div>
             </div>
           )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setViewDialogOpen(false)}>Close</Button>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setViewDialogOpen(false)} className="w-full sm:w-auto">Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

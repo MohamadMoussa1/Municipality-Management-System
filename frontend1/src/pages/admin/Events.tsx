@@ -361,7 +361,7 @@ export default function Events() {
                       </SelectContent>
                     </Select>
                   </div>
-                
+
                   <div className="space-y-2">
                     <Label htmlFor="date">Date *</Label>
                     <Input
@@ -372,9 +372,9 @@ export default function Events() {
                       required
                     />
                   </div>
-                  
+
                 </div>
-                
+
               </div>
               <DialogFooter>
                 <Button
@@ -404,22 +404,48 @@ export default function Events() {
         </Dialog>
       </div>
 
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <Card>
+          <CardContent className="p-3 sm:p-4 md:p-6">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold">{events.length}</div>
+            <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Total Events</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 sm:p-4 md:p-6">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold text-blue-500">{events.filter(e => e.status === 'upcoming').length}</div>
+            <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Upcoming</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 sm:p-4 md:p-6">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold text-green-500">{events.filter(e => e.status === 'ongoing').length}</div>
+            <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Ongoing</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 sm:p-4 md:p-6">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold text-gray-500">{events.filter(e => e.status === 'completed').length}</div>
+            <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Completed</div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row gap-4">
+        <CardHeader className="p-3 sm:p-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search events..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 text-sm"
               />
             </div>
             <div className="flex flex-wrap gap-2">
-
               <Select value={filterAudience} onValueChange={setFilterAudience}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-[120px] sm:w-[140px] h-8 sm:h-9 text-xs sm:text-sm">
                   <SelectValue placeholder="Audience" />
                 </SelectTrigger>
                 <SelectContent>
@@ -430,7 +456,7 @@ export default function Events() {
                 </SelectContent>
               </Select>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-[130px]">
+                <SelectTrigger className="w-[110px] sm:w-[130px] h-8 sm:h-9 text-xs sm:text-sm">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -444,76 +470,79 @@ export default function Events() {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 sm:p-6">
           {filteredEvents.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-8 text-muted-foreground text-sm">
               No events found. Create a new event to get started.
             </div>
           ) : (
             <div className="w-full">
               <div className="rounded-md border">
-                <Table>
+                <Table className="w-full">
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Event</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Audience</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                    <TableRow className="bg-muted/50 hover:bg-muted/50">
+                      <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap px-3 py-3 w-[30%] sm:w-[25%]">Event</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap px-3 py-3 hidden md:table-cell w-[30%]">Description</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap px-3 py-3 w-[25%] sm:w-[20%]">Date</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap px-3 py-3 w-[20%] sm:w-[15%]">Status</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap px-3 py-3 hidden sm:table-cell w-[15%]">Audience</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap px-3 py-3 w-[25%] sm:w-[15%] text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredEvents.map((event) => (
-                      <TableRow key={event.id} className="hover:bg-muted/50">
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            {event.title}
+                    {filteredEvents.map((event, index) => (
+                      <TableRow key={event.id} className={index % 2 === 0 ? 'bg-white' : 'bg-muted/20'}>
+                        <TableCell className="font-medium text-sm px-3 py-3 align-middle">
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <div className="p-1.5 bg-primary/10 rounded-md flex-shrink-0 hidden sm:block">
+                              <Calendar className="h-4 w-4 text-primary" />
+                            </div>
+                            <span className="font-semibold text-foreground truncate">{event.title}</span>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="max-w-xs truncate" title={event.description}>
+                        <TableCell className="text-sm text-muted-foreground px-3 py-3 align-middle hidden md:table-cell">
+                          <div className="truncate" title={event.description}>
                             {event.description || 'No description'}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            {new Date(event.date).toLocaleDateString()}
-                          </div>
+                        <TableCell className="text-sm text-muted-foreground whitespace-nowrap px-3 py-3 align-middle">
+                          {new Date(event.date).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
                         </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={getStatusColor(event.status)}>
+                        <TableCell className="px-3 py-3 align-middle">
+                          <Badge className={`${getStatusColor(event.status)} text-xs font-medium px-2 py-0.5 h-auto border-0 whitespace-nowrap`}>
                             {event.status || 'upcoming'}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
+                        <TableCell className="px-3 py-3 align-middle hidden sm:table-cell">
+                          <Badge variant="secondary" className="text-xs font-medium px-2 py-0.5 h-auto whitespace-nowrap">
                             {getAudienceLabel(event.target_audience as EventAudience)}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
+                        <TableCell className="text-right px-3 py-3 align-middle">
+                          <div className="flex items-center justify-end gap-1">
                             <Button
-                              variant="outline"
-                              size="sm"
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 sm:h-8 sm:w-8"
                               onClick={() => handleEditEvent(event)}
                             >
-                              <Edit className="h-4 w-4 mr-1" />
-                              Edit
+                              <Edit className="h-4 w-4" />
                             </Button>
                             <Button
-                              variant="destructive"
-                              size="sm"
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 sm:h-8 sm:w-8 text-destructive hover:text-destructive"
                               onClick={() => {
-                                if (window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+                                if (window.confirm('Are you sure you want to delete this event?')) {
                                   handleDeleteEvent(event.id);
                                 }
                               }}
                             >
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Delete
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </TableCell>

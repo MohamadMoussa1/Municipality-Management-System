@@ -118,7 +118,7 @@ export default function MyRequests() {
       toast.success(res.message);
     }
     fetchData();
-    setClicked(prev => !prev);  
+    setClicked(prev => !prev);
 
   };
 
@@ -149,11 +149,11 @@ export default function MyRequests() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 px-3 sm:px-0">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">My Requests</h1>
-          <p className="text-muted-foreground">Track and manage your service requests</p>
+        <div className="w-full sm:w-auto">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground break-words">My Requests</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">Track and manage your service requests</p>
         </div>
         <Dialog open={details} onOpenChange={setDetails}>
           <DialogTrigger asChild>
@@ -215,76 +215,78 @@ export default function MyRequests() {
         </Dialog>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Requests</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.total}</div>
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold">{stats?.total}</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Pending</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-500">{stats?.pending}</div>
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold text-yellow-500">{stats?.pending}</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">In Review</CardTitle>
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">In Review</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-500">{stats?.inReview}</div>
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold text-blue-500">{stats?.inReview}</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Completed</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-500">{stats?.completed}</div>
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold text-green-500">{stats?.completed}</div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Request History</CardTitle>
-          <CardDescription>View the status and details of all your requests</CardDescription>
+      <Card className="shadow-sm">
+        <CardHeader className="px-4 sm:px-6">
+          <CardTitle className="text-lg sm:text-xl">Request History</CardTitle>
+          <CardDescription className="text-sm sm:text-base">View the status and details of all your requests</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="px-4 sm:px-6">
+          <div className="space-y-3 sm:space-y-4">
             {R?.map((request) => (
               <Card key={request.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex flex-col sm:flex-row justify-between gap-4">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex flex-col gap-3 sm:gap-4">
                     <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold">{request?.type.replace('_', ' ').toUpperCase()}</h3>
-                        <Badge variant="outline" className={getStatusColor(request.status)}>
+                      <div className="flex items-start gap-2 flex-wrap">
+                        <h3 className="font-semibold text-sm sm:text-base break-words max-w-full">{request?.type.replace('_', ' ').toUpperCase()}</h3>
+                        <Badge variant="outline" className={`text-xs ${getStatusColor(request.status)}`}>
                           <span className="flex items-center gap-1">
                             {getStatusIcon(request.status)}
-                            {request?.status?.replace('_', ' ')}
+                            <span className="hidden sm:inline">{request?.status?.replace('_', ' ')}</span>
+                            <span className="sm:hidden">{request?.status?.replace('_', ' ').substring(0, 3)}</span>
                           </span>
                         </Badge>
                       </div>
 
-                      <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                        <span>ID: {request?.id}</span>
-                        <span>Submitted: {request?.submission_date.split("T")[0]}</span>
-                        <span>Completed: {request?.completion_date?.split("T")[0]}</span>
-
+                      <div className="flex flex-wrap gap-2 sm:gap-4 text-xs text-muted-foreground">
+                        <span className="bg-muted px-2 py-1 rounded">ID: {request?.id}</span>
+                        <span className="bg-muted px-2 py-1 rounded">Submitted: {request?.submission_date.split("T")[0]}</span>
+                        {request?.completion_date && (
+                          <span className="bg-muted px-2 py-1 rounded">Completed: {request?.completion_date.split("T")[0]}</span>
+                        )}
                       </div>
                     </div>
-                    <div className="flex sm:flex-col gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => handleViewDetails(request)}>
+                    <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto">
+                      <Button variant="outline" size="sm" className="flex-1 text-xs sm:text-sm" onClick={() => handleViewDetails(request)}>
                         View Details
                       </Button>
                       {request.status === 'pending' && (
-                        <Button variant="outline" size="sm" className="flex-1" onClick={() => handleCancelRequest(request.id)}>
+                        <Button variant="outline" size="sm" className="flex-1 text-xs sm:text-sm" onClick={() => handleCancelRequest(request.id)}>
                           Cancel
                         </Button>
                       )}
@@ -294,15 +296,15 @@ export default function MyRequests() {
               </Card>
             ))}
             {(citizenCurrentPage && citizenLastPage && citizenLastPage > 1) && (
-              <div className="flex items-center justify-between p-4 border-t">
-                <div className="text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-3 sm:p-4 border-t">
+                <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
                   Page {citizenCurrentPage} of {citizenLastPage}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2 order-1 sm:order-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
                     disabled={citizenCurrentPage <= 1}
                     onClick={async () => {
                       setLoading(true);
@@ -310,10 +312,10 @@ export default function MyRequests() {
                       setLoading(false);
                     }}
                   >
-                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 sm:w-3 sm:h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
-                    Previous
+                    <span className="hidden sm:inline">Previous</span>
                   </Button>
                   <div className="flex items-center gap-1">
                     {Array.from({ length: Math.min(5, citizenLastPage) }, (_, i) => {
@@ -324,7 +326,7 @@ export default function MyRequests() {
                           key={pageNum}
                           variant={isActive ? "default" : "outline"}
                           size="sm"
-                          className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                          className={`h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
                             ? "bg-primary text-primary-foreground shadow-sm"
                             : "hover:bg-primary hover:text-primary-foreground"
                             }`}
@@ -345,7 +347,7 @@ export default function MyRequests() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                          className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
                           onClick={async () => {
                             setLoading(true);
                             await fetchPage(citizenLastPage);
@@ -360,7 +362,7 @@ export default function MyRequests() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
                     disabled={citizenCurrentPage >= citizenLastPage}
                     onClick={async () => {
                       setLoading(true);
@@ -368,8 +370,8 @@ export default function MyRequests() {
                       setLoading(false);
                     }}
                   >
-                    Next
-                    <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span className="hidden sm:inline">Next</span>
+                    <svg className="w-3 h-3 sm:w-3 sm:h-3 sm:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </Button>
@@ -381,10 +383,10 @@ export default function MyRequests() {
       </Card>
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="sm:max-w-[525px]">
+        <DialogContent className="sm:max-w-[525px] mx-4 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Request Details</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-lg">Request Details</DialogTitle>
+            <DialogDescription className="text-sm">
               Complete information about your request
             </DialogDescription>
           </DialogHeader>

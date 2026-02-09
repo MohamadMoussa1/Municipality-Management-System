@@ -39,9 +39,9 @@ export default function EmployeeEvents() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [CurrentPage, setCurrentPage] = useState<number>(1);
-  const [LastPage, setLastPage] = useState<number>(1);
   const [Clicked, setClicked] = useState(false);
+  const [citizenLastPage, setCitizenLastPage] = useState(1);
+  const [citizenCurrentPage, setCitizenCurrentPage] = useState(1);
 
   const fetchPage = async (pageNumber: number) => {
     const response = await fetch(`http://127.0.0.1:8000/api/events?page=${pageNumber}`, {
@@ -53,10 +53,9 @@ export default function EmployeeEvents() {
       },
     });
     const res = await response.json();
-    console.log(res)
     setEvents(res.data.data);
-    setCurrentPage(res.data.current_page);
-    setLastPage(res.data.last_page);
+    setCitizenCurrentPage(res.data.current_page);
+    setCitizenLastPage(res.data.last_page);
   };
 
   const fetchData = async () => {
@@ -99,7 +98,7 @@ export default function EmployeeEvents() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="space-y-4 sm:space-y-6 px-3 sm:px-0">
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -112,40 +111,40 @@ export default function EmployeeEvents() {
         </div>
       ) : (
         <>
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Upcoming Events</h1>
-              <p className="text-muted-foreground">Find and participate in local community events</p>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="w-full sm:w-auto">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight break-words">Upcoming Events</h1>
+              <p className="text-sm sm:text-base text-muted-foreground mt-1">Find and participate in local community events</p>
             </div>
           </div>
 
           <Card>
             <CardHeader>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col xl:flex-row gap-3">
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search events..."
+                    placeholder="Search events by title or description..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 h-11 border-muted/50 focus:border-primary/50 transition-all duration-200"
                   />
                 </div>
                 <div className="flex gap-2">
                   <Select value={filterType} onValueChange={setFilterType}>
-                    <SelectTrigger className="w-[140px]">
+                    <SelectTrigger className="w-[130px] h-11 border-muted/50 hover:border-primary/50 transition-all duration-200">
                       <Filter className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Filter by type" />
+                      <SelectValue placeholder="Type" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Types</SelectItem>
                       <SelectItem value="public">Public</SelectItem>
-                      <SelectItem value="staff">Staff</SelectItem>
+                      <SelectItem value="citizens">Citizens</SelectItem>
                     </SelectContent>
                   </Select>
                   <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="w-[140px]">
-                      <SelectValue placeholder="Filter by status" />
+                    <SelectTrigger className="w-[120px] h-11 border-muted/50 hover:border-primary/50 transition-all duration-200">
+                      <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Events</SelectItem>
@@ -170,134 +169,142 @@ export default function EmployeeEvents() {
                   </p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Audience</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredEvents.map((event) => (
-                      <TableRow key={event.id} className="hover:bg-muted/50">
-                        <TableCell className="font-medium">{event.title}</TableCell>
-                        <TableCell className="text-muted-foreground max-w-xs truncate">
-                          {event.description}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
+                <div className="rounded-md border">
+                  <Table className="w-full">
+                    <TableHeader>
+                      <TableRow className="bg-muted/50 hover:bg-muted/50">
+                        <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap px-3 py-3 w-[25%]">Event</TableHead>
+                        <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap px-3 py-3 hidden sm:table-cell w-[30%]">Description</TableHead>
+                        <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap px-3 py-3 w-[20%]">Date</TableHead>
+                        <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap px-3 py-3 w-[15%]">Audience</TableHead>
+                        <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap px-3 py-3 w-[15%] text-right">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredEvents.map((event, index) => (
+                        <TableRow key={event.id} className={index % 2 === 0 ? 'bg-white' : 'bg-muted/20'}>
+                          <TableCell className="font-medium text-sm px-3 py-3 align-middle">
+                            <div className="flex items-center gap-2 overflow-hidden">
+                              <div className="p-1.5 bg-primary/10 rounded-md flex-shrink-0 hidden sm:block">
+                                <Calendar className="h-4 w-4 text-primary" />
+                              </div>
+                              <span className="font-semibold text-foreground truncate">{event.title}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground px-3 py-3 align-middle hidden sm:table-cell">
+                            <div className="truncate" title={event.description}>
+                              {event.description || 'No description'}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground whitespace-nowrap px-3 py-3 align-middle">
                             {new Date(event.date).toLocaleDateString('en-US', {
-                              year: 'numeric',
                               month: 'short',
                               day: 'numeric',
+                              year: 'numeric'
                             })}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={`${getTypeColor(event.target_audience)} capitalize`}>
-                            {event.target_audience}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={`${getStatusColor(event.date)} capitalize`}>
-                            {new Date(event.date) < new Date() ? 'Past' : 'Upcoming'}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {(CurrentPage && LastPage && LastPage > 1) && (
-                      <TableRow>
-                        <TableCell colSpan={5} className="p-0">
-                          <div className="flex items-center justify-between w-full p-4 bg-muted/30 border-t">
-                            <div className="text-sm font-medium text-muted-foreground">
-                              Page {CurrentPage} of {LastPage}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={CurrentPage <= 1}
-                                onClick={async () => {
-                                  setLoading(true);
-                                  await fetchPage(CurrentPage - 1);
-                                  setLoading(false);
-                                }}
-                              >
-                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                </svg>
-                                Previous
-                              </Button>
-                              <div className="flex items-center gap-1">
-                                {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
-                                  const pageNum = i + 1;
-                                  const isActive = pageNum === CurrentPage;
-                                  return (
-                                    <Button
-                                      key={pageNum}
-                                      variant={isActive ? "default" : "outline"}
-                                      size="sm"
-                                      className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
-                                        ? "bg-primary text-primary-foreground shadow-sm"
-                                        : "hover:bg-primary hover:text-primary-foreground"
-                                        }`}
-                                      disabled={pageNum > LastPage}
-                                      onClick={async () => {
-                                        setLoading(true);
-                                        await fetchPage(pageNum);
-                                        setLoading(false);
-                                      }}
-                                    >
-                                      {pageNum}
-                                    </Button>
-                                  );
-                                })}
-                                {LastPage > 5 && (
-                                  <>
-                                    <span className="text-muted-foreground text-xs px-1">...</span>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
-                                      onClick={async () => {
-                                        setLoading(true);
-                                        await fetchPage(LastPage);
-                                        setLoading(false);
-                                      }}
-                                    >
-                                      {LastPage}
-                                    </Button>
-                                  </>
-                                )}
+                          </TableCell>
+                          <TableCell className="px-3 py-3 align-middle">
+                            <Badge className={`${getTypeColor(event.target_audience)} text-xs font-medium px-2 py-0.5 h-auto border-0 whitespace-nowrap capitalize`}>
+                              {event.target_audience}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right px-3 py-3 align-middle">
+                            <Badge className={`${getStatusColor(event.date)} text-xs font-medium px-2 py-0.5 h-auto border-0 whitespace-nowrap capitalize`}>
+                              {new Date(event.date) < new Date() ? 'Past' : 'Upcoming'}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {(citizenCurrentPage && citizenLastPage && citizenLastPage > 1) && (
+                        <TableRow>
+                          <TableCell colSpan={5} className="p-3 sm:p-4">
+                            <div className="flex items-center justify-between w-full">
+                              <div className="text-xs sm:text-sm text-muted-foreground">
+                                Page {citizenCurrentPage} of {citizenLastPage}
                               </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={CurrentPage >= LastPage}
-                                onClick={async () => {
-                                  setLoading(true);
-                                  await fetchPage(CurrentPage + 1);
-                                  setLoading(false);
-                                }}
-                              >
-                                Next
-                                <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                              </Button>
+                              <div className="flex items-center gap-1 sm:gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
+                                  disabled={citizenCurrentPage <= 1}
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    await fetchPage(citizenCurrentPage - 1);
+                                    setLoading(false);
+                                  }}
+                                >
+                                  <svg className="w-3 h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                  </svg>
+                                  <span className="hidden sm:inline">Previous</span>
+                                </Button>
+                                <div className="flex items-center gap-1">
+                                  {Array.from({ length: Math.min(5, citizenLastPage) }, (_, i) => {
+                                    const pageNum = i + 1;
+                                    const isActive = pageNum === citizenCurrentPage;
+                                    return (
+                                      <Button
+                                        key={pageNum}
+                                        variant={isActive ? "default" : "outline"}
+                                        size="sm"
+                                        className={`h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                                          ? "bg-primary text-primary-foreground shadow-sm"
+                                          : "hover:bg-primary hover:text-primary-foreground"
+                                          }`}
+                                        disabled={pageNum > citizenLastPage}
+                                        onClick={async () => {
+                                          setLoading(true);
+                                          await fetchPage(pageNum);
+                                          setLoading(false);
+                                        }}
+                                      >
+                                        {pageNum}
+                                      </Button>
+                                    );
+                                  })}
+                                  {citizenLastPage > 5 && (
+                                    <>
+                                      <span className="text-muted-foreground text-xs px-1">...</span>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                                        onClick={async () => {
+                                          setLoading(true);
+                                          await fetchPage(citizenLastPage);
+                                          setLoading(false);
+                                        }}
+                                      >
+                                        {citizenLastPage}
+                                      </Button>
+                                    </>
+                                  )}
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
+                                  disabled={citizenCurrentPage >= citizenLastPage}
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    await fetchPage(citizenCurrentPage + 1);
+                                    setLoading(false);
+                                  }}
+                                >
+                                  <span className="hidden sm:inline">Next</span>
+                                  <svg className="w-3 h-3 sm:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                  </svg>
+                                </Button>
+                              </div>
                             </div>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </CardContent>
           </Card>

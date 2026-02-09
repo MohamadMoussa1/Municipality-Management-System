@@ -75,20 +75,20 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <AppSidebar />
 
         <div className="flex-1 flex flex-col">
-          <header className="h-16 border-b bg-card sticky top-0 z-10 flex items-center justify-between px-6">
-            <div className="flex items-center gap-4">
+          <header className="h-16 border-b bg-card sticky top-0 z-10 flex items-center justify-between px-4 sm:px-6">
+            <div className="flex items-center gap-2 sm:gap-4">
               <SidebarTrigger />
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">
+              <div className="min-w-0">
+                <h2 className="text-base sm:text-lg font-semibold text-foreground truncate">
                   Municipality Management System
                 </h2>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">
                   Welcome back, {user}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Button
                 variant="ghost"
                 size="icon"
@@ -108,19 +108,19 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2">
+                  <Button variant="ghost" className="flex items-center gap-2 h-10 px-2 sm:px-3">
                     <img
                       src={getRolePhoto(role || 'citizen')}
                       alt="Profile"
-                      className="h-8 w-8 rounded-full"
+                      className="h-7 w-7 sm:h-8 sm:w-8 rounded-full flex-shrink-0"
                     />
-                    <div className="text-left hidden md:block">
-                      <p className="text-sm font-medium">{user}</p>
-                      {/* <p className="text-xs text-muted-foreground capitalize">{user?.role.replace('_', ' ')}</p> */}
+                    <div className="text-left hidden sm:block min-w-0">
+                      <p className="text-sm font-medium truncate">{user}</p>
+                      {/* <p className="text-xs text-muted-foreground capitalize truncate">{user?.role.replace('_', ' ')}</p> */}
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuContent align="end" className="w-48 sm:w-56">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {!isAdmin && <DropdownMenuItem onClick={handleProfile}>
@@ -137,8 +137,10 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </div>
           </header>
 
-          <main className="flex-1 p-6 overflow-auto">
-            {children}
+          <main className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
+            <div className="max-w-7xl mx-auto">
+              {children}
+            </div>
           </main>
         </div>
       </div>

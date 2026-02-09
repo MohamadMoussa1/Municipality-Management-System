@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, CheckCircle, LogIn, LogOut ,Loader2} from 'lucide-react';
-import  getCsrfToken  from '../../lib/utils';
+import { Clock, CheckCircle, LogIn, LogOut, Loader2 } from 'lucide-react';
+import getCsrfToken from '../../lib/utils';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -61,8 +61,8 @@ export default function MyAttendances() {
     try {
       const res = await fetch('http://127.0.0.1:8000/cs/attendance/check-in', {
         method: 'POST',
-        credentials:"include",
-        headers: { Accept: 'application/json', 'X-XSRF-TOKEN':getCsrfToken(), },
+        credentials: "include",
+        headers: { Accept: 'application/json', 'X-XSRF-TOKEN': getCsrfToken(), },
       });
 
       if (res.status === 401) {
@@ -116,8 +116,8 @@ export default function MyAttendances() {
     try {
       const res = await fetch('http://127.0.0.1:8000/cs/attendance/check-out', {
         method: 'POST',
-        credentials:"include",
-        headers: { Accept: 'application/json', 'X-XSRF-TOKEN':getCsrfToken(), },
+        credentials: "include",
+        headers: { Accept: 'application/json', 'X-XSRF-TOKEN': getCsrfToken(), },
       });
 
       if (res.status === 401) {
@@ -170,15 +170,15 @@ export default function MyAttendances() {
       toast.error('Attendance id not found.');
       return;
     }
-   
+
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/attendance/${id}`, {
         headers: { Accept: 'application/json' },
-        credentials:"include",
+        credentials: "include",
       });
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');
-        
+
         navigate('/login');
         return;
       }
@@ -199,13 +199,13 @@ export default function MyAttendances() {
   const handleCheckoutFromDetails = async () => {
     if (detailsCheckoutLoading) return;
     setDetailsCheckoutLoading(true);
-    
+
 
     try {
       const res = await fetch('http://127.0.0.1:8000/cs/attendance/check-out', {
         method: 'POST',
-        credentials:"include",
-        headers: {  Accept: 'application/json' , 'X-XSRF-TOKEN':getCsrfToken(),},
+        credentials: "include",
+        headers: { Accept: 'application/json', 'X-XSRF-TOKEN': getCsrfToken(), },
       });
 
       if (res.status === 401) {
@@ -260,7 +260,7 @@ export default function MyAttendances() {
     const hrs = diffMs / (1000 * 60 * 60);
     return Math.round(hrs * 100) / 100;
   };
-   if (loading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -278,10 +278,10 @@ export default function MyAttendances() {
         </div>
         <div className="flex gap-2">
           {!todayAttendance && (
-            <Button onClick={handleCheckIn} disabled={actionLoading}><LogIn className="h-4 w-4 mr-2"/> Check In</Button>
+            <Button onClick={handleCheckIn} disabled={actionLoading}><LogIn className="h-4 w-4 mr-2" /> Check In</Button>
           )}
           {todayAttendance && !todayAttendance.check_out && (
-            <Button onClick={handleCheckOut} variant="secondary" disabled={actionLoading}><LogOut className="h-4 w-4 mr-2"/> Check Out</Button>
+            <Button onClick={handleCheckOut} variant="secondary" disabled={actionLoading}><LogOut className="h-4 w-4 mr-2" /> Check Out</Button>
           )}
           {todayAttendance && todayAttendance.check_out && (
             <Button disabled variant="outline">Checked out</Button>
@@ -289,7 +289,7 @@ export default function MyAttendances() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total Records</CardTitle></CardHeader>
           <CardContent><div className="text-2xl font-bold">{stats.total}</div></CardContent>
@@ -326,7 +326,7 @@ export default function MyAttendances() {
                         <h3 className="font-semibold">{new Date(a.date).toLocaleDateString()}</h3>
                         <Badge variant="outline" className={!a.check_out ? 'bg-yellow-500/10 text-yellow-500' : 'bg-green-500/10 text-green-500'}>
                           <span className="flex items-center gap-1">
-                            {!a.check_out ? <Clock className="h-4 w-4"/> : <CheckCircle className="h-4 w-4"/>}
+                            {!a.check_out ? <Clock className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
                             {!a.check_out ? 'Missing checkout' : `${a.hours_worked} hrs`}
                           </span>
                         </Badge>
@@ -334,7 +334,7 @@ export default function MyAttendances() {
                       <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                         <span>Check-in: {fmt(a.check_in)}</span>
                         <span>Check-out: {fmt(a.check_out)}</span>
-                        
+
                       </div>
                     </div>
                     <div className="flex sm:flex-col gap-2">
@@ -349,7 +349,7 @@ export default function MyAttendances() {
                             if (updated) setSelected(updated);
                           }
                         }} disabled={actionLoading}>
-                          <LogOut className="h-4 w-4 mr-2"/> Check Out
+                          <LogOut className="h-4 w-4 mr-2" /> Check Out
                         </Button>
                       )}
                     </div>
@@ -359,87 +359,87 @@ export default function MyAttendances() {
             ))}
             {attendances.length === 0 && !loading && <div className="text-sm text-muted-foreground">No attendance records found.</div>}
             {(CurrentPage && LastPage && LastPage > 1) && (
-                  <div className="flex items-center justify-between w-full p-4">
-                    <div className="text-sm text-muted-foreground">
-                      Page {CurrentPage} of {LastPage}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={CurrentPage <= 1}
-                        onClick={async () => {
-                          setLoading(true);
-                          await fetchPage(CurrentPage - 1);
-                          setLoading(false);
-                        }}
-                      >
-                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                        Previous
-                      </Button>
-                      <div className="flex items-center gap-1">
-                        {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
-                          const pageNum = i + 1;
-                          const isActive = pageNum === CurrentPage;
-                          return (
-                            <Button
-                              key={pageNum}
-                              variant={isActive ? "default" : "outline"}
-                              size="sm"
-                              className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
-                                ? "bg-primary text-primary-foreground shadow-sm"
-                                : "hover:bg-primary hover:text-primary-foreground"
-                                }`}
-                              disabled={pageNum > LastPage}
-                              onClick={async () => {
-                                setLoading(true);
-                                await fetchPage(pageNum);
-                                setLoading(false);
-                              }}
-                            >
-                              {pageNum}
-                            </Button>
-                          );
-                        })}
-                        {LastPage > 5 && (
-                          <>
-                            <span className="text-muted-foreground text-xs px-1">...</span>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
-                              onClick={async () => {
-                                setLoading(true);
-                                await fetchPage(LastPage);
-                                setLoading(false);
-                              }}
-                            >
-                              {LastPage}
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={CurrentPage >= LastPage}
-                        onClick={async () => {
-                          setLoading(true);
-                          await fetchPage(CurrentPage + 1);
-                          setLoading(false);
-                        }}
-                      >
-                        Next
-                        <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </Button>
-                    </div>
+              <div className="flex items-center justify-between w-full p-4">
+                <div className="text-sm text-muted-foreground">
+                  Page {CurrentPage} of {LastPage}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={CurrentPage <= 1}
+                    onClick={async () => {
+                      setLoading(true);
+                      await fetchPage(CurrentPage - 1);
+                      setLoading(false);
+                    }}
+                  >
+                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Previous
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
+                      const pageNum = i + 1;
+                      const isActive = pageNum === CurrentPage;
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={isActive ? "default" : "outline"}
+                          size="sm"
+                          className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "hover:bg-primary hover:text-primary-foreground"
+                            }`}
+                          disabled={pageNum > LastPage}
+                          onClick={async () => {
+                            setLoading(true);
+                            await fetchPage(pageNum);
+                            setLoading(false);
+                          }}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                    {LastPage > 5 && (
+                      <>
+                        <span className="text-muted-foreground text-xs px-1">...</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                          onClick={async () => {
+                            setLoading(true);
+                            await fetchPage(LastPage);
+                            setLoading(false);
+                          }}
+                        >
+                          {LastPage}
+                        </Button>
+                      </>
+                    )}
                   </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={CurrentPage >= LastPage}
+                    onClick={async () => {
+                      setLoading(true);
+                      await fetchPage(CurrentPage + 1);
+                      setLoading(false);
+                    }}
+                  >
+                    Next
+                    <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Button>
+                </div>
+              </div>
             )}
           </div>
         </CardContent>

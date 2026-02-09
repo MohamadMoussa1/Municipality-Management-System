@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import  getCsrfToken  from '../lib/utils';
+import getCsrfToken from '../lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Building2,Loader2 } from 'lucide-react';
+import { Building2, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 export default function Login() {
   const { setUser, setRole } = useAuth();
@@ -41,29 +41,29 @@ export default function Login() {
   };
   useEffect(() => {
     const fetchCsrf = async () => {
-        try {
-            const res = await fetch('http://127.0.0.1:8000/sanctum/csrf-cookie', {
-                method: 'GET',
-                credentials: 'include',
-            });
-            if (!res.ok) throw new Error('Failed to fetch CSRF cookie');
-        } catch (err) {
-            console.error(err);
-        }
+      try {
+        const res = await fetch('http://127.0.0.1:8000/sanctum/csrf-cookie', {
+          method: 'GET',
+          credentials: 'include',
+        });
+        if (!res.ok) throw new Error('Failed to fetch CSRF cookie');
+      } catch (err) {
+        console.error(err);
+      }
     };
 
     fetchCsrf();
-}, []);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoadingSubmit(true);
-    try{
+    try {
       const response = await fetch("http://127.0.0.1:8000/cs/auth/login", {
         method: "POST",
-        credentials:"include",
+        credentials: "include",
         headers: {
-          'X-XSRF-TOKEN':getCsrfToken(),
+          'X-XSRF-TOKEN': getCsrfToken(),
           "Content-Type": "application/json",
           "Accept": "application/json",
         },
@@ -73,35 +73,35 @@ export default function Login() {
         })
       });
       const result = await response.json();
-       if(result.message == "Login successful") {      
-           localStorage.setItem("role",result.user.role);
-           localStorage.setItem("user",result.user.name);
-           setRole(result.user.role);
-           setUser(result.user.name);
-           // Dispatch custom event to trigger notification fetch
-           window.dispatchEvent(new Event('userLoggedIn'));
-           toast.success(result.message,{ duration: 4000 });
-           navigate("/dashboard");
-        }
-        else{
-          toast.error(result.message,{ duration: 4000 });
-        }    
-      }catch(e){
-        console.log("error");
-      }finally{
+      if (result.message == "Login successful") {
+        localStorage.setItem("role", result.user.role);
+        localStorage.setItem("user", result.user.name);
+        setRole(result.user.role);
+        setUser(result.user.name);
+        // Dispatch custom event to trigger notification fetch
+        window.dispatchEvent(new Event('userLoggedIn'));
+        toast.success(result.message, { duration: 4000 });
+        navigate("/dashboard");
+      }
+      else {
+        toast.error(result.message, { duration: 4000 });
+      }
+    } catch (e) {
+      console.log("error");
+    } finally {
       setLoadingSubmit(false);
     }
-}
-  
+  }
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     const response = await fetch("http://127.0.0.1:8000/cs/auth/register", {
       method: "POST",
-      credentials:"include",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
-         'X-XSRF-TOKEN': getCsrfToken(),
+        'X-XSRF-TOKEN': getCsrfToken(),
       },
       body: JSON.stringify({
         name: Data.name,
@@ -148,11 +148,11 @@ export default function Login() {
         {/* Mobile hero */}
         <div className="md:hidden mb-4 text-center space-y-1">
 
-          <div className="flex flex-col items-center gap-2 ">
-            <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg ">
-              <Building2 className="h-10 w-10 text-primary-foreground " />
+          <div className="flex items-center justify-center gap-3">
+            <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg flex-shrink-0">
+              <Building2 className="h-10 w-10 text-primary-foreground" />
             </div>
-            <div>
+            <div className="text-left">
               <h1 className="text-3xl font-bold text-foreground">MMS Portal</h1>
               <p className="text-muted-foreground">Municipality Management System</p>
             </div>
@@ -205,13 +205,13 @@ export default function Login() {
 
                   <Button type="submit" className="w-full" disabled={loadingSubmit}>
                     {loadingSubmit ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Logining in...
-                  </>
-                ) : (
-                  'Login in'
-                )}
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Logining in...
+                      </>
+                    ) : (
+                      'Login in'
+                    )}
                   </Button>
 
                 </form>
@@ -318,13 +318,13 @@ export default function Login() {
 
                   <Button type="submit" className="w-full  text-white" disabled={loadingSubmit}>
                     {loadingSubmit ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing in...
-                  </>
-                ) : (
-                  'Sign up'
-                )}
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : (
+                      'Sign up'
+                    )}
                   </Button>
                 </form>
               </TabsContent>

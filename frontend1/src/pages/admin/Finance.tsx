@@ -410,11 +410,11 @@ export default function Finance() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Total Payments</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{stats.total}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Pending</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-yellow-500">{stats.pending}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Completed</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-green-500">{stats.completed}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Failed</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-red-500">{stats.failed}</div></CardContent></Card>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs sm:text-sm font-medium">Total Payments</CardTitle></CardHeader><CardContent><div className="text-xl sm:text-2xl font-bold">{stats.total}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs sm:text-sm font-medium">Pending</CardTitle></CardHeader><CardContent><div className="text-xl sm:text-2xl font-bold text-yellow-500">{stats.pending}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs sm:text-sm font-medium">Completed</CardTitle></CardHeader><CardContent><div className="text-xl sm:text-2xl font-bold text-green-500">{stats.completed}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs sm:text-sm font-medium">Failed</CardTitle></CardHeader><CardContent><div className="text-xl sm:text-2xl font-bold text-red-500">{stats.failed}</div></CardContent></Card>
       </div>
 
       {/* Payments Table */}

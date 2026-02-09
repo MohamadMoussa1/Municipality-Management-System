@@ -107,16 +107,16 @@ export default function HumanResources() {
 
       {/* Tabs */}
       <Tabs defaultValue="employees">
-        <TabsList className="w-full h-auto grid grid-cols-2 sm:grid-cols-3 gap-3 bg-muted/60 p-2 rounded-xl -mx-4 sm:mx-0">
+        <TabsList className="w-full h-auto flex flex-wrap justify-start sm:justify-center gap-2 bg-muted/60 p-2 rounded-xl">
           <TabsTrigger
             value="employees"
-            className="text-xs sm:text-sm rounded-lg px-3 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground hover:bg-background/70" >Employees</TabsTrigger>
+            className="text-xs sm:text-sm rounded-lg px-3 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground hover:bg-background/70 flex-1 sm:flex-none min-w-[100px]">Employees</TabsTrigger>
           <TabsTrigger
             value="leaves"
-            className="text-xs sm:text-sm rounded-lg px-3 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground hover:bg-background/70">Leave Requests</TabsTrigger>
+            className="text-xs sm:text-sm rounded-lg px-3 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground hover:bg-background/70 flex-1 sm:flex-none min-w-[100px]">Leave Requests</TabsTrigger>
           <TabsTrigger
             value="payroll"
-            className="text-xs sm:text-sm rounded-lg px-3 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground hover:bg-background/70">Payroll</TabsTrigger>
+            className="text-xs sm:text-sm rounded-lg px-3 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground hover:bg-background/70 flex-1 sm:flex-none min-w-[100px]">Payroll</TabsTrigger>
         </TabsList>
 
         {/* Employee Directory */}
@@ -283,33 +283,46 @@ const EmployeesTab = () => {
             </div>
           ) : (
             <>
-              <div className="grid gap-3 sm:gap-4">
-                {E.map((employee) => (
-                  <Card key={employee.id}>
-                    <CardContent className="p-3 sm:p-4">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                        <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
-                          <AvatarFallback className="text-xs sm:text-sm">
-                            {employee.name?.split(' ').map(n => n[0]).join('') || 'NA'}
-                          </AvatarFallback>
-                        </Avatar>
+              <div className="grid gap-2">
+                {E.map((employee, index) => (
+                  <Card key={employee.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-muted/20'} hover:shadow-sm transition-shadow border-l-4 ${employee.status === 'active' ? 'border-l-green-500' : 'border-l-gray-400'}`}>
+                    <CardContent className="p-2 sm:p-3">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="relative flex-shrink-0">
+                          <Avatar className="h-9 w-9 sm:h-10 sm:w-10 border-2 border-primary/10">
+                            <AvatarFallback className="text-xs sm:text-sm font-semibold bg-primary/10 text-primary">
+                              {employee.name?.split(' ').map(n => n[0]).join('') || 'NA'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${employee.status === 'active' ? 'bg-green-500' : 'bg-gray-400'}`} />
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-sm sm:text-base truncate">Name: {employee.name}</h4>
-                          <p className="text-xs sm:text-sm text-muted-foreground truncate">Position: {employee.position}</p>
-                          <p className="text-xs text-muted-foreground mt-1 truncate">Department: {employee.department}</p>
-
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold text-sm truncate text-foreground">{employee.name}</h4>
+                            <span className="hidden sm:inline-flex items-center px-1.5 py-0 rounded text-[10px] font-medium bg-blue-100 text-blue-800">
+                              {employee.department}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">{employee.position}</p>
                         </div>
-                        <div className="hidden lg:block text-right">
-                          <p className="text-xs sm:text-sm font-medium truncate">{employee.email}</p>
-                          <p className="text-xs sm:text-sm text-muted-foreground">Role:{employee.user.role}</p>
-                          <p className="text-xs text-muted-foreground mt-1 truncate">Salary:{employee.salary}</p>
+                        <div className="hidden lg:block text-right min-w-[120px]">
+                          <p className="text-xs text-muted-foreground truncate">{employee.email}</p>
+                          <p className="text-[10px] font-medium text-primary">{employee.user.role.replace('_', ' ')}</p>
                         </div>
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                          <Badge variant={employee.status === 'active' ? 'default' : 'outline'} className="text-xs">
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <Badge
+                            variant={employee.status === 'active' ? 'default' : 'secondary'}
+                            className={`text-[10px] px-1.5 py-0 h-5 ${employee.status === 'active' ? 'bg-green-100 text-green-800 hover:bg-green-100' : 'bg-gray-100 text-gray-600'}`}
+                          >
                             {employee.user.status}
                           </Badge>
-                          <Button variant="outline" size="sm" onClick={() => handleViewProfile(employee)} className="text-xs h-8 flex-1 sm:flex-none">
-                            View Profile
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleViewProfile(employee)}
+                            className="h-7 w-7 hover:bg-primary hover:text-primary-foreground"
+                          >
+                            <Eye className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
@@ -318,15 +331,15 @@ const EmployeesTab = () => {
                 ))}
               </div>
               {(employeeCurrentPage && employeeLastPage && employeeLastPage > 1) && (
-                <div className="flex items-center justify-between w-full p-4">
-                  <div className="text-sm text-muted-foreground">
+                <div className="flex items-center justify-between w-full p-4 gap-2">
+                  <div className="text-xs sm:text-sm text-muted-foreground">
                     Page {employeeCurrentPage} of {employeeLastPage}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="h-7 w-7 sm:h-8 sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled={employeeCurrentPage <= 1}
                       onClick={async () => {
                         setLoading(true);
@@ -334,13 +347,13 @@ const EmployeesTab = () => {
                         setLoading(false);
                       }}
                     >
-                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
-                      Previous
+                      <span className="hidden sm:inline">Previous</span>
                     </Button>
                     <div className="flex items-center gap-1">
-                      {Array.from({ length: Math.min(5, employeeLastPage) }, (_, i) => {
+                      {Array.from({ length: Math.min(3, employeeLastPage) }, (_, i) => {
                         const pageNum = i + 1;
                         const isActive = pageNum === employeeCurrentPage;
                         return (
@@ -348,7 +361,7 @@ const EmployeesTab = () => {
                             key={pageNum}
                             variant={isActive ? "default" : "outline"}
                             size="sm"
-                            className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                            className={`h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
                               ? "bg-primary text-primary-foreground shadow-sm"
                               : "hover:bg-primary hover:text-primary-foreground"
                               }`}
@@ -363,13 +376,13 @@ const EmployeesTab = () => {
                           </Button>
                         );
                       })}
-                      {employeeLastPage > 5 && (
+                      {employeeLastPage > 3 && (
                         <>
                           <span className="text-muted-foreground text-xs px-1">...</span>
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                            className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
                             onClick={async () => {
                               setLoading(true);
                               await fetchEmployeePage(employeeLastPage);
@@ -384,7 +397,7 @@ const EmployeesTab = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="h-7 w-7 sm:h-8 sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled={employeeCurrentPage >= employeeLastPage}
                       onClick={async () => {
                         setLoading(true);
@@ -392,8 +405,8 @@ const EmployeesTab = () => {
                         setLoading(false);
                       }}
                     >
-                      Next
-                      <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <span className="hidden sm:inline">Next</span>
+                      <svg className="w-3 h-3 sm:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </Button>
@@ -715,21 +728,21 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
             </div>
           </div>
 
-          <div className="rounded-md border overflow-x-auto -mx-3 sm:mx-0">
-            <Table>
+          <div className="rounded-md border">
+            <Table className="w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Employee Id</TableHead>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Employee Name</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 w-[60px] sm:w-auto">ID</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 w-[120px] sm:w-auto">Employee</TableHead>
                   <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">Type</TableHead>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell">Status</TableHead>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">view</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 w-[100px] sm:w-auto">Status</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 w-[60px] sm:w-auto text-right">View</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {leaveLoading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
+                    <TableCell colSpan={5} className="text-center py-8">
                       <div className="flex items-center justify-center">
                         <Loader2 className="h-6 w-6 animate-spin mr-2" />
                         <span>Loading requests...</span>
@@ -740,7 +753,7 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
                   statusFilter === 'all' || String(request.status ?? '').toLowerCase() === statusFilter
                 ).length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
+                    <TableCell colSpan={5} className="text-center py-8">
                       <div className="text-muted-foreground">
                         {statusFilter === 'all' ? 'No requests found' : `No ${statusFilter} requests found`}
                       </div>
@@ -752,45 +765,43 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
                   ).map((request) => (
                     <TableRow key={request.id}>
                       <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4">{request.id}</TableCell>
-                      <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[80px] sm:max-w-none truncate">{request?.employee.user?.name || 'N/A'}</TableCell>
+                      <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[100px] sm:max-w-none truncate">{request?.employee.user?.name || 'N/A'}</TableCell>
                       <TableCell className="capitalize text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">{request.type || 'N/A'}</TableCell>
                       <TableCell className="px-2 sm:px-4">
                         <Select
                           value={request.status}
                           onValueChange={(value: RequestLeaveStatus) => handleStatusChange(request.id, value)}
                         >
-                          <SelectTrigger className="w-[130px] h-8">
+                          <SelectTrigger className="w-[90px] sm:w-[130px] h-7 sm:h-8 text-[10px] sm:text-sm">
                             <SelectValue>
-                              <Badge className={getStatusColor(request.status)}>
+                              <Badge className={`${getStatusColor(request.status)} text-[10px] sm:text-xs`}>
                                 {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                               </Badge>
                             </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="approved">
-                              <Badge className="bg-success">approved</Badge>
+                              <Badge className="bg-success text-xs">approved</Badge>
                             </SelectItem>
                             <SelectItem value="pending">
-                              <Badge className="bg-accent">Pending</Badge>
+                              <Badge className="bg-accent text-xs">Pending</Badge>
                             </SelectItem>
                             <SelectItem value="rejected">
-                              <Badge className="bg-destructive">rejected</Badge>
+                              <Badge className="bg-destructive text-xs">rejected</Badge>
                             </SelectItem>
                           </SelectContent>
                         </Select>
                       </TableCell>
 
-                      <TableCell className="px-2 sm:px-4">
-                        <div className="flex gap-0.5 sm:gap-4">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 sm:h-8 sm:w-8"
-                            onClick={() => handleViewRequest(request)}
-                          >
-                            <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                          </Button>
-                        </div>
+                      <TableCell className="px-2 sm:px-4 text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 sm:h-8 sm:w-8"
+                          onClick={() => handleViewRequest(request)}
+                        >
+                          <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
@@ -799,15 +810,15 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
             </Table>
           </div>
           {(leaveCurrentPage && leaveLastPage && leaveLastPage > 1) && (
-            <div className="flex items-center justify-between w-full p-4">
-              <div className="text-sm text-muted-foreground">
+            <div className="flex items-center justify-between w-full p-4 gap-2">
+              <div className="text-xs sm:text-sm text-muted-foreground">
                 Page {leaveCurrentPage} of {leaveLastPage}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-7 w-7 sm:h-8 sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={leaveCurrentPage <= 1}
                   onClick={async () => {
                     setLoading(true);
@@ -815,13 +826,13 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
                     setLoading(false);
                   }}
                 >
-                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
-                  Previous
+                  <span className="hidden sm:inline">Previous</span>
                 </Button>
                 <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, leaveLastPage) }, (_, i) => {
+                  {Array.from({ length: Math.min(3, leaveLastPage) }, (_, i) => {
                     const pageNum = i + 1;
                     const isActive = pageNum === leaveCurrentPage;
                     return (
@@ -829,7 +840,7 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
                         key={pageNum}
                         variant={isActive ? "default" : "outline"}
                         size="sm"
-                        className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                        className={`h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
                           ? "bg-primary text-primary-foreground shadow-sm"
                           : "hover:bg-primary hover:text-primary-foreground"
                           }`}
@@ -844,13 +855,13 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
                       </Button>
                     );
                   })}
-                  {leaveLastPage > 5 && (
+                  {leaveLastPage > 3 && (
                     <>
                       <span className="text-muted-foreground text-xs px-1">...</span>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                        className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
                         onClick={async () => {
                           setLoading(true);
                           await fetchLeavePage(leaveLastPage);
@@ -865,7 +876,7 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-7 w-7 sm:h-8 sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={leaveCurrentPage >= leaveLastPage}
                   onClick={async () => {
                     setLoading(true);
@@ -873,8 +884,8 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
                     setLoading(false);
                   }}
                 >
-                  Next
-                  <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span className="hidden sm:inline">Next</span>
+                  <svg className="w-3 h-3 sm:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </Button>
@@ -1211,17 +1222,17 @@ const PayRollTab = () => {
               Showing {pr?.length || 0}
             </div>
           </div>
-          <div className="rounded-md border overflow-x-auto -mx-3 sm:mx-0">
-            <Table>
+          <div className="rounded-md border">
+            <Table className="w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Employee ID</TableHead>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Employee Name</TableHead>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Month</TableHead>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Base Salary</TableHead>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Bonuses</TableHead>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Generated Date</TableHead>
-                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-gray-700">Actions</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 w-[60px] sm:w-auto">ID</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 w-[120px] sm:w-auto">Name</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell w-[80px]">Month</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell w-[100px]">Base</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell w-[80px]">Bonus</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden lg:table-cell w-[100px]">Generated</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 w-[80px] sm:w-auto text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1246,18 +1257,18 @@ const PayRollTab = () => {
                   pr?.map((payroll) => (
                     <TableRow key={payroll.id} className="hover:bg-gray-50 transition-colors">
                       <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4 text-blue-600">{payroll.employee_id}</TableCell>
-                      <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[80px] sm:max-w-none truncate font-medium">{payroll?.employee?.user?.name || 'N/A'}</TableCell>
-                      <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 bg-purple-50 text-purple-700 rounded px-2 py-1">{payroll.month || 'N/A'}</TableCell>
-                      <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 font-semibold text-green-600">${payroll.base_salary || '0.00'}</TableCell>
-                      <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 text-blue-600">${payroll.bonuses || '0.00'}</TableCell>
-                      <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 text-gray-600">{new Date(payroll.generated_at).toLocaleDateString()}</TableCell>
-                      <TableCell className="px-2 sm:px-4">
-                        <div className="flex gap-1">
+                      <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 max-w-[100px] sm:max-w-none truncate font-medium">{payroll?.employee?.user?.name || 'N/A'}</TableCell>
+                      <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">{payroll.month || 'N/A'}</TableCell>
+                      <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell font-semibold text-green-600">${payroll.base_salary || '0.00'}</TableCell>
+                      <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell text-blue-600">${payroll.bonuses || '0.00'}</TableCell>
+                      <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden lg:table-cell text-gray-600">{new Date(payroll.generated_at).toLocaleDateString()}</TableCell>
+                      <TableCell className="px-2 sm:px-4 text-right">
+                        <div className="flex gap-1 justify-end">
                           <Button
                             variant="ghost"
                             size="icon"
                             type="button"
-                            className="h-7 w-7 sm:h-8 sm:w-8 hover:bg-blue-50"
+                            className="h-6 w-6 sm:h-8 sm:w-8 hover:bg-blue-50"
                             onClick={() => handlePayrollView(payroll)}
                           >
                             <Eye className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
@@ -1266,7 +1277,7 @@ const PayRollTab = () => {
                             variant="ghost"
                             size="icon"
                             type="button"
-                            className="h-7 w-7 sm:h-8 sm:w-8 hover:bg-blue-50"
+                            className="h-6 w-6 sm:h-8 sm:w-8 hover:bg-blue-50"
                             onClick={() => handlePayrollEditOpen(payroll)}
                           >
                             <Pencil className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
@@ -1280,15 +1291,15 @@ const PayRollTab = () => {
             </Table>
           </div>
           {(payrollCurrentPage && payrollLastPage && payrollLastPage > 1) && (
-            <div className="flex items-center justify-between w-full p-4">
-              <div className="text-sm text-muted-foreground">
+            <div className="flex items-center justify-between w-full p-4 gap-2">
+              <div className="text-xs sm:text-sm text-muted-foreground">
                 Page {payrollCurrentPage} of {payrollLastPage}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-7 w-7 sm:h-8 sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={payrollCurrentPage <= 1}
                   onClick={async () => {
                     setLoading(true);
@@ -1296,13 +1307,13 @@ const PayRollTab = () => {
                     setLoading(false);
                   }}
                 >
-                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
-                  Previous
+                  <span className="hidden sm:inline">Previous</span>
                 </Button>
                 <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, payrollLastPage) }, (_, i) => {
+                  {Array.from({ length: Math.min(3, payrollLastPage) }, (_, i) => {
                     const pageNum = i + 1;
                     const isActive = pageNum === payrollCurrentPage;
                     return (
@@ -1310,7 +1321,7 @@ const PayRollTab = () => {
                         key={pageNum}
                         variant={isActive ? "default" : "outline"}
                         size="sm"
-                        className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                        className={`h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
                           ? "bg-primary text-primary-foreground shadow-sm"
                           : "hover:bg-primary hover:text-primary-foreground"
                           }`}
@@ -1325,13 +1336,13 @@ const PayRollTab = () => {
                       </Button>
                     );
                   })}
-                  {payrollLastPage > 5 && (
+                  {payrollLastPage > 3 && (
                     <>
                       <span className="text-muted-foreground text-xs px-1">...</span>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                        className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
                         onClick={async () => {
                           setLoading(true);
                           await fetchPayrollPage(payrollLastPage);
@@ -1346,7 +1357,7 @@ const PayRollTab = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-7 w-7 sm:h-8 sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={payrollCurrentPage >= payrollLastPage}
                   onClick={async () => {
                     setLoading(true);
@@ -1354,8 +1365,8 @@ const PayRollTab = () => {
                     setLoading(false);
                   }}
                 >
-                  Next
-                  <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span className="hidden sm:inline">Next</span>
+                  <svg className="w-3 h-3 sm:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </Button>

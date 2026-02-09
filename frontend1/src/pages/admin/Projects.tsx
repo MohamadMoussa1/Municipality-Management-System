@@ -300,58 +300,58 @@ export default function Projects() {
         <p className="text-muted-foreground mt-1">Manage infrastructure and development projects</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">{activeProjectsCount}</div>
-                <div className="text-sm text-muted-foreground">Active Projects</div>
+                <div className="text-lg sm:text-xl md:text-2xl font-bold">{activeProjectsCount}</div>
+                <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Active Projects</div>
               </div>
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Building2 className="h-6 w-6 text-primary" />
+              <div className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Building2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">{formatCurrencyCompact(totalBudgetValue)}</div>
-                <div className="text-sm text-muted-foreground">Total Budget</div>
+                <div className="text-lg sm:text-xl md:text-2xl font-bold">{formatCurrencyCompact(totalBudgetValue)}</div>
+                <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Total Budget</div>
               </div>
-              <div className="h-12 w-12 rounded-full bg-success/10 flex items-center justify-center">
-                <DollarSign className="h-6 w-6 text-success" />
+              <div className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-full bg-success/10 flex items-center justify-center">
+                <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-success" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">{completedProjectsCount}</div>
-                <div className="text-sm text-muted-foreground">Completed</div>
+                <div className="text-lg sm:text-xl md:text-2xl font-bold">{completedProjectsCount}</div>
+                <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Completed</div>
               </div>
-              <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center">
-                <CheckCircle className="h-6 w-6 text-accent" />
+              <div className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-full bg-accent/10 flex items-center justify-center">
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-accent" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold">{onHoldProjectsCount}</div>
-                <div className="text-sm text-muted-foreground">On Hold</div>
+                <div className="text-lg sm:text-xl md:text-2xl font-bold">{onHoldProjectsCount}</div>
+                <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">On Hold</div>
               </div>
-              <div className="h-12 w-12 rounded-full bg-warning/10 flex items-center justify-center">
-                <Clock className="h-6 w-6 text-warning" />
+              <div className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 rounded-full bg-warning/10 flex items-center justify-center">
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-warning" />
               </div>
             </div>
           </CardContent>
@@ -359,84 +359,84 @@ export default function Projects() {
       </div>
 
       <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
+        <CardHeader className="p-3 sm:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-              <CardTitle>Project Overview</CardTitle>
-              <CardDescription>All active and planned projects</CardDescription>
+              <CardTitle className="text-sm sm:text-lg md:text-xl">Project Overview</CardTitle>
+              <CardDescription className="text-[11px] sm:text-sm">All active and planned projects</CardDescription>
             </div>
-            <Button onClick={() => setCreateDialogOpen(true)}>Create New Project</Button>
+            <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto text-xs sm:text-sm">Create New Project</Button>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
+        <CardContent className="p-0 sm:p-6">
+          <div className="rounded-md border overflow-x-auto -mx-3 sm:mx-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Project Name</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Start Date</TableHead>
-                  <TableHead>End Date</TableHead>
-                  <TableHead>Budget</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 w-[120px] sm:w-auto">Project</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden md:table-cell">Department</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell w-[90px]">Start</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell w-[90px]">End</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 w-[80px] sm:w-auto">Budget</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 w-[100px] sm:w-auto">Status</TableHead>
+                  <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 w-[140px] sm:w-auto">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {Projects?.map((project) => (
                   <TableRow key={project.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-primary" />
-                        {project.name}
+                    <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+                        <span className="truncate max-w-[80px] sm:max-w-none">{project.name}</span>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Users className="h-3 w-3 text-muted-foreground" />
+                    <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 hidden md:table-cell">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <Users className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                         {project.department}
                       </div>
                     </TableCell>
-                    <TableCell>{project.start_date.split("T")[0]}</TableCell>
-                    <TableCell>{project.end_date.split("T")[0]}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        {project.budget}
+                    <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell">{project.start_date.split("T")[0]}</TableCell>
+                    <TableCell className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell">{project.end_date.split("T")[0]}</TableCell>
+                    <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4">
+                      <div className="flex items-center gap-1">
+                        <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
+                        <span className="truncate">{project.budget}</span>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="px-2 sm:px-4">
                       <Select
                         value={project.status}
                         onValueChange={(value: RequestProjectStatus) => handleStatusChange(project.id, value)}
                       >
-                        <SelectTrigger className="w-[130px] h-8">
+                        <SelectTrigger className="w-[90px] sm:w-[130px] h-7 sm:h-8 text-[10px] sm:text-sm">
                           <SelectValue>
-                            <Badge className={getStatusColor(project.status)}>
+                            <Badge className={`${getStatusColor(project.status)} text-[10px] sm:text-xs`}>
                               {project.status === 'in_review' ? 'In Review' : project.status.charAt(0).toUpperCase() + project.status.slice(1)}
                             </Badge>
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="completed">
-                            <Badge className="bg-success">completed</Badge>
+                            <Badge className="bg-success text-xs">completed</Badge>
                           </SelectItem>
                           <SelectItem value="in_progress">
-                            <Badge className="bg-warning">In progress</Badge>
+                            <Badge className="bg-warning text-xs">In progress</Badge>
                           </SelectItem>
                           <SelectItem value="on_hold">
-                            <Badge className="bg-muted text-black">on_hold</Badge>
+                            <Badge className="bg-muted text-black text-xs">on_hold</Badge>
                           </SelectItem>
                           <SelectItem value="cancelled">
-                            <Badge className="bg-destructive">cancelled</Badge>
+                            <Badge className="bg-destructive text-xs">cancelled</Badge>
                           </SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(project)}>View Details</Button>
-                        <Button variant="outline" size="sm" onClick={() => handleAssignTasks(project)}>Assign Task</Button>
+                    <TableCell className="px-2 sm:px-4">
+                      <div className="flex gap-1 sm:gap-2">
+                        <Button variant="outline" size="sm" className="h-7 sm:h-8 px-1.5 sm:px-3 text-[10px] sm:text-xs" onClick={() => handleViewDetails(project)}>View</Button>
+                        <Button variant="outline" size="sm" className="h-7 sm:h-8 px-1.5 sm:px-3 text-[10px] sm:text-xs" onClick={() => handleAssignTasks(project)}>Assign</Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -535,10 +535,10 @@ export default function Projects() {
       </Card>
 
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[525px] max-w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create New Project</DialogTitle>
-            <DialogDescription>Add a new urban planning project</DialogDescription>
+            <DialogTitle className="text-lg">Create New Project</DialogTitle>
+            <DialogDescription className="text-sm">Add a new urban planning project</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -780,10 +780,10 @@ export default function Projects() {
       </Dialog>
 
       <Dialog open={tasksDialogOpen} onOpenChange={setTasksDialogOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="sm:max-w-[700px] max-w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Project Tasks</DialogTitle>
-            <DialogDescription>Tasks for </DialogDescription>
+            <DialogTitle className="text-lg">Project Tasks</DialogTitle>
+            <DialogDescription className="text-sm">Tasks for selected project</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>

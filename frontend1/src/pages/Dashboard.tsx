@@ -46,12 +46,12 @@ export default function Dashboard() {
 }
 
 const AdminDashboard = () => {
- const [info, setinfo] = useState<any>([]);
+  const [info, setinfo] = useState<any>([]);
   const [i, seti] = useState<any>([]);
   const [loading, setLoading] = useState(true);
   const [D, setD] = useState<any>(true);
   const [load, setload] = useState(true);
-  
+
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch("http://127.0.0.1:8000/api/admin/dashboard/totals", {
@@ -159,20 +159,20 @@ const AdminDashboard = () => {
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                 <Pie
-                data={financeData || []}
-                cx="50%"
-                cy="50%"
-                labelLine={true}
-                label={({ name, percent }) => {if (percent > 0) {return `${name} ${(percent * 100).toFixed(0)}%`}}}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {(financeData || []).map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
+                <Pie
+                  data={financeData || []}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={true}
+                  label={({ name, percent }) => { if (percent > 0) { return `${name} ${(percent * 100).toFixed(0)}%` } }}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {(financeData || []).map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
                 <Tooltip />
                 <Legend />
               </PieChart>
@@ -194,116 +194,116 @@ const CitizenDashboard = () => {
   const [ue, setue] = useState<any>([]);
   const [p, setp] = useState<any>([]);
   useEffect(() => {
-  //   const fetchRequests = async () => {
+    //   const fetchRequests = async () => {
 
-  //     const response = await fetch("http://127.0.0.1:8000/api/requests/latest", {
-  //       method: "GET",
-  //       credentials: "include",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         "Accept": "application/json",
+    //     const response = await fetch("http://127.0.0.1:8000/api/requests/latest", {
+    //       method: "GET",
+    //       credentials: "include",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         "Accept": "application/json",
 
-  //       },
-  //     });
-  //     const res = await response.json();
-  //     setloading(false);
-  //     setrequestsL(res.requests);
-  //     console.log(requestsL);
+    //       },
+    //     });
+    //     const res = await response.json();
+    //     setloading(false);
+    //     setrequestsL(res.requests);
+    //     console.log(requestsL);
 
-  //   };
-  //   const fetchEvents = async () => {
+    //   };
+    //   const fetchEvents = async () => {
 
-  //     const response = await fetch("http://127.0.0.1:8000/api/events/upcoming-count", {
-  //       method: "GET",
-  //       credentials: "include",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         "Accept": "application/json",
+    //     const response = await fetch("http://127.0.0.1:8000/api/events/upcoming-count", {
+    //       method: "GET",
+    //       credentials: "include",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         "Accept": "application/json",
 
-  //       },
-  //     });
-  //     const res = await response.json();
-  //     setloading(false);
-  //     setue(res);
+    //       },
+    //     });
+    //     const res = await response.json();
+    //     setloading(false);
+    //     setue(res);
 
-  //   };
-  //   const fetchRequestsCounts = async () => {
+    //   };
+    //   const fetchRequestsCounts = async () => {
 
-  //     const response = await fetch("http://127.0.0.1:8000/api/requests/counts", {
-  //       method: "GET",
-  //       credentials: "include",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         "Accept": "application/json",
+    //     const response = await fetch("http://127.0.0.1:8000/api/requests/counts", {
+    //       method: "GET",
+    //       credentials: "include",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         "Accept": "application/json",
 
-  //       },
-  //     });
-  //     const res = await response.json();
-  //     setloading(false);
-  //     setUCEC(res);
+    //       },
+    //     });
+    //     const res = await response.json();
+    //     setloading(false);
+    //     setUCEC(res);
 
-  //   };
-  //   const fetchPermitCount = async () => {
-  //     const response = await fetch("http://127.0.0.1:8000/api/permits/permit-counts", {
-  //       method: "GET",
-  //       credentials: "include",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         "Accept": "application/json",
-  //       },
-  //     });
-  //     const res = await response.json();
-  //     setloading(false);
-  //     setpc(res);
+    //   };
+    //   const fetchPermitCount = async () => {
+    //     const response = await fetch("http://127.0.0.1:8000/api/permits/permit-counts", {
+    //       method: "GET",
+    //       credentials: "include",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         "Accept": "application/json",
+    //       },
+    //     });
+    //     const res = await response.json();
+    //     setloading(false);
+    //     setpc(res);
 
-  //   };
-  //   const fetchPayments = async () => {
-  //     const response = await fetch("http://127.0.0.1:8000/api/payments/pending-total", {
-  //       method: "GET",
-  //       credentials: "include",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         "Accept": "application/json",
-  //       },
-  //     });
-  //     const res = await response.json();
-  //     setloading(false);
-  //     setLoading(false);
-  //     setp(res);
+    //   };
+    //   const fetchPayments = async () => {
+    //     const response = await fetch("http://127.0.0.1:8000/api/payments/pending-total", {
+    //       method: "GET",
+    //       credentials: "include",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         "Accept": "application/json",
+    //       },
+    //     });
+    //     const res = await response.json();
+    //     setloading(false);
+    //     setLoading(false);
+    //     setp(res);
 
-  //   };
-  //   fetchRequestsCounts();
-  //   fetchPermitCount();
-  //   fetchEvents();
-  //   fetchRequests();
-  //   fetchPayments();
+    //   };
+    //   fetchRequestsCounts();
+    //   fetchPermitCount();
+    //   fetchEvents();
+    //   fetchRequests();
+    //   fetchPayments();
 
-  //here fetch the dashboard api
-  const fetchDashboard = async () => {
-    const response = await fetch("http://127.0.0.1:8000/api/citizens/dashboard", {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-    });
-    const res = await response.json();
-     setloading(false);
-     setLoading(false);
-    console.log(res);
-    // Set all the state variables from the dashboard response
-    setrequestsL(res.latest_requests.requests);
-    setue(res.upcoming_events);
-    setUCEC(res.completed_requests);
-    setpc(res.permit_counts);
-    setp(res.pending_payments);
-    
-    // Dispatch event to trigger notification fetch
-    window.dispatchEvent(new Event('dashboardLoaded'));
-  };
-  
-  fetchDashboard();
+    //here fetch the dashboard api
+    const fetchDashboard = async () => {
+      const response = await fetch("http://127.0.0.1:8000/api/citizens/dashboard", {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+      });
+      const res = await response.json();
+      setloading(false);
+      setLoading(false);
+      console.log(res);
+      // Set all the state variables from the dashboard response
+      setrequestsL(res.latest_requests.requests);
+      setue(res.upcoming_events);
+      setUCEC(res.completed_requests);
+      setpc(res.permit_counts);
+      setp(res.pending_payments);
+
+      // Dispatch event to trigger notification fetch
+      window.dispatchEvent(new Event('dashboardLoaded'));
+    };
+
+    fetchDashboard();
 
   }, []);
 
@@ -324,7 +324,7 @@ const CitizenDashboard = () => {
 
       {!loading && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <StatsCard
               title="Active Requests"
               value={Loading ? "Loading..." : UCEC.active_requests}
@@ -444,7 +444,7 @@ const FinanceDashboard = () => {
         <p className="text-muted-foreground mt-1">Revenue and payments</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatsCard
           title="Total Amount"
           value={loading ? "Loading..." : `${info?.total_amount} ${info?.currency}`}
@@ -480,7 +480,7 @@ const FinanceDashboard = () => {
                 cx="50%"
                 cy="50%"
                 labelLine={true}
-                label={({ name, percent }) => {if (percent > 0) {return `${name} ${(percent * 100).toFixed(0)}%`}}}
+                label={({ name, percent }) => { if (percent > 0) { return `${name} ${(percent * 100).toFixed(0)}%` } }}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
@@ -540,7 +540,7 @@ const ProjectDashboard = () => {
         <p className="text-muted-foreground mt-1">Projects and budgets</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatsCard
           title="Total Budget"
           value={loading ? "Loading..." : projectsL.total_budget}
@@ -569,19 +569,19 @@ const ProjectDashboard = () => {
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-               <Pie
-                data={DepartmentsData || []}
-                cx="50%"
-                cy="50%"
-                label={({ name, percent }) => percent > 0 ? `${name} ${(percent * 100).toFixed(0)}%` : ''}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {(DepartmentsData || []).map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
+                <Pie
+                  data={DepartmentsData || []}
+                  cx="50%"
+                  cy="50%"
+                  label={({ name, percent }) => percent > 0 ? `${name} ${(percent * 100).toFixed(0)}%` : ''}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {(DepartmentsData || []).map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
                 <Tooltip />
                 <Legend />
               </PieChart>
@@ -709,7 +709,7 @@ const HRDashboard = () => {
         <p className="text-muted-foreground mt-1">Employee management</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatsCard
           title="Total Employees"
           value={load ? "Loading..." : totalEmployee}
@@ -744,20 +744,20 @@ const HRDashboard = () => {
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-               <Pie
-                data={departmentData || []}
-                cx="50%"
-                cy="50%"
-                labelLine={true}
-                label={({ name, percent }) => {if (percent > 0) {return `${name} ${(percent * 100).toFixed(0)}%`}}}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {(departmentData || []).map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
+                <Pie
+                  data={departmentData || []}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={true}
+                  label={({ name, percent }) => { if (percent > 0) { return `${name} ${(percent * 100).toFixed(0)}%` } }}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {(departmentData || []).map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
                 <Tooltip />
                 <Legend />
               </PieChart>

@@ -324,7 +324,7 @@ export default function MyLeaves() {
             </div>
 
             {/* Stats */}
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
@@ -449,15 +449,15 @@ export default function MyLeaves() {
                                 </Card>
                             ))}
                             {(CurrentPage && LastPage && LastPage > 1) && (
-                                <div className="flex items-center justify-between w-full p-4">
-                                    <div className="text-sm text-muted-foreground">
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4">
+                                    <div className="text-xs sm:text-sm text-muted-foreground">
                                         Page {CurrentPage} of {LastPage}
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1 sm:gap-2">
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
                                             disabled={CurrentPage <= 1}
                                             onClick={async () => {
                                                 setLoading(true);
@@ -465,10 +465,10 @@ export default function MyLeaves() {
                                                 setLoading(false);
                                             }}
                                         >
-                                            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-3 h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                             </svg>
-                                            Previous
+                                            <span className="hidden sm:inline">Previous</span>
                                         </Button>
                                         <div className="flex items-center gap-1">
                                             {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
@@ -479,7 +479,7 @@ export default function MyLeaves() {
                                                         key={pageNum}
                                                         variant={isActive ? "default" : "outline"}
                                                         size="sm"
-                                                        className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                                                        className={`h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
                                                             ? "bg-primary text-primary-foreground shadow-sm"
                                                             : "hover:bg-primary hover:text-primary-foreground"
                                                             }`}
@@ -500,7 +500,7 @@ export default function MyLeaves() {
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                                                        className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
                                                         onClick={async () => {
                                                             setLoading(true);
                                                             await fetchPage(LastPage);
@@ -515,7 +515,7 @@ export default function MyLeaves() {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
                                             disabled={CurrentPage >= LastPage}
                                             onClick={async () => {
                                                 setLoading(true);
@@ -523,8 +523,8 @@ export default function MyLeaves() {
                                                 setLoading(false);
                                             }}
                                         >
-                                            Next
-                                            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <span className="hidden sm:inline">Next</span>
+                                            <svg className="w-3 h-3 sm:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                             </svg>
                                         </Button>

@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Download, FileText, Loader2, BadgeCheck, Calendar, Clock, Phone, User, Plus, AlertCircle, CheckCircle, XCircle, Eye } from 'lucide-react';;
+import { Download, FileText, Loader2, BadgeCheck, Calendar, Clock, Phone, User, Plus, AlertCircle, CheckCircle, XCircle, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { RequestPermitStatus, RequestStatus } from '@/types';
 import {
@@ -274,29 +274,29 @@ export default function Permits() {
         <p className="text-muted-foreground mt-1">Manage permit applications and renewals</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">{P.length}</div>
-            <div className="text-sm text-muted-foreground">Total Permits</div>
+          <CardContent className="p-3 sm:p-4 md:p-6">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold">{P.length}</div>
+            <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Total Permits</div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold text-warning">{P.filter(r => r.status === 'expired').length}</div>
-            <div className="text-sm text-muted-foreground">EXpirde</div>
+          <CardContent className="p-3 sm:p-4 md:p-6">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold text-warning">{P.filter(r => r.status === 'expired').length}</div>
+            <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Expired</div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold text-success">{P.filter(r => r.status === 'approved').length}</div>
-            <div className="text-sm text-muted-foreground">Approved</div>
+          <CardContent className="p-3 sm:p-4 md:p-6">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold text-success">{P.filter(r => r.status === 'approved').length}</div>
+            <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Approved</div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold text-destructive">{P.filter(r => r.status === 'rejected').length}</div>
-            <div className="text-sm text-muted-foreground">rejected</div>
+          <CardContent className="p-3 sm:p-4 md:p-6">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold text-destructive">{P.filter(r => r.status === 'rejected').length}</div>
+            <div className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">Rejected</div>
           </CardContent>
         </Card>
       </div>
@@ -307,40 +307,39 @@ export default function Permits() {
             <CardTitle>Recent Applications</CardTitle>
             <CardDescription>Latest permit applications</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
+          <CardContent className="p-3 sm:p-6">
+            <div className="rounded-md border overflow-x-auto -mx-3 sm:mx-0">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Permit ID</TableHead>
-                    <TableHead>Applicant</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Permit ID</TableHead>
+                    <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4 hidden sm:table-cell">Applicant</TableHead>
+                    <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Type</TableHead>
+                    <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Status</TableHead>
+                    <TableHead className="text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {P.map((p) => (
                     <TableRow key={p.id}>
-                      <TableCell className="font-medium">{p.id}</TableCell>
-                      <TableCell>{p.applicant.id}</TableCell>
-                      <TableCell className="capitalize">{p.type}</TableCell>
-                      <TableCell>
+                      <TableCell className="font-medium text-[10px] sm:text-sm px-2 sm:px-4">{p.id}</TableCell>
+                      <TableCell className="text-[10px] sm:text-sm px-2 sm:px-4 hidden sm:table-cell">{p.applicant.id}</TableCell>
+                      <TableCell className="capitalize text-[10px] sm:text-sm px-2 sm:px-4">{p.type}</TableCell>
+                      <TableCell className="px-2 sm:px-4">
                         <Button
                           variant="default"
                           size="sm"
-                          className="h-9 px-4 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 border-0 rounded-lg"
+                          className="h-7 sm:h-9 px-2 sm:px-4 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 border-0 rounded-lg text-xs sm:text-sm"
                           onClick={() => {
                             setDialogOpen(true);
                             setSelectedPermit(p);
                             setId(p.id);
-
                           }}
                         >
                           Choose
                         </Button>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="px-2 sm:px-4">
                         <Select
                           value={p.status}
                         >
@@ -351,23 +350,23 @@ export default function Permits() {
                           </SelectValue>
                         </Select>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleViewPermit(p.id)}>
-                            <Eye className="h-4 w-4" />
+                      <TableCell className="px-2 sm:px-4">
+                        <div className="flex gap-1 sm:gap-2">
+                          <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8" onClick={() => handleViewPermit(p.id)}>
+                            <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDownloadPermit(p.related_documents)}>
-                            <Download className="h-4 w-4" />
+                          <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8" onClick={() => handleDownloadPermit(p.related_documents)}>
+                            <Download className="h-3 w-3 sm:h-4 sm:w-4" />
                           </Button>
                           {isAdmin && (
                             <Button
                               variant="destructive"
                               size="sm"
-                              className="h-8 px-3 bg-gradient-to-r from-destructive to-destructive/80 hover:from-destructive/90 hover:to-destructive/70 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 border-0 rounded-md flex items-center gap-2"
+                              className="h-7 sm:h-8 px-1 sm:px-3 bg-gradient-to-r from-destructive to-destructive/80 hover:from-destructive/90 hover:to-destructive/70 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 border-0 rounded-md flex items-center gap-1 text-xs"
                               onClick={() => handleDeletePermit(p.id)}
                             >
                               <XCircle className="h-3 w-3" />
-                              Delete
+                              <span className="hidden sm:inline">Delete</span>
                             </Button>
                           )}
                         </div>
@@ -376,16 +375,16 @@ export default function Permits() {
                   ))}
                   {(CurrentPage && LastPage && LastPage > 1) && (
                     <TableRow>
-                      <TableCell colSpan={6} className="p-4">
+                      <TableCell colSpan={5} className="p-2 sm:p-4">
                         <div className="flex items-center justify-between w-full">
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-[10px] sm:text-sm text-muted-foreground">
                             Page {CurrentPage} of {LastPage}
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1 sm:gap-2">
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="h-7 sm:h-8 px-2 sm:px-3 text-[10px] sm:text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={CurrentPage <= 1}
                               onClick={async () => {
                                 setLoading(true);
@@ -396,7 +395,7 @@ export default function Permits() {
                               <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                               </svg>
-                              Previous
+                              <span className="hidden sm:inline">Previous</span>
                             </Button>
                             <div className="flex items-center gap-1">
                               {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
@@ -407,7 +406,7 @@ export default function Permits() {
                                     key={pageNum}
                                     variant={isActive ? "default" : "outline"}
                                     size="sm"
-                                    className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                                    className={`h-7 sm:h-8 w-7 sm:w-8 p-0 text-[10px] sm:text-xs font-medium transition-all duration-200 ${isActive
                                       ? "bg-primary text-primary-foreground shadow-sm"
                                       : "hover:bg-primary hover:text-primary-foreground"
                                       }`}
@@ -424,11 +423,11 @@ export default function Permits() {
                               })}
                               {LastPage > 5 && (
                                 <>
-                                  <span className="text-muted-foreground text-xs px-1">...</span>
+                                  <span className="text-muted-foreground text-[10px] sm:text-xs px-1">...</span>
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                                    className="h-7 sm:h-8 w-7 sm:w-8 p-0 text-[10px] sm:text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
                                     onClick={async () => {
                                       setLoading(true);
                                       await fetchPage(LastPage);
@@ -443,7 +442,7 @@ export default function Permits() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="h-7 sm:h-8 px-2 sm:px-3 text-[10px] sm:text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={CurrentPage >= LastPage}
                               onClick={async () => {
                                 setLoading(true);
@@ -451,8 +450,8 @@ export default function Permits() {
                                 setLoading(false);
                               }}
                             >
-                              Next
-                              <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <span className="hidden sm:inline">Next</span>
+                              <svg className="w-3 h-3 ml-0 sm:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                               </svg>
                             </Button>
@@ -468,10 +467,10 @@ export default function Permits() {
         </Card >
       </div >
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="sm:max-w-[525px]">
+        <DialogContent className="sm:max-w-[525px] max-w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Permit Details</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-lg">Permit Details</DialogTitle>
+            <DialogDescription className="text-sm">
               Complete information about your permit
             </DialogDescription>
           </DialogHeader>
@@ -487,7 +486,7 @@ export default function Permits() {
               <div className="flex items-start gap-3">
                 <FileText className="h-5 w-5 text-muted-foreground mt-1" />
                 <div>
-                  <Label>Permit Type</Label>
+                  <Label className="text-sm">Permit Type</Label>
                   <p className="text-sm font-medium mt-1">
                     {selectedPermit.permit.type.replace("_", " ").toUpperCase()} LICENSE
                   </p>
@@ -498,7 +497,7 @@ export default function Permits() {
               <div className="flex items-start gap-3">
                 <BadgeCheck className="h-5 w-5 text-muted-foreground mt-1" />
                 <div>
-                  <Label>Status</Label>
+                  <Label className="text-sm">Status</Label>
                   <Badge
                     variant="outline"
                     className={`mt-1 ${getStatusColor(selectedPermit.permit.status)}`}
@@ -512,7 +511,7 @@ export default function Permits() {
               <div className="flex items-start gap-3">
                 <Clock className="h-5 w-5 text-muted-foreground mt-1" />
                 <div>
-                  <Label>Created At</Label>
+                  <Label className="text-sm">Created At</Label>
                   <p className="text-sm font-medium mt-1">
                     {selectedPermit.permit.created_at?.split("T")[0]}
                   </p>
@@ -523,7 +522,7 @@ export default function Permits() {
               <div className="flex items-start gap-3">
                 <User className="h-5 w-5 text-muted-foreground mt-1" />
                 <div>
-                  <Label>Applicant ID</Label>
+                  <Label className="text-sm">Applicant ID</Label>
                   <p className="text-sm font-medium mt-1">
                     {selectedPermit.applicant.id}
                   </p>
@@ -534,7 +533,7 @@ export default function Permits() {
               <div className="flex items-start gap-3">
                 <User className="h-5 w-5 text-muted-foreground mt-1" />
                 <div>
-                  <Label>Applicant Name</Label>
+                  <Label className="text-sm">Applicant Name</Label>
                   <p className="text-sm font-medium mt-1">
                     {selectedPermit.applicant.name}
                   </p>
@@ -545,7 +544,7 @@ export default function Permits() {
               <div className="flex items-start gap-3">
                 <Phone className="h-5 w-5 text-muted-foreground mt-1" />
                 <div>
-                  <Label>Contact</Label>
+                  <Label className="text-sm">Contact</Label>
                   <p className="text-sm font-medium mt-1">
                     {selectedPermit.applicant.contact}
                   </p>
@@ -558,7 +557,7 @@ export default function Permits() {
                   <div className="flex items-start gap-3">
                     <Calendar className="h-5 w-5 text-muted-foreground mt-1" />
                     <div>
-                      <Label>Issue Date</Label>
+                      <Label className="text-sm">Issue Date</Label>
                       <p className="text-sm mt-1">{selectedPermit.permit.issue_date.split("T")[0]}</p>
                     </div>
                   </div>
@@ -567,7 +566,7 @@ export default function Permits() {
                     <div className="flex items-start gap-3">
                       <Calendar className="h-5 w-5 text-muted-foreground mt-1" />
                       <div>
-                        <Label>Expiry Date</Label>
+                        <Label className="text-sm">Expiry Date</Label>
                         <p className="text-sm mt-1">{selectedPermit.permit.expiry_date?.split("T")[0]}</p>
                       </div>
                     </div>
@@ -581,7 +580,7 @@ export default function Permits() {
                   <div>
                     <div className="flex items-center gap-2">
                       <FileText className="h-5 w-5 text-muted-foreground" />
-                      <Label>Related Documents</Label>
+                      <Label className="text-sm">Related Documents</Label>
                     </div>
 
                     <div className="flex flex-wrap gap-2 mt-2">
@@ -596,10 +595,10 @@ export default function Permits() {
             </div>
 
           ) : null}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDetailsOpen(false)}>Close</Button>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setDetailsOpen(false)} className="w-full sm:w-auto">Close</Button>
             {selectedPermit?.status === 'completed' && (
-              <Button onClick={() => handleDownload(selectedPermit.documents.url, selectedPermit.appliant.id)}>Download Permit</Button>
+              <Button onClick={() => handleDownload(selectedPermit.documents.url, selectedPermit.appliant.id)} className="w-full sm:w-auto">Download Permit</Button>
             )}
           </DialogFooter>
         </DialogContent>

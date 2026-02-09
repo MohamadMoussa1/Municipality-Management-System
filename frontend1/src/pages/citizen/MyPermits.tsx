@@ -168,11 +168,11 @@ This is an official permit issued by the municipality.
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 px-3 sm:px-0">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">My Permits</h1>
-          <p className="text-muted-foreground">Manage your permits and licenses</p>
+        <div className="w-full sm:w-auto">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground break-words">My Permits</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">Manage your permits and licenses</p>
         </div>
         <Dialog open={openSubmit} onOpenChange={setSubmitOpen}>
           <DialogTrigger asChild>
@@ -238,193 +238,207 @@ This is an official permit issued by the municipality.
         </Dialog>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Permits</CardTitle>
+      <div className="grid gap-3 sm:gap-4 grid-cols-3">
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Permits</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Active</CardTitle>
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Active</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-500">{stats.active}</div>
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold text-green-500">{stats.active}</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Pending</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-500">{stats.pending}</div>
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold text-yellow-500">{stats.pending}</div>
           </CardContent>
         </Card>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Permit Applications</CardTitle>
-          <CardDescription>View and manage your permit applications</CardDescription>
+      <Card className="shadow-sm">
+        <CardHeader className="px-4 sm:px-6">
+          <CardTitle className="text-lg sm:text-xl">Permit Applications</CardTitle>
+          <CardDescription className="text-sm sm:text-base">View and manage your permit applications</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Permit Type</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Permit ID</TableHead>
-                  <TableHead>Issue Date</TableHead>
-                  <TableHead>Expiry Date</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {P.map((permit) => (
-                  <TableRow key={permit.id}>
-                    <TableCell className="font-medium">
-                      {permit.type.replace('_', ' ').toUpperCase()} LICENSE
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(permit.status)}>
-                        {permit.status.replace('_', ' ')}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                        {permit.id}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {permit.issue_date ? (
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          {permit.issue_date.split("T")[0]}
-                        </div>
-                      ) : (
-                        '-'
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {permit.expiry_date ? (
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          {permit.expiry_date.split("T")[0]}
-                        </div>
-                      ) : (
-                        '-'
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(permit)}>
-                          View Details
-                        </Button>
-                        {permit.status === 'completed' && (
-                          <Button variant="outline" size="sm" onClick={() => handleDownload(permit)}>
-                            Download
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {(CurrentPage && LastPage && LastPage > 1) && (
+        <CardContent className="px-4 sm:px-6">
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <div className="min-w-full">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm text-muted-foreground">
-                          Page {CurrentPage} of {LastPage}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={CurrentPage <= 1}
-                            onClick={async () => {
-                              setLoading(true);
-                              await fetchPage(CurrentPage - 1);
-                              setLoading(false);
-                            }}
-                          >
-                            Previous
-                          </Button>
-                          <div className="flex items-center gap-1">
-                            {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
-                              const pageNum = i + 1;
-                              const isActive = pageNum === CurrentPage;
-                              return (
-                                <Button
-                                  key={pageNum}
-                                  variant={isActive ? "default" : "outline"}
-                                  size="sm"
-                                  className={`h-8 w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
-                                    ? "bg-primary text-primary-foreground shadow-sm"
-                                    : "hover:bg-primary hover:text-primary-foreground"
-                                    }`}
-                                  disabled={pageNum > LastPage}
-                                  onClick={async () => {
-                                    setLoading(true);
-                                    await fetchPage(pageNum);
-                                    setLoading(false);
-                                  }}
-                                >
-                                  {pageNum}
-                                </Button>
-                              );
-                            })}
-                            {LastPage > 5 && (
-                              <>
-                                <span className="text-muted-foreground text-xs px-1">...</span>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-8 w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
-                                  onClick={async () => {
-                                    setLoading(true);
-                                    await fetchPage(LastPage);
-                                    setLoading(false);
-                                  }}
-                                >
-                                  {LastPage}
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={CurrentPage >= LastPage}
-                            onClick={async () => {
-                              setLoading(true);
-                              await fetchPage(CurrentPage + 1);
-                              setLoading(false);
-                            }}
-                          >
-                            Next
-                          </Button>
-                        </div>
-                      </div>
-                    </TableCell>
+                    <TableHead className="text-xs sm:text-sm">Type</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Status</TableHead>
+                    <TableHead className="text-xs sm:text-sm">ID</TableHead>
+                    <TableHead className="text-xs sm:text-sm hidden md:table-cell">Issue Date</TableHead>
+                    <TableHead className="text-xs sm:text-sm hidden lg:table-cell">Expiry Date</TableHead>
+                    <TableHead className="text-xs sm:text-sm text-right">Actions</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {P.map((permit) => (
+                    <TableRow key={permit.id}>
+                      <TableCell className="font-medium text-xs sm:text-sm">
+                        <div className="flex flex-col gap-1">
+                          <span className="sm:hidden text-xs text-muted-foreground">Type:</span>
+                          {permit.type.replace('_', ' ').toUpperCase()} LICENSE
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-xs sm:text-sm">
+                        <div className="flex flex-col gap-1">
+
+                          <Badge variant="outline" className={`text-xs ${getStatusColor(permit.status)}`}>
+                            {permit.status.replace('_', ' ')}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-xs sm:text-sm">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                          {permit.id}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-xs sm:text-sm hidden md:table-cell">
+                        {permit.issue_date ? (
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                            {permit.issue_date.split("T")[0]}
+                          </div>
+                        ) : (
+                          '-'
+                        )}
+                      </TableCell>
+                      <TableCell className="text-xs sm:text-sm hidden lg:table-cell">
+                        {permit.expiry_date ? (
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                            {permit.expiry_date.split("T")[0]}
+                          </div>
+                        ) : (
+                          '-'
+                        )}
+                      </TableCell>
+                      <TableCell className="text-xs sm:text-sm">
+                        <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
+                          <Button variant="outline" size="sm" className="text-xs h-7 px-2" onClick={() => handleViewDetails(permit)}>
+                            View
+                          </Button>
+                          {permit.status === 'completed' && (
+                            <Button variant="outline" size="sm" className="text-xs h-7 px-2" onClick={() => handleDownload(permit)}>
+                              Download
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {(CurrentPage && LastPage && LastPage > 1) && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="p-3 sm:p-4">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                          <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
+                            Page {CurrentPage} of {LastPage}
+                          </div>
+                          <div className="flex items-center gap-1 sm:gap-2 order-1 sm:order-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
+                              disabled={CurrentPage <= 1}
+                              onClick={async () => {
+                                setLoading(true);
+                                await fetchPage(CurrentPage - 1);
+                                setLoading(false);
+                              }}
+                            >
+                              <svg className="w-3 h-3 sm:w-3 sm:h-3 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                              </svg>
+                              <span className="hidden sm:inline">Previous</span>
+                            </Button>
+                            <div className="flex items-center gap-1">
+                              {Array.from({ length: Math.min(5, LastPage) }, (_, i) => {
+                                const pageNum = i + 1;
+                                const isActive = pageNum === CurrentPage;
+                                return (
+                                  <Button
+                                    key={pageNum}
+                                    variant={isActive ? "default" : "outline"}
+                                    size="sm"
+                                    className={`h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs font-medium transition-all duration-200 ${isActive
+                                      ? "bg-primary text-primary-foreground shadow-sm"
+                                      : "hover:bg-primary hover:text-primary-foreground"
+                                      }`}
+                                    disabled={pageNum > LastPage}
+                                    onClick={async () => {
+                                      setLoading(true);
+                                      await fetchPage(pageNum);
+                                      setLoading(false);
+                                    }}
+                                  >
+                                    {pageNum}
+                                  </Button>
+                                );
+                              })}
+                              {LastPage > 5 && (
+                                <>
+                                  <span className="text-muted-foreground text-xs px-1">...</span>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 w-7 sm:h-8 sm:w-8 p-0 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground"
+                                    onClick={async () => {
+                                      setLoading(true);
+                                      await fetchPage(LastPage);
+                                      setLoading(false);
+                                    }}
+                                  >
+                                    {LastPage}
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
+                              disabled={CurrentPage >= LastPage}
+                              onClick={async () => {
+                                setLoading(true);
+                                await fetchPage(CurrentPage + 1);
+                                setLoading(false);
+                              }}
+                            >
+                              <span className="hidden sm:inline">Next</span>
+                              <svg className="w-3 h-3 sm:w-3 sm:h-3 sm:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </Button>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </div>
 
           {P.some(permit => permit.related_documents && permit.related_documents.length > 0) && (
-            <div className="mt-4">
+            <div className="mt-4 space-y-2">
               <h4 className="text-sm font-medium mb-2">Related Documents:</h4>
               <div className="space-y-2">
                 {P.filter(permit => permit.related_documents && permit.related_documents.length > 0).map((permit) => (
-                  <div key={permit.id} className="flex items-center gap-2 text-sm">
-                    <span className="font-medium">{permit.id}:</span>
+                  <div key={permit.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-2 text-sm bg-muted p-2 rounded">
+                    <span className="font-medium text-xs">{permit.id}:</span>
                     <div className="flex flex-wrap gap-1">
                       {permit.related_documents.map((doc, idx) => (
                         <Badge key={idx} variant="secondary" className="gap-1 text-xs">
@@ -442,10 +456,10 @@ This is an official permit issued by the municipality.
       </Card>
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="sm:max-w-[525px]">
+        <DialogContent className="sm:max-w-[525px] mx-4 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Permit Details</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-lg">Permit Details</DialogTitle>
+            <DialogDescription className="text-sm">
               Complete information about your permit
             </DialogDescription>
           </DialogHeader>
