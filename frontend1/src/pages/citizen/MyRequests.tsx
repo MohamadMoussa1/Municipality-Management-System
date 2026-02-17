@@ -46,7 +46,6 @@ export default function MyRequests() {
       },
     });
     const res = await response.json();
-    console.log(res.requests)
     setR(res.requests.data);
     setCitizenCurrentPage(res.requests.current_page);
     setCitizenLastPage(res.requests.last_page);
@@ -88,7 +87,11 @@ export default function MyRequests() {
       const result = await response.json();
       navigate('/citizen/requests');
       setClicked(prev => !prev);
-      toast.message(result.message);
+      if (response.ok) {
+        toast.success('Request submitted successfully!');
+      } else {
+        toast.error('Failed to submit request. Please try again.');
+      }
     } catch (e) {
       console.log("error");
     } finally {
@@ -115,7 +118,11 @@ export default function MyRequests() {
         },
       });
       res = await response.json();
-      toast.success(res.message);
+      if (response.ok) {
+        toast.success('Request cancelled successfully!');
+      } else {
+        toast.error('Failed to cancel request. Please try again.');
+      }
     }
     fetchData();
     setClicked(prev => !prev);
@@ -300,11 +307,11 @@ export default function MyRequests() {
                 <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
                   Page {citizenCurrentPage} of {citizenLastPage}
                 </div>
-                <div className="flex items-center gap-1 sm:gap-2 order-1 sm:order-2">
+                <div className="flex items-center gap-3 order-1 sm:order-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
+                    className="h-7 w-7 sm:h-8 sm:w-auto sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
                     disabled={citizenCurrentPage <= 1}
                     onClick={async () => {
                       setLoading(true);
@@ -362,7 +369,7 @@ export default function MyRequests() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
+                    className="h-7 w-7 sm:h-8 sm:w-auto sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
                     disabled={citizenCurrentPage >= citizenLastPage}
                     onClick={async () => {
                       setLoading(true);

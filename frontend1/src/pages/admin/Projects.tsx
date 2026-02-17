@@ -97,12 +97,19 @@ export default function Projects() {
       });
       res = await response.json();
       setClicked(true);
+      if (response.ok) {
+        toast({
+          title: "Status Updated",
+          description: `Project ${Id} status changed to ${newStatus.replace('_', ' ')}.`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update project status. Please try again.",
+        });
+      }
     }
     fetchData();
-    toast({
-      title: "Status Updated",
-      description: `Project ${Id} status changed to ${newStatus.replace('_', ' ')}.`,
-    });
   };
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,18 +137,22 @@ export default function Projects() {
         })
       });
       const result = await response.json();
-      console.log(result.message);
-      if (result.message == "Login successful") {
+      if (response.ok) {
         toast({
           title: "Success",
-          description: result.message
+          description: "Project created successfully!"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create project. Please try again."
         });
       }
-      else {
-
-      }
     } catch (e) {
-
+      toast({
+        title: "Error",
+        description: "Failed to create project. Please try again."
+      });
     } finally {
       setLoadingSubmit(false);
     }
@@ -165,7 +176,7 @@ export default function Projects() {
         setspecificPro(res.data.tasks);
 
       } catch (error) {
-        console.error("Error fetching project details:", error);
+        // Error fetching project details
       } finally {
         setLoading(false);
       }
@@ -198,16 +209,25 @@ export default function Projects() {
       });
 
       const result = await response.json();
-      console.log(result.message)
-      toast({
-        title: "Success",
-        description: result.message
-      });
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Task assigned successfully!"
+        });
+        setTasksDialogOpen(false);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to assign task. Please try again."
+        });
+      }
     } catch (e) {
-      console.log("error");
+      toast({
+        title: "Error",
+        description: "Failed to assign task. Please try again."
+      });
     } finally {
       setLoadingSubmit(false);
-      setTasksDialogOpen(false);
     }
 
   }
@@ -230,8 +250,8 @@ export default function Projects() {
       } else if (res.status === 403) {
         setEmployeeResult(null);
         const role = localStorage.getItem('role') || JSON.parse(localStorage.getItem('mms_user') || 'null')?.role || 'unknown';
-        const msg = body?.message || 'Permission denied. You do not have access to view that citizen.';
-        setPermissionError(`${msg} (Your role: ${role})`);
+        const msg = 'Permission denied. You do not have access to view that citizen.';
+        setPermissionError(msg);
         toast({
           title: "Error",
           description: `${msg} (Your role: ${role})`,
@@ -242,7 +262,7 @@ export default function Projects() {
         setPermissionError(null);
         toast({
           title: "Error",
-          description: body?.message || body?.error || "Citizen not found or unauthorized",
+          description:"Citizen not found or unauthorized",
           variant: "destructive"
         });
       }

@@ -180,17 +180,15 @@ export default function MyLeaves() {
                 // Validation errors
                 const errors = body?.errors;
                 if (errors) {
-                    const firstField = Object.keys(errors)[0];
-                    const firstMsg = errors[firstField][0];
-                    toast.error(firstMsg || 'Validation failed.');
+                    toast.error('Validation failed.');
                 } else {
-                    toast.error(body?.message || 'Validation failed.');
+                    toast.error('Validation failed.');
                 }
                 return;
             }
 
             if (res.ok) {
-                toast.success(body?.message || 'Leave request submitted successfully.');
+                toast.success('Leave request submitted successfully.');
 
                 const created: Leave | undefined = body?.data || body;
                 if (created) {
@@ -206,7 +204,7 @@ export default function MyLeaves() {
                 setReason('');
                 setNewDialogOpen(false);
             } else {
-                toast.error(body?.message || 'Failed to submit leave request');
+                toast.error('Failed to submit leave request');
             }
         } catch (error) {
             toast.error('Failed to submit leave request. Please try again.');
@@ -453,11 +451,11 @@ export default function MyLeaves() {
                                     <div className="text-xs sm:text-sm text-muted-foreground">
                                         Page {CurrentPage} of {LastPage}
                                     </div>
-                                    <div className="flex items-center gap-1 sm:gap-2">
+                                    <div className="flex items-center gap-3">
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
+                                            className="h-7 w-7 sm:h-8 sm:w-auto sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
                                             disabled={CurrentPage <= 1}
                                             onClick={async () => {
                                                 setLoading(true);
@@ -515,7 +513,7 @@ export default function MyLeaves() {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
+                                            className="h-7 w-7 sm:h-8 sm:w-auto sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
                                             disabled={CurrentPage >= LastPage}
                                             onClick={async () => {
                                                 setLoading(true);

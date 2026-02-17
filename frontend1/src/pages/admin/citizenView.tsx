@@ -133,13 +133,20 @@ export function CitizenList() {
       const result = await response.json();
       setRefreshTrigger(100);
 
-      setIsEditDialogOpen(false);
-      toast({
-        title: "Success",
-        description: "changed",
-      });
+      if (response.ok) {
+        setIsEditDialogOpen(false);
+        toast({
+          title: "Success",
+          description: "Citizen information updated successfully!",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update citizen information. Please try again.",
+        });
+      }
     } catch (e) {
-      console.log("error");
+     
     } finally {
       setLoadingSubmit(false);
     }

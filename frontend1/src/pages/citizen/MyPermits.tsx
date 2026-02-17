@@ -101,7 +101,7 @@ export default function MyPermits() {
       }
     } catch (error) {
       console.error('Error submitting application:', error);
-      toast.error(error.message || 'Failed to submit application');
+      toast.error('Failed to submit application');
     } finally {
       setLoadingSubmit(false);
     }
@@ -347,11 +347,11 @@ This is an official permit issued by the municipality.
                           <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
                             Page {CurrentPage} of {LastPage}
                           </div>
-                          <div className="flex items-center gap-1 sm:gap-2 order-1 sm:order-2">
+                          <div className="flex items-center gap-3 order-1 sm:order-2">
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
+                              className="h-7 w-7 sm:h-8 sm:w-auto sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
                               disabled={CurrentPage <= 1}
                               onClick={async () => {
                                 setLoading(true);
@@ -409,7 +409,7 @@ This is an official permit issued by the municipality.
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
+                              className="h-7 w-7 sm:h-8 sm:w-auto sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
                               disabled={CurrentPage >= LastPage}
                               onClick={async () => {
                                 setLoading(true);

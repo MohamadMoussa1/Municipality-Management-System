@@ -45,8 +45,7 @@ export default function MyPayments() {
         "Accept": "application/json",
       },
     });
-    const res = await response.json();
-    console.log(res)
+    const res = await response.json();  
     setPayments(res.data.data);
     setCitizenCurrentPage(res.data.current_page);
     setCitizenLastPage(res.data.last_page);
@@ -133,7 +132,6 @@ export default function MyPayments() {
       });
       if (response.status === 401) {
         toast.error("Session expired. Please login again.");
-        localStorage.removeItem('token');
         navigate('/login');
         return;
       }
@@ -141,7 +139,7 @@ export default function MyPayments() {
       if (res?.checkout_url) {
         window.location.href = res.checkout_url;
       } else {
-        toast.error(res?.message || "Failed to initiate payment.");
+        toast.error("Failed to initiate payment.");
       }
     } catch (e) {
       toast.error("Failed to initiate payment.");
@@ -194,7 +192,7 @@ Thank you for your payment!
         setSelectedPayment(res?.data || res);
         setDetailsOpen(true);
       } else {
-        toast.error(res?.message || "Failed to fetch payment details");
+        toast.error( "Failed to fetch payment details");
       }
     } catch (e) {
       toast.error("Failed to fetch payment details.");

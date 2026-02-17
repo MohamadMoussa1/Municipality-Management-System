@@ -12,6 +12,8 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function Login() {
   const { setUser, setRole } = useAuth();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [csrfLoading, setCsrfLoading] = useState(true);
   const [Data, setData] = useState({
     name: ""
     , email: ""
@@ -33,15 +35,18 @@ export default function Login() {
       [e.target.name]: e.target.value
     }));
   };
+
   const handleChangeSignIn = (e: React.ChangeEvent<HTMLInputElement>) => {
     setData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
     }));
   };
+
   useEffect(() => {
     const fetchCsrf = async () => {
       try {
+        setCsrfLoading(true);
         const res = await fetch('http://127.0.0.1:8000/sanctum/csrf-cookie', {
           method: 'GET',
           credentials: 'include',
@@ -49,11 +54,22 @@ export default function Login() {
         if (!res.ok) throw new Error('Failed to fetch CSRF cookie');
       } catch (err) {
         console.error(err);
+      } finally {
+        setCsrfLoading(false);
       }
     };
 
     fetchCsrf();
   }, []);
+
+  if (loading || csrfLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2 text-xs sm:text-sm">Loading page...</span>
+      </div>
+    );
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +100,7 @@ export default function Login() {
         navigate("/dashboard");
       }
       else {
-        toast.error(result.message, { duration: 4000 });
+        toast.error('Login failed. Please check your credentials and try again.', { duration: 4000 });
       }
     } catch (e) {
       console.log("error");
@@ -117,14 +133,25 @@ export default function Login() {
       ),
     });
     const result = await response.json();
-    navigate(-1);
-    alert(result.message);
-  }
+    if (response.ok) {
+      toast.success('Registration successful! Please login with your credentials.');
+      navigate(-1);
+    } else {
+      toast.error('Registration failed. Please check your information and try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4 transform scale-80 origin-top">
+      {(loading || csrfLoading) && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 shadow-xl">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="mt-2 text-sm text-muted-foreground">Loading page...</p>
+          </div>
+        </div>
+      )}
       <div className="w-full max-w-5xl grid md:grid-cols-2 gap-8 ">
-
 
         <div className="hidden md:block space-y-6 ">
 

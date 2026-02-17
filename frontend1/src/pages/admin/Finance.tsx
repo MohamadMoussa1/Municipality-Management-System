@@ -102,7 +102,7 @@ export default function Finance() {
         setPayments(paymentsData?.data || paymentsData || []);
       } else {
         const err = await paymentsRes.json().catch(() => null);
-        toast.error(err?.message || "Failed to fetch payments");
+        toast.error("Failed to fetch payments");
         setPayments([]);
       }
     } catch (e) {
@@ -118,7 +118,6 @@ export default function Finance() {
       });
       if (citizensRes.status === 401) {
         toast.error("Session expired. Please login again.");
-        localStorage.removeItem('token');
         navigate('/login');
         return;
       }
@@ -132,7 +131,7 @@ export default function Finance() {
         toast.warning("You do not have permission to list all citizens. Use the search box to add citizens individually.");
       } else {
         const err = await citizensRes.json().catch(() => null);
-        toast.error(err?.message || "Failed to fetch citizens");
+        toast.error("Failed to fetch citizens");
         setCitizens([]);
       }
     } catch (e) {
@@ -176,7 +175,7 @@ export default function Finance() {
       } else {
         setCitizenResult(null);
         setPermissionError(null);
-        toast.error(body?.message || body?.error || "Citizen not found or unauthorized");
+        toast.error("Citizen not found or unauthorized");
       }
     } catch (e) {
       setCitizenLoading(false);
@@ -205,13 +204,13 @@ export default function Finance() {
       } else if (res.status === 403) {
         setBulkSearchResult(null);
         const role = localStorage.getItem('role') || JSON.parse(localStorage.getItem('mms_user') || 'null')?.role || 'unknown';
-        const msg = body?.message || 'Permission denied. You do not have access to view that citizen.';
+        const msg = 'Permission denied. You do not have access to view that citizen.';
         setBulkPermissionError(`${msg} (Your role: ${role})`);
-        toast.error(`${msg} (Your role: ${role})`);
+        toast.error(`Permission denied. You do not have access to view that citizen. (Your role: ${role})`);
       } else {
         setBulkSearchResult(null);
         setBulkPermissionError(null);
-        toast.error(body?.message || body?.error || "Citizen not found or unauthorized");
+        toast.error("Citizen not found or unauthorized");
       }
     } catch (e) {
       setBulkCitizenLoading(false);
@@ -267,20 +266,20 @@ export default function Finance() {
 
       if (res.status === 401) {
         toast.error("Session expired. Please login again.");
-        localStorage.removeItem('token');
+       
         navigate('/login');
         return;
       }
 
       const data = await res.json().catch(() => null);
       if (res.ok) {
-        toast.success(data?.message || "Payment created");
+        toast.success("Payment created");
         setCreateDialogOpen(false);
         // Add created payment to UI without reloading
         const created = data?.data || data;
         if (created) setPayments(p => [created, ...p]);
       } else {
-        toast.error(data?.message || "Failed to create payment");
+        toast.error("Failed to create payment");
       }
     } catch (e) {
       toast.error("Failed to create payment. Please try again.");
@@ -306,18 +305,17 @@ export default function Finance() {
       });
       if (res.status === 401) {
         toast.error("Session expired. Please login again.");
-        localStorage.removeItem('token');
         navigate('/login');
         return;
       }
       const data = await res.json().catch(() => null);
       if (res.ok) {
-        toast.success(data?.message || "Bulk payments created");
+        toast.success("Bulk payments created");
         setBulkDialogOpen(false);
         // Refresh list
         fetchData();
       } else {
-        toast.error(data?.message || "Failed to create bulk payments");
+        toast.error("Failed to create bulk payments");
       }
     } catch (e) {
       toast.error("Failed to create bulk payments. Please try again.");
@@ -339,11 +337,11 @@ export default function Finance() {
     });
     const data = await res.json();
     if (res.ok) {
-      toast.success(data.message || "Payment updated");
+      toast.success("Payment updated");
       setEditDialogOpen(false);
       fetchData();
     } else {
-      toast.error(data.message || "Failed to update payment");
+      toast.error("Failed to update payment");
     }
   };
 
@@ -360,11 +358,11 @@ export default function Finance() {
     }
     const data = await res.json();
     if (res.ok) {
-      toast.success(data.message || "Payment deleted");
+      toast.success("Payment deleted");
       // remove from state
       setPayments(p => p.filter(item => item.id !== id));
     } else {
-      toast.error(data.message || "Failed to delete payment");
+      toast.error("Failed to delete payment");
     }
   };
 

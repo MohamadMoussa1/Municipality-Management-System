@@ -222,11 +222,11 @@ export default function EmployeeEvents() {
                               <div className="text-xs sm:text-sm text-muted-foreground">
                                 Page {citizenCurrentPage} of {citizenLastPage}
                               </div>
-                              <div className="flex items-center gap-1 sm:gap-2">
+                              <div className="flex items-center gap-3">
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
+                                  className="h-7 w-7 sm:h-8 sm:w-auto sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
                                   disabled={citizenCurrentPage <= 1}
                                   onClick={async () => {
                                     setLoading(true);
@@ -284,7 +284,7 @@ export default function EmployeeEvents() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="h-7 w-7 sm:h-8 sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
+                                  className="h-7 w-7 sm:h-8 sm:w-auto sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed p-0 sm:p-auto"
                                   disabled={citizenCurrentPage >= citizenLastPage}
                                   onClick={async () => {
                                     setLoading(true);

@@ -64,7 +64,6 @@ const AdminDashboard = () => {
       });
       const res = await response.json();
       setinfo(res);
-      console.log(res);
       setLoading(false);
     };
     fetchData();
@@ -291,7 +290,6 @@ const CitizenDashboard = () => {
       const res = await response.json();
       setloading(false);
       setLoading(false);
-      console.log(res);
       // Set all the state variables from the dashboard response
       setrequestsL(res.latest_requests.requests);
       setue(res.upcoming_events);

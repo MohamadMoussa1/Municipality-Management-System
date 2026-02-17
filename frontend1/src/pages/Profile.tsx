@@ -103,7 +103,7 @@ export default function Profile() {
       );
 
       const result = await response.json();
-      toast.success(result.message || 'Profile updated');
+      toast.success('Profile updated');
       navigate(-1);
     } catch (error) {
       toast.error('Update failed');

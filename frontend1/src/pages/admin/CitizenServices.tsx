@@ -98,10 +98,17 @@ export default function CitizenServices() {
         },
       });
       res = await response.json();
-      toast({
-        title: "Success",
-        description: res.message,
-      });
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Request deleted successfully!",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to delete request. Please try again.",
+        });
+      }
     }
     fetchData();
     setClicked(prev => !prev);
@@ -126,12 +133,19 @@ export default function CitizenServices() {
       });
       res = await response.json();
       setClicked(true);
+      if (response.ok) {
+        toast({
+          title: "Status Updated",
+          description: `Request ${Id} status changed to ${newStatus.replace('_', ' ')}.`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update request status. Please try again.",
+        });
+      }
     }
     fetchData();
-    toast({
-      title: "Status Updated",
-      description: `Permit ${Id} status changed to ${newStatus.replace('_', ' ')}.`,
-    });
   };
   if (loading) {
     return (

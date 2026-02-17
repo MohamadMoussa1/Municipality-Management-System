@@ -335,11 +335,11 @@ const EmployeesTab = () => {
                   <div className="text-xs sm:text-sm text-muted-foreground">
                     Page {employeeCurrentPage} of {employeeLastPage}
                   </div>
-                  <div className="flex items-center gap-1 sm:gap-2">
+                  <div className="flex items-center gap-3">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-7 w-7 sm:h-8 sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="h-7 w-7 sm:h-8 sm:w-auto sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled={employeeCurrentPage <= 1}
                       onClick={async () => {
                         setLoading(true);
@@ -397,7 +397,7 @@ const EmployeesTab = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-7 w-7 sm:h-8 sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="h-7 w-7 sm:h-8 sm:w-auto sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled={employeeCurrentPage >= employeeLastPage}
                       onClick={async () => {
                         setLoading(true);
@@ -814,11 +814,11 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
               <div className="text-xs sm:text-sm text-muted-foreground">
                 Page {leaveCurrentPage} of {leaveLastPage}
               </div>
-              <div className="flex items-center gap-1 sm:gap-2">
+              <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-7 w-7 sm:h-8 sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-7 w-7 sm:h-8 sm:w-auto sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={leaveCurrentPage <= 1}
                   onClick={async () => {
                     setLoading(true);
@@ -876,7 +876,7 @@ const LeaveTab = ({ onStatsUpdate }: { onStatsUpdate?: () => void }) => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-7 w-7 sm:h-8 sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-7 w-7 sm:h-8 sm:w-auto sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={leaveCurrentPage >= leaveLastPage}
                   onClick={async () => {
                     setLoading(true);
@@ -1295,11 +1295,11 @@ const PayRollTab = () => {
               <div className="text-xs sm:text-sm text-muted-foreground">
                 Page {payrollCurrentPage} of {payrollLastPage}
               </div>
-              <div className="flex items-center gap-1 sm:gap-2">
+              <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-7 w-7 sm:h-8 sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-7 w-7 sm:h-8 sm:w-auto sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={payrollCurrentPage <= 1}
                   onClick={async () => {
                     setLoading(true);
@@ -1357,7 +1357,7 @@ const PayRollTab = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-7 w-7 sm:h-8 sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-7 w-7 sm:h-8 sm:w-auto sm:px-3 p-0 sm:p-auto text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={payrollCurrentPage >= payrollLastPage}
                   onClick={async () => {
                     setLoading(true);

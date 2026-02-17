@@ -1,16 +1,16 @@
- import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
-import { Mail, Clock, Calendar, User,Briefcase,Building2,CalendarCheck,CheckCircle,DollarSign,Loader2 } from 'lucide-react';
+import { Mail, Clock, Calendar, User, Briefcase, Building2, CalendarCheck, CheckCircle, DollarSign, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getRolePhoto } from '@/lib/rolePhotos';
 import { useNavigate } from 'react-router-dom';
-import  getCsrfToken  from '../../lib/utils';
+import getCsrfToken from '../../lib/utils';
 export default function ProfileEmployee() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -24,13 +24,13 @@ export default function ProfileEmployee() {
     contact: '',
     date_of_birth: '',
     role: '',
-    position:'',
-    department:'',
-    status:'',
-    hire_date:'',
-    salary:'',
+    position: '',
+    department: '',
+    status: '',
+    hire_date: '',
+    salary: '',
     created_at: '',
-    updated_at:''
+    updated_at: ''
   });
 
   const [loading, setLoading] = useState(true);
@@ -43,8 +43,8 @@ export default function ProfileEmployee() {
   useEffect(() => {
     const fetchProfile = async () => {
       const response = await fetch('http://127.0.0.1:8000/api/employees/me', {
-         method: "GET",
-         credentials:"include",
+        method: "GET",
+        credentials: "include",
         headers: {
           Accept: 'application/json',
         },
@@ -61,22 +61,22 @@ export default function ProfileEmployee() {
         contact: res.data.contact ?? '',
         date_of_birth: res.data.date_of_birth ?? '',
         role: res.data.role ?? '',
-        salary:res.data.salary ?? '',
-        position:res.data.position ?? '',       
-        department:res.data.department ?? '',
+        salary: res.data.salary ?? '',
+        position: res.data.position ?? '',
+        department: res.data.department ?? '',
         created_at: res.data.created_at ?? '',
         updated_at: res.data.updated_at ?? '',
-        hire_date:res.data.hire_date ?? '',
-        status:res.data.status ?? '',
-      }); 
-     
+        hire_date: res.data.hire_date ?? '',
+        status: res.data.status ?? '',
+      });
+
 
       setLoading(false);
     };
 
     fetchProfile();
   }, []);
- if (loading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -88,33 +88,37 @@ export default function ProfileEmployee() {
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoadingSubmit(true);
-  try{
-    const response = await fetch('http://127.0.0.1:8000/cs/employees/me/update',{
+    try {
+      const response = await fetch('http://127.0.0.1:8000/cs/employees/me/update', {
         method: 'PUT',
-        credentials:"include",
+        credentials: "include",
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
-          'X-XSRF-TOKEN':getCsrfToken(),
+          'X-XSRF-TOKEN': getCsrfToken(),
         },
         body: JSON.stringify({
           name: form.name,
           email: form.email,
         }),
       }
-    );
-    const result = await response.json();
-    toast.success(result.message);
-    navigate(-1);
-  }
-  catch(e){
-    console.log("error");
-  }finally{
+      );
+      const result = await response.json();
+      if (response.ok) {
+        toast.success('Profile updated successfully!');
+        navigate(-1);
+      } else {
+        toast.error('Failed to update profile. Please try again.');
+      }
+    }
+    catch (e) {
+      toast.error('Failed to update profile. Please try again.');
+    } finally {
       setLoadingSubmit(false);
     }
   };
 
-  
+
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
@@ -190,7 +194,7 @@ export default function ProfileEmployee() {
                 Cancel
               </Button>
               <Button type="button" onClick={handleSaveProfile} disabled={loadingSubmit}>
-               {loadingSubmit ? (
+                {loadingSubmit ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
@@ -205,93 +209,93 @@ export default function ProfileEmployee() {
       </div>
 
       <Card>
-  <CardHeader>
-    <CardTitle>Account Details</CardTitle>
-  </CardHeader>
-  <CardContent className="grid gap-4 md:grid-cols-2">
-   
-    <div className="flex items-center gap-3">
-      <Mail className="h-5 w-5 text-blue-500" />
-      <span>{form.email}</span>
-    </div>
+        <CardHeader>
+          <CardTitle>Account Details</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
 
-    <div className="flex items-center gap-3">
-      <User className="h-5 w-5 text-green-500" />
-      <span>{form.id}</span>
-    </div>
+          <div className="flex items-center gap-3">
+            <Mail className="h-5 w-5 text-blue-500" />
+            <span>{form.email}</span>
+          </div>
 
-    
-    <div className="flex items-center gap-3">
-      <Calendar className="h-5 w-5 text-purple-500" />
-      <span>{form.created_at}</span>
-    </div>
+          <div className="flex items-center gap-3">
+            <User className="h-5 w-5 text-green-500" />
+            <span>{form.id}</span>
+          </div>
 
-    
-    <div className="flex items-center gap-3">
-      <Briefcase className="h-5 w-5 text-yellow-500" />
-      <span>{form.role}</span>
-    </div>
 
-    
-    <div className="flex items-center gap-3">
-      <DollarSign className="h-5 w-5 text-green-600" />
-      <span>{form.salary}</span>
-    </div>
+          <div className="flex items-center gap-3">
+            <Calendar className="h-5 w-5 text-purple-500" />
+            <span>{form.created_at}</span>
+          </div>
 
-    
-    <div className="flex items-center gap-3">
-      <CheckCircle className="h-5 w-5 text-teal-500" />
-      <span>{form.status}</span>
-    </div>
 
-    
-    <div className="flex items-center gap-3">
-      <CalendarCheck className="h-5 w-5 text-orange-500" />
-      <span>{form.hire_date}</span>
-    </div>
+          <div className="flex items-center gap-3">
+            <Briefcase className="h-5 w-5 text-yellow-500" />
+            <span>{form.role}</span>
+          </div>
 
-    <div className="flex items-center gap-3">
-      <Clock className="h-5 w-5 text-gray-500" />
-      <span>{form.updated_at}</span>
-    </div>
 
-    <div className="flex items-center gap-3">
-      <Building2 className="h-5 w-5 text-indigo-500" />
-      <span>{form.department}</span>
-    </div>
-    <div className="flex items-center gap-3">
-      <Briefcase className="h-5 w-5 text-pink-500" />
-      <span>{form.position}</span>
-    </div>
-  </CardContent>
-</Card>
+          <div className="flex items-center gap-3">
+            <DollarSign className="h-5 w-5 text-green-600" />
+            <span>{form.salary}</span>
+          </div>
 
- <Card>
-          <CardHeader>
-            <CardTitle>Security Settings</CardTitle>
-            <CardDescription>Manage your password and security preferences</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+
+          <div className="flex items-center gap-3">
+            <CheckCircle className="h-5 w-5 text-teal-500" />
+            <span>{form.status}</span>
+          </div>
+
+
+          <div className="flex items-center gap-3">
+            <CalendarCheck className="h-5 w-5 text-orange-500" />
+            <span>{form.hire_date}</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Clock className="h-5 w-5 text-gray-500" />
+            <span>{form.updated_at}</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Building2 className="h-5 w-5 text-indigo-500" />
+            <span>{form.department}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Briefcase className="h-5 w-5 text-pink-500" />
+            <span>{form.position}</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Security Settings</CardTitle>
+          <CardDescription>Manage your password and security preferences</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="current-password">Current Password</Label>
+            <Input id="current-password" type="password" />
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="current-password">Current Password</Label>
-              <Input id="current-password" type="password" />
+              <Label htmlFor="new-password">New Password</Label>
+              <Input id="new-password" type="password" />
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="new-password">New Password</Label>
-                <Input id="new-password" type="password" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirm Password</Label>
-                <Input id="confirm-password" type="password" />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Input id="confirm-password" type="password" />
             </div>
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={(e) => { e.preventDefault(); navigate(-1); toast.info('Password change cancelled'); }}>Cancel</Button>
-              <Button type="button" >Update Password</Button>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={(e) => { e.preventDefault(); navigate(-1); toast.info('Password change cancelled'); }}>Cancel</Button>
+            <Button type="button" >Update Password</Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

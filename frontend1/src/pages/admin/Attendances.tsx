@@ -48,7 +48,6 @@ export default function Attendances() {
       },
     });
     const res = await response.json();
-    console.log(res)
     setAttendances(res.data.data);
     setCurrentPage(res.data.current_page);
     setLastPage(res.data.last_page);
@@ -97,13 +96,13 @@ export default function Attendances() {
       }
       const body = await res.json().catch(() => null);
       if (res.ok) {
-        toast.success(body?.message || 'Attendance updated');
+        toast.success('Attendance updated');
         // update local list
         const att = body?.attendance || body?.data || body;
         if (att) setAttendances(prev => prev.map(a => (a.id === att.id ? att : a)));
         setEditOpen(false);
       } else {
-        toast.error(body?.message || 'Failed to update attendance');
+        toast.error('Failed to update attendance');
       }
     } catch (e) {
       toast.error('Failed to update attendance.');

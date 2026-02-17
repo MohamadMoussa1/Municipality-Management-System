@@ -51,7 +51,6 @@ export default function EmployeeTasks() {
       },
     });
     const res = await response.json();
-    console.log(res)
     setTasks(res.data.data);
     setCurrentPage(res.data.current_page);
     setLastPage(res.data.last_page);
@@ -92,12 +91,19 @@ export default function EmployeeTasks() {
       });
       res = await response.json();
       setClicked(true);
+      if (response.ok) {
+        toast({
+          title: "Status Updated",
+          description: `Task ${Id} status changed to ${newStatus.replace('_', ' ')}.`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update task status. Please try again.",
+        });
+      }
     }
     fetchData();
-    toast({
-      title: "Status Updated",
-      description: `Permit ${Id} status changed to ${newStatus.replace('_', ' ')}.`,
-    });
   };
 
   if (loading) {

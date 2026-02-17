@@ -139,6 +139,8 @@ export default function Events() {
         ));
         await fetchEvents(1);
         toast.success('Event updated successfully');
+        setDialogOpen(false);
+        resetForm();
       } else {
         // Create new event
         const response = await axios.post(
@@ -158,14 +160,13 @@ export default function Events() {
         setEvents(prevEvents => [newEvent, ...prevEvents]);
         await fetchEvents(1);
         toast.success('Event created successfully');
+        setDialogOpen(false);
+        resetForm();
       }
-
-      setDialogOpen(false);
-      resetForm();
       return true;
     } catch (error: any) {
-      console.error('Error saving event:', error);
-      toast.error(`Failed to ${selectedEvent ? 'update' : 'create'} event: ${error.response?.data?.message || error.message}`);
+    
+      toast.error(`Failed to ${selectedEvent ? 'update' : 'create'} event. Please try again.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -556,11 +557,11 @@ export default function Events() {
                   <div className="text-sm text-muted-foreground">
                     Page {CurrentPage} of {LastPage}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="h-8 w-8 sm:h-8 sm:w-auto sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled={CurrentPage <= 1}
                       onClick={async () => {
                         setLoading(true);
@@ -618,7 +619,7 @@ export default function Events() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-8 px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="h-8 w-8 sm:h-8 sm:w-auto sm:px-3 text-xs font-medium transition-all duration-200 hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled={CurrentPage >= LastPage}
                       onClick={async () => {
                         setLoading(true);

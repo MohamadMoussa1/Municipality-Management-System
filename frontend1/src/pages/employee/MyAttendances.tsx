@@ -73,7 +73,7 @@ export default function MyAttendances() {
 
       const body = await res.json().catch(() => null);
       if (res.ok) {
-        toast.success(body?.message || 'Checked in');
+        toast.success('Checked in');
         // Use returned attendance if present, otherwise show optimistic local record
         const att = body?.attendance || body?.data || body;
         if (att && (att.id || att.date)) {
@@ -97,11 +97,11 @@ export default function MyAttendances() {
       } else {
         // Specific handling for already-checked-in
         if (body?.message && body.message.toLowerCase().includes('already checked in')) {
-          toast.error(body.message);
+          toast.error('You have already checked in today.');
           // refresh to get current state
           await fetchData();
         } else {
-          toast.error(body?.message || 'Failed to check in');
+          toast.error('Failed to check in');
         }
       }
     } catch (e) {
@@ -128,7 +128,7 @@ export default function MyAttendances() {
 
       const body = await res.json().catch(() => null);
       if (res.ok) {
-        toast.success(body?.message || 'Checked out');
+        toast.success('Checked out');
         const att = body?.attendance || body?.data || body;
         if (att && att.id) {
           setAttendances(prev => prev.map(a => (a.date === att.date ? att : a)));
@@ -150,13 +150,13 @@ export default function MyAttendances() {
       } else {
         // specific handling
         if (body?.message && body.message.toLowerCase().includes('no check-in')) {
-          toast.error(body.message);
+          toast.error('You need to check in first before checking out.');
           await fetchData();
         } else if (body?.message && body.message.toLowerCase().includes('already checked out')) {
-          toast.error(body.message);
+          toast.error('You have already checked out today.');
           await fetchData();
         } else {
-          toast.error(body?.message || 'Failed to check out');
+          toast.error('Failed to check out');
         }
       }
     } catch (e) {
@@ -178,7 +178,6 @@ export default function MyAttendances() {
       });
       if (res.status === 401) {
         toast.error('Session expired. Please login again.');
-
         navigate('/login');
         return;
       }
@@ -188,7 +187,7 @@ export default function MyAttendances() {
         setSelected(att);
         setDetailsOpen(true);
       } else {
-        toast.error(body?.message || 'Failed to fetch attendance details');
+        toast.error('Failed to fetch attendance details');
       }
     } catch (e) {
       toast.error('Failed to fetch attendance details.');
@@ -217,7 +216,7 @@ export default function MyAttendances() {
 
       const body = await res.json().catch(() => null);
       if (res.ok) {
-        toast.success(body?.message || 'Checked out successfully');
+        toast.success('Checked out successfully');
         const att = body?.attendance || body?.data || body;
         if (att && att.date) {
           // update the list and the selected record
@@ -233,8 +232,7 @@ export default function MyAttendances() {
         setDetailsOpen(false);
         await fetchData();
       } else {
-        if (body?.message) toast.error(body.message);
-        else toast.error('Failed to check out');
+        toast.error('Failed to check out');
       }
     } catch (e) {
       toast.error('Failed to check out. Please try again.');
